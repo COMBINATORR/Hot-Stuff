@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveImage from './ResponsiveImage';
@@ -159,7 +160,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -671,6 +672,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
           )}
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
