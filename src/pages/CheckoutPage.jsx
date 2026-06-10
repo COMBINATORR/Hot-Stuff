@@ -225,19 +225,52 @@ export default function CheckoutPage({ cartItems = [] }) {
               </div>
             </div>
 
-            {/* Trust badges */}
-            <div className="mt-6 flex items-center justify-center gap-6 text-outline">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">lock</span>
-                <span className="text-[10px] label-caps">SSL</span>
+            {/* Privacy & Discretion Assurances */}
+            <div className="mt-6 border border-white/10 bg-[#0F0E11] p-6 text-left font-sans">
+              <div className="flex items-center gap-4 mb-4">
+                {/* SVG of discreet box */}
+                <div className="w-12 h-12 flex-none flex items-center justify-center bg-white/5 border border-white/10">
+                  <svg className="w-8 h-8 text-[#f2ca50]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    {/* Isometric box representation */}
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 7v10" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 12v10" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M22 7v10" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Tape accent */}
+                    <path d="M12 7l5-2.5M12 12l5-2.5" stroke="#f2ca50" strokeWidth="1" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="label-caps text-[10px] text-white tracking-[0.2em] font-bold">100% КОНФИДЕНЦИАЛЬНОСТЬ</h4>
+                  <p className="text-[9px] text-[#f2ca50] label-caps tracking-[0.1em] mt-0.5">ГАРАНТИЯ АНОНИМНОСТИ</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">verified</span>
-                <span className="text-[10px] label-caps">ГАРАНТИЯ</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">undo</span>
-                <span className="text-[10px] label-caps">ВОЗВРАТ</span>
+
+              <div className="space-y-4 text-[11px] leading-relaxed text-on-surface-variant border-t border-white/5 pt-4">
+                <div className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">inventory_2</span>
+                  <div>
+                    <span className="text-white font-bold block mb-0.5">НЕЙТРАЛЬНАЯ УПАКОВКА</span>
+                    Все заказы отправляются в плотных непрозрачных сейф-пакетах или стандартных картонных коробках без каких-либо логотипов, надписей бренда или указания интимного характера содержимого.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">account_balance_wallet</span>
+                  <div>
+                    <span className="text-white font-bold block mb-0.5">НЕЙТРАЛЬНЫЙ БИЛЛИНГ</span>
+                    В выписке по вашей карте или Kaspi при списании отобразится нейтральное наименование продавца (например, <span className="text-white">«Retail Atyrau»</span> или <span className="text-white">«HS-Atyrau»</span>), без упоминания интимных товаров или бренда.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">shield</span>
+                  <div>
+                    <span className="text-white font-bold block mb-0.5">ЗАЩИТА SSL И ДАННЫХ</span>
+                    Ваши персональные данные защищены 256-битным SSL-шифрованием и используются исключительно для конфиденциальной доставки заказа курьером.
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
