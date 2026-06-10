@@ -54,11 +54,13 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   }, [product]);
 
-  // Lock body scroll when open (both mobile and desktop)
+  // Lock body scroll when open (desktop only — на мобильном overflow:hidden ломает отображение)
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('preview-modal-open');
-      document.body.style.overflow = 'hidden';
+      if (!isMobile) {
+        document.body.style.overflow = 'hidden';
+      }
       // На мобильном сбрасываем скролл модала в начало (к фото товара)
       if (isMobile && mobileModalRef.current) {
         mobileModalRef.current.scrollTop = 0;
