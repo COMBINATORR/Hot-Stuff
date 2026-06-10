@@ -263,7 +263,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               <Link to="/" className="text-[22px] font-light tracking-[0.25em] text-white uppercase leading-none font-sans">
                 HOT STUFF
               </Link>
-              <span className="text-[8px] tracking-[0.45em] text-white/50 font-normal mt-1.5 uppercase font-sans">
+              <span className="text-[12px] tracking-[0.45em] text-white font-normal mt-1.5 uppercase font-sans">
                 АТЫРАУ
               </span>
             </div>
@@ -274,7 +274,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
             <Link to="/" className="text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none">
               HOT STUFF
             </Link>
-            <span className="text-[10px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
+            <span className="text-[18px] tracking-[0.45em] text-white font-medium mt-2 uppercase">
               АТЫРАУ
             </span>
           </div>
