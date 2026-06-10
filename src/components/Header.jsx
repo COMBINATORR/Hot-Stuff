@@ -168,33 +168,44 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
       </div>
 
       {/* Main Glassmorphic Header */}
-      <header className="w-full bg-transparent border-b border-white/5 absolute top-12 left-0 z-40">
+      <header className="w-full bg-transparent absolute top-12 left-0 z-40">
         <div className="container-hs flex items-center justify-between h-20">
           
-          {/* LEFT: Menu / Sandwich */}
+          {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
-            <button onClick={() => setNavOpen(true)} className="flex items-center justify-center gap-3 bg-transparent text-white border-none focus:outline-none group h-[24px]">
+            {/* Sandwich for Desktop */}
+            <button onClick={() => setNavOpen(true)} className="hidden md:flex items-center justify-center gap-3 bg-transparent text-white border-none focus:outline-none group h-[24px]">
               <div className="flex flex-col justify-between items-start w-6 h-[10px]">
                 <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
                 <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
               </div>
-              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors hidden sm:flex items-center mt-[1px]">
+              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors flex items-center mt-[1px]">
                 МЕНЮ
               </span>
             </button>
+
+            {/* Logo for Mobile */}
+            <div className="flex md:hidden flex-col items-start justify-center select-none">
+              <Link to="/" className="text-[28px] font-medium tracking-[0.3em] text-white uppercase leading-none">
+                HOT STUFF
+              </Link>
+              <span className="text-[9px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
+                АТЫРАУ
+              </span>
+            </div>
           </div>
 
-          {/* CENTER: Logo LELO & SWEDEN styled as HOT STUFF & ATYRAU */}
-          <div className="flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
-            <Link to="/" className="text-[28px] md:text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none">
+          {/* CENTER: Logo (Desktop only) */}
+          <div className="hidden md:flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
+            <Link to="/" className="text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none">
               HOT STUFF
             </Link>
-            <span className="text-[9px] md:text-[10px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
+            <span className="text-[10px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
               АТЫРАУ
             </span>
           </div>
 
-          {/* RIGHT: Search, Profile, Cart */}
+          {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
             <button className="flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
@@ -209,6 +220,14 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
                   {cartCount}
                 </span>
               )}
+            </button>
+
+            {/* Sandwich for Mobile */}
+            <button onClick={() => setNavOpen(true)} className="flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none group">
+              <div className="flex flex-col justify-between items-end w-6 h-[10px]">
+                <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+                <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+              </div>
             </button>
           </div>
         </div>
