@@ -166,18 +166,21 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
           {isMobile ? (
             /* MOBILE FULL SCREEN SHEET */
             <motion.div
+              key={product.id}
               ref={mobileModalRef}
-              className="fixed inset-0 w-full h-full bg-white z-[300] block overflow-y-auto text-black font-sans overscroll-y-contain"
+              className="fixed inset-0 w-full h-full bg-white z-[300] flex flex-col overflow-y-auto text-black font-sans overscroll-y-contain"
               style={{ WebkitOverflowScrolling: 'touch' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
               onAnimationComplete={() => {
-                // Гарантированный сброс скролла после завершения анимации входа
-                if (mobileModalRef.current) {
-                  mobileModalRef.current.scrollTop = 0;
-                }
+                // Гарантированный сброс скролла после рендера и анимации
+                requestAnimationFrame(() => {
+                  if (mobileModalRef.current) {
+                    mobileModalRef.current.scrollTop = 0;
+                  }
+                });
               }}
             >
               {/* Floating Controls at Top Right */}
