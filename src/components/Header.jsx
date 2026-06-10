@@ -9,6 +9,59 @@ const TICKER_ITEMS = [
   { text: "НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ", link: "/catalog?cat=wellness" }
 ];
 
+const MENU_ITEMS = [
+  { label: 'популярные секс-игрушки', link: '/catalog' },
+  { 
+    label: 'секс-игрушки для женщин', 
+    subItems: [
+      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=women' },
+      { label: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G', link: '/catalog?cat=g-spot' },
+      { label: 'ВИБРАТОРЫ ДЛЯ КЛИТОРА', link: '/catalog?cat=clitoral' },
+      { label: 'ВИБРАТОРЫ-КРОЛИКИ', link: '/catalog?cat=rabbit' },
+      { label: 'АНАЛЬНЫЕ ПРОБКИ', link: '/catalog?cat=anal-plugs' },
+      { label: 'ВИБРОПУЛЯ', link: '/catalog?cat=bullets' },
+      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', link: '/catalog?cat=remote' },
+      { label: 'СЕКС-ИГРУШКИ ДЛЯ ПОЕЗДОК', link: '/catalog?cat=travel' },
+      { label: 'ЖЕЗЛОВЫЕ МАССАЖЕРЫ', link: '/catalog?cat=wands' },
+      { label: 'ВАГИНАЛЬНЫЕ ШАРИКИ', link: '/catalog?cat=kegel' },
+      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', link: '/catalog?cat=anal-balls' }
+    ]
+  },
+  {
+    label: 'секс-игрушки для мужчин',
+    subItems: [
+      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=men' },
+      { label: 'МАССАЖЕРЫ ПРОСТАТЫ', link: '/catalog?cat=prostate' },
+      { label: 'АНАЛЬНЫЕ ПРОБКИ', link: '/catalog?cat=anal-plugs' },
+      { label: 'ЭРЕКЦИОННЫЕ КОЛЬЦА', link: '/catalog?cat=rings' },
+      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', link: '/catalog?cat=anal-balls' },
+      { label: 'МУЖСКОЙ МАСТУРБАТОР', link: '/catalog?cat=masturbators' }
+    ]
+  },
+  {
+    label: 'секс-игрушки для пар',
+    subItems: [
+      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=couples' },
+      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', link: '/catalog?cat=remote' },
+      { label: 'НАДЕВАЕМЫЕ ВИБРОМАССАЖЕРЫ', link: '/catalog?cat=wearable' }
+    ]
+  },
+  {
+    label: 'секс-аксессуары',
+    subItems: [
+      { label: 'БДСМ-ИГРУШКИ', link: '/catalog?cat=bdsm' },
+      { label: 'ВЭЛНЕС', link: '/catalog?cat=wellness' },
+      { label: 'ЗАРЯДНЫЕ УСТРОЙСТВА И КАБЕЛИ USB', link: '/catalog?cat=chargers' },
+      { label: 'СЕКС-СВЕЧИ', link: '/catalog?cat=candles' },
+      { label: 'СМАЗКИ', link: '/catalog?cat=lubes' },
+      { label: 'СПРЕЙ ДЛЯ ОЧИСТКИ', link: '/catalog?cat=cleaners' }
+    ]
+  },
+  { label: 'эротическое белье', link: '/catalog?cat=lingerie' },
+  { label: 'подарочные наборы', link: '/catalog?cat=gifts' },
+  { label: 'блог', link: '/blog' },
+];
+
 /** CartDrawer — slide-in panel (Stitch design) */
 function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -130,6 +183,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
 export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState(null);
   const [tickerIndex, setTickerIndex] = useState(0);
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
@@ -270,43 +324,67 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
 
               {/* Navigation Links */}
               <nav className="flex flex-col px-10 py-2 gap-5 overflow-y-auto flex-1">
-                {[
-                  { label: 'популярные секс-игрушки', link: '/catalog' },
-                  { label: 'секс-игрушки для женщин', link: '/catalog', hasSub: true },
-                  { label: 'секс-игрушки для мужчин', link: '/catalog', hasSub: true },
-                  { label: 'секс-игрушки для пар', link: '/catalog', hasSub: true },
-                  { label: 'новинки секс-игрушек', link: '/catalog' },
-                  { label: 'секс-игрушки с приложением', link: '/catalog' },
-                  { label: 'добавки', link: '/catalog' },
-                  { label: 'наборы', link: '/catalog' },
-                  { label: 'смазки', link: '/catalog' },
-                  { label: 'секс-аксессуары', link: '/catalog', hasSub: true },
-                  { label: 'intimina by lelo', link: '/catalog' },
-                  { label: 'люксовые секс-игрушки', link: '/catalog' },
-                  { label: 'lelo makeup™', link: '/catalog' },
-                  { label: 'презервативы', link: '/catalog' },
-                  { label: 'секс-игрушки для лгбт', link: '/catalog' },
-                  { label: 'блог', link: '/blog' },
-                ].map((item, idx) => (
-                  <Link 
-                    key={idx} 
-                    to={item.link} 
-                    className="relative text-white font-bold text-[13px] hover:text-primary transition-colors pl-5 -ml-5"
-                    onClick={() => setNavOpen(false)}
-                  >
-                    {item.hasSub && (
-                      <span className="absolute left-0 top-1/2 -translate-y-[55%] font-normal text-[15px] leading-none">+</span>
-                    )}
-                    <span className="lowercase tracking-wide">{item.label}</span>
-                  </Link>
-                ))}
+                {MENU_ITEMS.map((item, idx) => {
+                  const isExpanded = expandedCategory === item.label;
+                  return (
+                    <div key={idx} className="flex flex-col">
+                      {item.subItems ? (
+                        <button 
+                          onClick={() => setExpandedCategory(isExpanded ? null : item.label)}
+                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase relative w-full"
+                        >
+                          <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-white/50 text-[14px] font-light leading-none">
+                            {isExpanded ? '–' : '+'}
+                          </span>
+                          {item.label}
+                        </button>
+                      ) : (
+                        <Link 
+                          to={item.link} 
+                          className="text-white text-[11px] font-bold tracking-widest lowercase relative"
+                          onClick={() => setNavOpen(false)}
+                        >
+                          <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-white/50 text-[14px] font-light leading-none">+</span>
+                          {item.label}
+                        </Link>
+                      )}
+
+                      {/* Sub-items accordion */}
+                      {item.subItems && (
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden flex flex-col mt-5"
+                            >
+                              <div className="flex flex-col gap-4 pb-4">
+                                {item.subItems.map((sub, sIdx) => (
+                                  <Link 
+                                    key={sIdx} 
+                                    to={sub.link}
+                                    className="text-white text-[10px] font-bold tracking-widest uppercase hover:text-primary transition-colors"
+                                    onClick={() => setNavOpen(false)}
+                                  >
+                                    {sub.label}
+                                  </Link>
+                                ))}
+                              </div>
+                              <div className="w-full h-px bg-white/30 mt-2 mb-2"></div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      )}
+                    </div>
+                  );
+                })}
               </nav>
 
-              <div className="p-8 border-t border-white/10 mt-4">
-                <NavLink to="/account" className="font-bold text-[13px] text-white flex items-center gap-3 hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>
-                  <span className="material-symbols-outlined text-xl font-light">person</span> 
-                  <span className="lowercase tracking-wide">личный кабинет</span>
-                </NavLink>
+              <div className="px-10 pb-12 mt-auto">
+                <Link to="/profile" className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors" onClick={() => setNavOpen(false)}>
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                </Link>
               </div>
             </motion.div>
           </>
