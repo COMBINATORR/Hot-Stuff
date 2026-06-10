@@ -1,20 +1,58 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n.js';
 import AppRouter from './router.jsx';
-import ThemeToggler from './components/ThemeToggler.jsx';
+import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
 import SecureProvider from './components/SecureProvider.jsx';
 
 function App() {
+  /* ── Cart state (lifted to App so Header + pages share it) ── */
+  const [cartItems, setCartItems] = useState([]);
+
+  const addToCart = useCallback((item) => {
+    setCartItems(prev => {
+      const existing = prev.find(i => i.id === item.id && i.variant === item.variant);
+      if (existing) {
+        return prev.map(i =>
+          i.id === item.id && i.variant === item.variant
+            ? { ...i, qty: i.qty + (item.qty || 1) }
+            : i
+        );
+      }
+      return [...prev, { ...item, qty: item.qty || 1 }];
+    });
+  }, []);
+
+  const updateQty = useCallback((id, qty) => {
+    setCartItems(prev =>
+      prev.map(i => i.id === id ? { ...i, qty: Math.max(1, qty) } : i)
+    );
+  }, []);
+
+  const removeItem = useCallback((id) => {
+    setCartItems(prev => prev.filter(i => i.id !== id));
+  }, []);
+
   return (
     <I18nextProvider i18n={i18n}>
       <HelmetProvider>
         <SecureProvider>
           <BrowserRouter>
-            <ThemeToggler />
-            <AppRouter />
+            <Header
+              cartItems={cartItems}
+              onUpdateQty={updateQty}
+              onRemove={removeItem}
+            />
+            <main className="min-h-screen">
+              <AppRouter
+                cartItems={cartItems}
+                onAddToCart={addToCart}
+              />
+            </main>
+            <Footer />
           </BrowserRouter>
         </SecureProvider>
       </HelmetProvider>
