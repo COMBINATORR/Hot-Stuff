@@ -7,6 +7,8 @@ import logoNoirDress from '../assets/images/products/noir_silhouette_dress.png';
 import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
+import heroBg from '../assets/images/hero-bg.png';
+
 const HERO = {
   headline: 'ИСКУССТВО\nЧУВСТВЕННОСТИ',
   sub: 'Премиальные интимные аксессуары для тех, кто ценит эстетику, качество и новые ощущения.',
@@ -64,8 +66,13 @@ export default function HomePage({ onAddToCart }) {
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
         {/* Subtle gold glow */}
         <div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
