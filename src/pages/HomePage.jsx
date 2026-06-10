@@ -2,31 +2,58 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-/* ── Mock data ─────────────────────────────────── */
+// Import local product images generated for the shop to keep consistency
+import logoNoirDress from '../assets/images/products/noir_silhouette_dress.png';
+import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
+import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
+
 const HERO = {
   headline: 'ИСКУССТВО\nЧУВСТВЕННОСТИ',
   sub: 'Премиальные интимные аксессуары для тех, кто ценит эстетику, качество и новые ощущения.',
 };
 
-const CATEGORIES = [
-  { slug: 'vibrators', name: 'Вибраторы', emoji: '✨' },
-  { slug: 'massagers', name: 'Массажёры', emoji: '🌙' },
-  { slug: 'couples',   name: 'Для пар',   emoji: '💫' },
-  { slug: 'wellness',  name: 'Wellness',  emoji: '🌿' },
+// Popular Categories matching the second screenshot ("ПОПУЛЯРНЫЕ КАТЕГОРИИ")
+const POPULAR_CATEGORIES = [
+  {
+    id: 1,
+    title: 'Популярные секс-игрушки',
+    image: logoNoirDress,
+    link: '/catalog?cat=vibrators'
+  },
+  {
+    id: 2,
+    title: 'Секс-игрушки для женщин',
+    image: logoEtherealWrap,
+    link: '/catalog?cat=vibrators'
+  },
+  {
+    id: 3,
+    title: 'Секс-игрушки для мужчин',
+    image: logoGoldBoots,
+    link: '/catalog?cat=massagers'
+  },
+  {
+    id: 4,
+    title: 'Секс-игрушки для пар',
+    image: logoNoirDress,
+    link: '/catalog?cat=couples'
+  }
 ];
 
-const BESTSELLERS = [
-  { id: 1, name: 'Lush Sensation', price: 42900, emoji: '🌸', colors: ['#1a1a1a','#C4A661','#8B4557'] },
-  { id: 2, name: 'Velvet Noir',    price: 54900, emoji: '🖤', colors: ['#1a1a1a','#4A3C5C'] },
-  { id: 3, name: 'Bloom Essence',  price: 38900, emoji: '🌺', colors: ['#C4A661','#8B4557','#E5E2E1'] },
-  { id: 4, name: 'Silk Wave',      price: 62900, emoji: '🌊', colors: ['#1a1a1a','#355E5C'] },
-];
-
-/* ── Animations ────────────────────────────────── */
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 
 export default function HomePage({ onAddToCart }) {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleScroll = (e) => {
+    const element = e.target;
+    const totalWidth = element.scrollWidth - element.clientWidth;
+    if (totalWidth > 0) {
+      setScrollProgress((element.scrollLeft / totalWidth) * 100);
+    }
+  };
+
   return (
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
@@ -86,7 +113,7 @@ export default function HomePage({ onAddToCart }) {
         </motion.div>
       </section>
 
-      {/* ═══ BRAND INTRODUCTION SECTION (After Hero) ═══ */}
+      {/* ═══ BRAND INTRODUCTION SECTION ═══ */}
       <section className="bg-background py-20 px-6 border-b border-white/5">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-sm md:text-base text-on-surface-variant font-medium leading-relaxed max-w-2xl mx-auto font-sans tracking-wide">
@@ -99,73 +126,56 @@ export default function HomePage({ onAddToCart }) {
         </div>
       </section>
 
-      {/* ═══ CATEGORIES ════════════════════════════ */}
-      <section className="container-hs py-section-gap">
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={stagger}
+      {/* ═══ POPULAR CATEGORIES / TOYS (Horizontal Scroll) ═══ */}
+      <section className="bg-background py-16 border-b border-white/5">
+        <div className="container-hs">
+          <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
+            ПОПУЛЯРНЫЕ КАТЕГОРИИ
+          </h2>
+        </div>
+        
+        {/* Horizontal scrollable wrapper */}
+        <div 
+          className="flex overflow-x-auto gap-4 px-6 md:px-20 scrollbar-none snap-x snap-mandatory pb-6"
+          onScroll={handleScroll}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center mb-16">
-            <h2 className="label-caps text-on-surface-variant">КАТЕГОРИИ</h2>
-            <div className="section-rule" />
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
-            {CATEGORIES.map((cat, i) => (
-              <motion.div key={cat.slug} variants={fadeUp} transition={{ duration: 0.45, delay: i * 0.08 }}>
-                <Link
-                  to={`/catalog?cat=${cat.slug}`}
-                  className="group block bg-surface-container-low hover:bg-surface-container transition-colors p-10 text-center"
+          {POPULAR_CATEGORIES.map((cat) => (
+            <div 
+              key={cat.id} 
+              className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[32vw] lg:min-w-[24vw] snap-start relative aspect-[4/3] group overflow-hidden border border-white/5"
+            >
+              {/* Product Background Image */}
+              <img 
+                src={cat.image} 
+                alt={cat.title} 
+                className="w-full h-full object-cover brightness-[0.8] group-hover:scale-105 transition-transform duration-700"
+              />
+              {/* Overlay with title & CTA button */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end items-start">
+                <h3 className="text-white font-bold text-lg md:text-xl mb-4">
+                  {cat.title}
+                </h3>
+                <Link 
+                  to={cat.link} 
+                  className="bg-white text-black font-label-caps text-[10px] font-black tracking-widest py-3 px-8 transition-transform hover:scale-105"
                 >
-                  <div className="text-4xl mb-6 group-hover:scale-110 transition-transform duration-500">
-                    {cat.emoji}
-                  </div>
-                  <p className="label-caps text-on-surface group-hover:text-primary transition-colors">
-                    {cat.name}
-                  </p>
+                  УЗНАТЬ БОЛЬШЕ
                 </Link>
-              </motion.div>
-            ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Custom Scroll Indicator Line */}
+        <div className="container-hs mt-4">
+          <div className="w-full bg-white/10 h-[2px] relative rounded-full overflow-hidden">
+            <div 
+              className="bg-white h-full transition-all duration-100" 
+              style={{ width: '25%', transform: `translateX(${scrollProgress * 3}%)` }}
+            ></div>
           </div>
-        </motion.div>
-      </section>
-
-      {/* ═══ BESTSELLERS ═══════════════════════════ */}
-      <section className="container-hs pb-section-gap">
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={stagger}
-        >
-          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center mb-16">
-            <h2 className="label-caps text-on-surface-variant">БЕСТСЕЛЛЕРЫ</h2>
-            <div className="section-rule" />
-          </motion.div>
-
-          <div className="product-grid-4">
-            {BESTSELLERS.map((p, i) => (
-              <motion.div key={p.id} variants={fadeUp} transition={{ duration: 0.5, delay: i * 0.1 }}>
-                <Link to={`/product/${p.id}`} className="product-card block">
-                  <div className="product-card-image">
-                    <div className="product-card-placeholder">{p.emoji}</div>
-                  </div>
-                  <div className="product-card-info">
-                    {/* Color dots */}
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      {p.colors.map(c => (
-                        <span key={c} className="color-dot" style={{ background: c }} />
-                      ))}
-                    </div>
-                    <p className="product-card-name">{p.name}</p>
-                    <p className="product-card-price">{p.price.toLocaleString('ru-KZ')} ₸</p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="text-center mt-16">
-            <Link to="/catalog" className="btn-outline">СМОТРЕТЬ ВСЁ</Link>
-          </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══ BRAND QUOTE ═══════════════════════════ */}
