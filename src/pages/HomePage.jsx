@@ -10,6 +10,7 @@ import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 import heroBg from '../assets/images/hero-bg.png';
 import logoInaThrustPromo from '../assets/images/ina_thrust_promo.png';
 import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
+import logoNewsletterBg from '../assets/images/newsletter_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
@@ -774,27 +775,57 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ NEWSLETTER ════════════════════════════ */}
-      <section className="container-hs py-section-gap">
-        <motion.div
-          className="max-w-2xl mx-auto text-center"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-        >
-          <motion.p variants={fadeUp} className="label-caps text-primary mb-4">ОСТАВАЙТЕСЬ С НАМИ</motion.p>
-          <motion.h2 variants={fadeUp} transition={{ delay: 0.1 }} className="text-headline-lg mb-4">
-            Подпишитесь на новинки
-          </motion.h2>
-          <motion.p variants={fadeUp} transition={{ delay: 0.15 }} className="text-body-md text-on-surface-variant mb-10">
-            Получайте эксклюзивные предложения и будьте первыми, кто узнает о новых коллекциях.
-          </motion.p>
-          <motion.form variants={fadeUp} transition={{ delay: 0.2 }} className="flex gap-0 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
-            <input
-              type="email"
-              placeholder="Ваш email"
-              className="flex-1 bg-surface-container-low border border-white/10 border-r-0 px-5 py-4 text-body-md text-on-surface outline-none focus:border-primary transition-colors"
-            />
-            <button className="btn-primary px-8">→</button>
-          </motion.form>
-        </motion.div>
+      <section className="relative w-full aspect-[21/9] min-h-[400px] md:min-h-[500px] flex items-center justify-center overflow-hidden border-b border-white/5">
+        <ResponsiveImage 
+          src={logoNewsletterBg} 
+          alt="Newsletter Discount" 
+          className="absolute inset-0 w-full h-full object-cover opacity-80" 
+          loading="lazy" 
+        />
+        {/* Dark mask overlay to replicate LELO style */}
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
+
+        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex flex-col items-center">
+          <h2 className="text-white text-[28px] sm:text-[36px] md:text-[48px] lg:text-[56px] font-bold leading-tight mb-4 lowercase font-sans">
+            получи скидку 15% сегодня
+          </h2>
+          <p className="text-white text-xs sm:text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
+            Подпишись и будь среди первых, кто узнает об акциях, новостях и обновлениях продуктов, а также сэкономь 15% на следующей покупке.
+          </p>
+
+          <form className="w-full max-w-xl flex flex-col gap-4" onSubmit={e => e.preventDefault()}>
+            <div className="flex flex-row w-full h-12 sm:h-14">
+              <input
+                type="email"
+                placeholder="адрес электронной почты"
+                required
+                className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-xs sm:text-sm outline-none font-sans"
+              />
+              <button 
+                type="submit" 
+                className="bg-black hover:bg-neutral-900 text-white font-sans font-bold text-xs sm:text-sm tracking-widest px-6 sm:px-10 uppercase transition-colors flex-none"
+              >
+                ПОДПИСАТЬСЯ
+              </button>
+            </div>
+            
+            <label className="flex items-center justify-center gap-2 text-[10px] sm:text-xs text-white/90 select-none cursor-pointer">
+              <input 
+                type="checkbox" 
+                required 
+                className="accent-primary w-4 h-4 rounded border-white/20 bg-transparent text-primary focus:ring-0 focus:ring-offset-0" 
+              />
+              <span>
+                Я принимаю{' '}
+                <a href="/privacy" className="underline hover:text-white transition-colors">
+                  Политику конфиденциальности
+                </a>
+                .
+              </span>
+            </label>
+          </form>
+        </div>
       </section>
 
       {/* Product Preview Modal */}
