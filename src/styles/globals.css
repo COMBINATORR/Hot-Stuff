@@ -502,7 +502,7 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
    FOOTER
    ════════════════════════════════════════════════ */
 .site-footer {
-  background: #1c1b1b;
+  background: #000000;
   border-top: 1px solid rgba(255,255,255,0.05);
 }
 
