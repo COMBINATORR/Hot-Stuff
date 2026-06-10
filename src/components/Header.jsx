@@ -1,6 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+
+// Promo Ticker Data
+const TICKER_ITEMS = [
+  { text: "АКЦИИ ДЛЯ САМОНАСЛАЖДЕНИЯ: СКИДКИ ДО 50% + БЕСПЛАТНАЯ ИГРУШКА", link: "/catalog" },
+  { text: "БЕСПЛАТНАЯ ДОСТАВКА ПО ВСЕМУ КАЗАХСТАНУ ОТ 30 000 ₸", link: "/delivery" },
+  { text: "НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ", link: "/catalog?cat=wellness" }
+];
 
 /** CartDrawer — slide-in panel (Stitch design) */
 function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
@@ -49,7 +56,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
               <div key={item.id + (item.variant || '')} className="flex gap-6">
                 <div className="w-24 h-24 bg-surface-container-low flex-none">
                   {item.image ? (
-                    <img alt={item.name} className="w-full h-full object-contain" src={item.image} />
+                    <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl bg-surface-container">{item.emoji || '🌸'}</div>
                   )}
@@ -119,78 +126,95 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
   );
 }
 
-/** Main Header component */
+/** Main Header component with Promo Ticker */
 export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [tickerIndex, setTickerIndex] = useState(0);
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const handleNextTicker = () => {
+    setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
+  };
 
-  // close nav on Escape
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === 'Escape') { setNavOpen(false); setCartOpen(false); }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
-
-  const navLinks = [
-    { to: '/catalog', label: 'Collections' },
-    { to: '/catalog?cat=wellness', label: 'Wellness' },
-    { to: '/catalog?cat=philosophy', label: 'Philosophy' },
-  ];
+  const handlePrevTicker = () => {
+    setTickerIndex((prev) => (prev - 1 + TICKER_ITEMS.length) % TICKER_ITEMS.length);
+  };
 
   return (
     <>
-      <header
-        className="site-header"
-        style={{ boxShadow: scrolled ? '0 4px 40px rgba(0,0,0,0.4)' : 'none' }}
-      >
-        <div className="container-hs header-inner">
-          {/* LEFT — desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map(l => (
-              <NavLink key={l.to} to={l.to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-                {l.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* MOBILE — hamburger */}
-          <button className="header-icon md:hidden" onClick={() => setNavOpen(true)}>
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-
-          {/* CENTER — Logo */}
-          <Link to="/" className="header-logo-text absolute left-1/2 -translate-x-1/2">
-            HOT STUFF
+      {/* Promo Ticker Bar */}
+      <div className="w-full bg-black py-3 border-b border-white/5 flex items-center justify-between px-6 text-xs text-white z-50 relative h-12">
+        <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none">
+          <span className="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
+        </button>
+        
+        <div className="flex-1 text-center font-bold tracking-wider overflow-hidden px-4 flex items-center justify-center gap-4">
+          <span className="text-[10px] md:text-xs tracking-[0.15em] font-sans truncate">
+            {TICKER_ITEMS[tickerIndex].text}
+          </span>
+          <Link 
+            to={TICKER_ITEMS[tickerIndex].link} 
+            className="bg-[#FF5C3F] text-black text-[9px] font-black tracking-widest uppercase py-1.5 px-4 transition-transform hover:scale-105 inline-block"
+          >
+            КУПИТЬ
           </Link>
+        </div>
 
-          {/* RIGHT — icons */}
-          <div className="flex items-center gap-5">
-            <button className="header-icon hidden md:flex">
-              <span className="material-symbols-outlined">search</span>
+        <button onClick={handleNextTicker} className="hover:text-primary transition-colors focus:outline-none">
+          <span className="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
+        </button>
+      </div>
+
+      {/* Main Glassmorphic Header */}
+      <header className="w-full bg-transparent border-b border-white/5 absolute top-12 left-0 z-40">
+        <div className="container-hs flex items-center justify-between h-20">
+          
+          {/* LEFT: Menu / Sandwich */}
+          <div className="flex items-center gap-3">
+            <button onClick={() => setNavOpen(true)} className="flex items-center gap-3 bg-transparent text-white border-none focus:outline-none group">
+              <div className="flex flex-col gap-1.5 justify-center items-start w-6">
+                <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+                <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+              </div>
+              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors hidden sm:inline">
+                МЕНЮ
+              </span>
             </button>
-            <NavLink to="/account" className="header-icon hidden md:flex">
-              <span className="material-symbols-outlined">person</span>
+          </div>
+
+          {/* CENTER: Logo LELO & SWEDEN styled as HOT STUFF & ATYRAU */}
+          <div className="flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
+            <Link to="/" className="text-[28px] md:text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none">
+              HOT STUFF
+            </Link>
+            <span className="text-[9px] md:text-[10px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
+              ATYRAU
+            </span>
+          </div>
+
+          {/* RIGHT: Search, Profile, Cart */}
+          <div className="flex items-center gap-6">
+            <button className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[22px] font-light">search</span>
+            </button>
+            <NavLink to="/account" className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors hidden sm:inline-block">
+              <span className="material-symbols-outlined text-[22px] font-light">person</span>
             </NavLink>
-            <button className="header-icon" onClick={() => setCartOpen(true)}>
-              <span className="material-symbols-outlined">shopping_bag</span>
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            <button onClick={() => setCartOpen(true)} className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors relative flex items-center">
+              <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── Mobile Nav Drawer ───────────────────── */}
+      {/* Mobile Drawer (Nav) */}
       <AnimatePresence>
         {navOpen && (
           <>
@@ -201,28 +225,31 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
             />
             <motion.div
               className="mobile-nav-panel open"
-              initial={{ x: '100%' }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+              exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.32, ease: [0.25,0.46,0.45,0.94] }}
+              style={{ left: 0, right: 'auto' }} // Slide from left instead of right for menu
             >
               <div className="flex justify-between items-center p-8 border-b border-white/10">
-                <span className="header-logo-text">HOT STUFF</span>
+                <div className="flex flex-col">
+                  <span className="text-xl font-medium tracking-[0.3em] text-white uppercase">HOT STUFF</span>
+                  <span className="text-[9px] tracking-[0.4em] text-on-surface-variant uppercase mt-0.5">ATYRAU</span>
+                </div>
                 <button className="header-icon" onClick={() => setNavOpen(false)}>
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
               <nav className="flex flex-col p-8 gap-8">
-                {navLinks.map(l => (
-                  <NavLink
-                    key={l.to} to={l.to}
-                    className="label-caps text-on-surface flex items-center justify-between"
-                    onClick={() => setNavOpen(false)}
-                  >
-                    {l.label}
-                    <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
-                  </NavLink>
-                ))}
+                <Link to="/catalog" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
+                  Collections <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
+                </Link>
+                <Link to="/catalog?cat=wellness" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
+                  Wellness <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
+                </Link>
+                <Link to="/catalog?cat=philosophy" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
+                  Philosophy <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
+                </Link>
               </nav>
               <div className="mt-auto p-8 border-t border-white/10">
                 <NavLink to="/account" className="label-caps text-on-surface-variant flex items-center gap-3" onClick={() => setNavOpen(false)}>
@@ -234,7 +261,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
         )}
       </AnimatePresence>
 
-      {/* ── Cart Drawer ─────────────────────────── */}
+      {/* Cart Drawer */}
       <CartDrawer
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
