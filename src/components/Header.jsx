@@ -61,6 +61,7 @@ const MENU_ITEMS = [
   { label: 'эротическое белье', link: '/catalog?cat=lingerie' },
   { label: 'подарочные наборы', link: '/catalog?cat=gifts' },
   { label: 'блог', link: '/blog' },
+  { label: 'МАКЕТ SORAYA WAVE™', link: '/mockup/soraya-wave' },
 ];
 
 /** CartDrawer — slide-in panel (Stitch design) */
