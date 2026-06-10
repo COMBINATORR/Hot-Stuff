@@ -628,7 +628,7 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ BRAND INTRODUCTION SECTION ═══ */}
       <section className="bg-background py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-sm md:text-base text-on-surface-variant font-medium leading-relaxed max-w-2xl mx-auto font-sans tracking-wide">
+          <p className="text-base md:text-lg text-white font-medium leading-relaxed max-w-2xl mx-auto font-sans tracking-wide">
             За годы работы HOT STUFF стал признанным лидером на рынке товаров для взрослых и эксклюзивного нижнего белья. 
             Сочетая премиальное качество, утонченную эстетику и абсолютную конфиденциальность, мы помогаем открыть новые грани удовольствия. 
             HOT STUFF — это не просто интернет-магазин товаров для взрослых. Это философия осознанного ухода за собой, 
