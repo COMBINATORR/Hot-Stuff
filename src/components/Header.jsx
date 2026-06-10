@@ -173,12 +173,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
           
           {/* LEFT: Menu / Sandwich */}
           <div className="flex items-center gap-3">
-            <button onClick={() => setNavOpen(true)} className="flex items-center gap-3 bg-transparent text-white border-none focus:outline-none group">
-              <div className="flex flex-col gap-1.5 justify-center items-start w-6">
+            <button onClick={() => setNavOpen(true)} className="flex items-center justify-center gap-3 bg-transparent text-white border-none focus:outline-none group h-[24px]">
+              <div className="flex flex-col justify-between items-start w-6 h-[10px]">
                 <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
                 <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
               </div>
-              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors hidden sm:inline">
+              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors hidden sm:flex items-center mt-[1px]">
                 МЕНЮ
               </span>
             </button>
@@ -196,16 +196,16 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
 
           {/* RIGHT: Search, Profile, Cart */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button className="flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[22px] font-light">search</span>
+            <button className="flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
-            <NavLink to="/account" className="hidden sm:flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[22px] font-light">person</span>
+            <NavLink to="/account" className="hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
             </NavLink>
-            <button onClick={() => setCartOpen(true)} className="relative flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
+            <button onClick={() => setCartOpen(true)} className="relative flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[22px] font-light leading-none block">shopping_bag</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {cartCount}
                 </span>
               )}
