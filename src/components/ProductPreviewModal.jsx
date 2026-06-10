@@ -53,12 +53,17 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
 
   // Lock body scroll when open (desktop only to prevent iOS scroll lock conflict)
   useEffect(() => {
-    if (isOpen && !isMobile) {
-      document.body.style.overflow = 'hidden';
+    if (isOpen) {
+      document.body.classList.add('preview-modal-open');
+      if (!isMobile) {
+        document.body.style.overflow = 'hidden';
+      }
     } else {
+      document.body.classList.remove('preview-modal-open');
       document.body.style.overflow = '';
     }
     return () => {
+      document.body.classList.remove('preview-modal-open');
       document.body.style.overflow = '';
     };
   }, [isOpen, isMobile]);

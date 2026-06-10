@@ -201,7 +201,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
   return (
     <>
       {/* Promo Ticker Bar */}
-      <div className="w-full bg-black py-3 border-b border-white/5 flex items-center justify-between px-6 text-xs text-white z-50 relative h-12">
+      <div className="w-full bg-black py-3 border-b border-white/5 flex items-center justify-between px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
         <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none">
           <span className="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
         </button>

@@ -585,3 +585,11 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
   }
 }
 
+/* Hide global header elements when product preview is open on mobile */
+@media (max-width: 767px) {
+  body.preview-modal-open .global-promo-ticker,
+  body.preview-modal-open .mobile-premium-header {
+    display: none !important;
+  }
+}
+
