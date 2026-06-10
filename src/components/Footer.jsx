@@ -21,7 +21,7 @@ export default function Footer() {
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="text-outline hover:text-white transition-colors duration-300"
+                className="text-outline hover:text-[#E1306C] transition-colors duration-300"
                 aria-label="Instagram"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -34,7 +34,7 @@ export default function Footer() {
                 href="https://t.me" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="text-outline hover:text-white transition-colors duration-300"
+                className="text-outline hover:text-[#26A5E4] transition-colors duration-300"
                 aria-label="Telegram"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -46,7 +46,7 @@ export default function Footer() {
                 href="https://wa.me" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="text-outline hover:text-white transition-colors duration-300"
+                className="text-outline hover:text-[#25D366] transition-colors duration-300"
                 aria-label="WhatsApp"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -129,40 +129,40 @@ export default function Footer() {
           </p>
           
           {/* Accepted Payments Section */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <span className="font-sans font-bold text-[10px] tracking-wider text-outline uppercase mr-2 select-none">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-outline">
+            <span className="font-sans font-bold text-[10px] tracking-wider uppercase mr-2 select-none">
               Принимаем к оплате:
             </span>
             
             {/* Visa */}
-            <div className="h-7 px-3 border border-white/10 flex items-center justify-center select-none text-outline hover:text-white hover:border-white/30 transition-colors">
-              <span className="font-sans font-bold text-[9px] tracking-[0.15em] uppercase">VISA</span>
-            </div>
+            <span className="font-sans font-bold text-[11px] tracking-[0.15em] uppercase select-none hover:text-white transition-colors cursor-default">
+              VISA
+            </span>
             
             {/* Mastercard */}
-            <div className="h-7 px-3 border border-white/10 flex items-center justify-center gap-1.5 select-none text-outline hover:text-white hover:border-white/30 transition-colors">
+            <div className="flex items-center gap-1.5 select-none hover:text-white transition-colors cursor-default">
               <div className="flex -space-x-1">
                 <div className="w-2.5 h-2.5 rounded-full bg-current opacity-60"></div>
                 <div className="w-2.5 h-2.5 rounded-full bg-current"></div>
               </div>
-              <span className="font-sans font-bold text-[9px] tracking-[0.1em] uppercase">MC</span>
+              <span className="font-sans font-bold text-[11px] tracking-[0.1em] uppercase">MC</span>
             </div>
             
             {/* Kaspi QR */}
-            <div className="h-7 px-3 border border-white/15 bg-red-600/10 text-red-500 hover:text-red-400 hover:border-red-500/30 flex items-center justify-center gap-1.5 select-none transition-colors">
-              <span className="material-symbols-outlined text-[13px] leading-none">qr_code_2</span>
-              <span className="font-sans font-black text-[9px] tracking-wider uppercase">KASPI QR</span>
+            <div className="flex items-center gap-1.5 select-none text-red-500 hover:text-red-400 transition-colors cursor-default">
+              <span className="material-symbols-outlined text-[15px] leading-none">qr_code_2</span>
+              <span className="font-sans font-black text-[11px] tracking-wider uppercase">KASPI QR</span>
             </div>
             
             {/* Halyk Bank */}
-            <div className="h-7 px-3 border border-white/15 bg-emerald-600/10 text-emerald-500 hover:text-emerald-400 hover:border-emerald-500/30 flex items-center justify-center select-none transition-colors">
-              <span className="font-sans font-black text-[9px] tracking-wider uppercase">HALYK</span>
+            <div className="flex items-center gap-1 select-none text-emerald-500 hover:text-emerald-400 transition-colors cursor-default">
+              <span className="font-sans font-black text-[11px] tracking-wider uppercase">HALYK</span>
             </div>
             
             {/* Cash */}
-            <div className="h-7 px-3 border border-white/10 flex items-center justify-center gap-1 select-none text-outline hover:text-white hover:border-white/30 transition-colors">
-              <span className="material-symbols-outlined text-[13px] leading-none">payments</span>
-              <span className="font-sans font-bold text-[9px] tracking-[0.1em] uppercase">CASH</span>
+            <div className="flex items-center gap-1 select-none hover:text-white transition-colors cursor-default">
+              <span className="material-symbols-outlined text-[15px] leading-none">payments</span>
+              <span className="font-sans font-bold text-[11px] tracking-[0.1em] uppercase">CASH</span>
             </div>
           </div>
         </div>
