@@ -50,6 +50,8 @@ function App() {
               <AppRouter
                 cartItems={cartItems}
                 onAddToCart={addToCart}
+                onUpdateQty={updateQty}
+                onRemove={removeItem}
               />
             </main>
             <Footer />

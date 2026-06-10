@@ -96,17 +96,20 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
   );
 }
 
-export default function CartPage() {
+export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   const { t } = useTranslation();
-  const [items, setItems] = useState(MOCK_ITEMS);
+  const items = cartItems;
 
   const handleQty = (id, newQty) => {
-    if (newQty < 1) return handleRemove(id);
-    setItems(prev => prev.map(i => i.id === id ? { ...i, qty: newQty } : i));
+    if (newQty < 1) {
+      if (onRemove) onRemove(id);
+    } else {
+      if (onUpdateQty) onUpdateQty(id, newQty);
+    }
   };
 
   const handleRemove = (id) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+    if (onRemove) onRemove(id);
   };
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
