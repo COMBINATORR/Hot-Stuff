@@ -750,7 +750,7 @@ export default function HomePage({ onAddToCart }) {
 
       {/* ═══ BRAND QUOTE ═══════════════════════════ */}
       <section className="relative py-section-gap overflow-hidden">
-        <div className="absolute inset-0 bg-surface-container-lowest" />
+        <div className="absolute inset-0 bg-black" />
         <div
           className="absolute top-0 right-0 w-[400px] h-[400px] opacity-[0.03]"
           style={{ background: 'radial-gradient(circle, #f2ca50, transparent 70%)' }}
