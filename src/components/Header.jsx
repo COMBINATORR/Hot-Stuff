@@ -223,9 +223,8 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
         </button>
       </div>
 
-      {/* Main Glassmorphic Header */}
       <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header">
-        <div className="container-hs flex items-center justify-between h-20">
+        <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20">
           
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">

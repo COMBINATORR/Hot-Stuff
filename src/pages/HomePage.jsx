@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -99,6 +99,12 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 export default function HomePage({ onAddToCart }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
+  
+  // Mouse drag-to-scroll ref and states
+  const sliderRef = useRef(null);
+  const [isDown, setIsDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
 
   const handleScroll = (e) => {
     const element = e.target;
@@ -106,6 +112,35 @@ export default function HomePage({ onAddToCart }) {
     if (totalWidth > 0) {
       setScrollProgress((element.scrollLeft / totalWidth) * 100);
     }
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDown(true);
+    setStartX(e.pageX - sliderRef.current.offsetLeft);
+    setScrollLeftState(sliderRef.current.scrollLeft);
+    sliderRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseLeave = () => {
+    setIsDown(false);
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDown(false);
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Drag speed multiplier
+    sliderRef.current.scrollLeft = scrollLeftState - walk;
   };
 
   return (
@@ -197,14 +232,19 @@ export default function HomePage({ onAddToCart }) {
         
         {/* Horizontal scrollable wrapper */}
         <div 
-          className="flex overflow-x-auto gap-4 px-6 md:px-20 scrollbar-none snap-x snap-mandatory pb-6"
+          ref={sliderRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          className="flex overflow-x-auto gap-4 px-6 md:px-20 scrollbar-none snap-x snap-mandatory md:snap-none pb-6 cursor-grab select-none"
           onScroll={handleScroll}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {POPULAR_CATEGORIES.map((cat) => (
             <div 
               key={cat.id} 
-              className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[32vw] lg:min-w-[24vw] snap-start relative aspect-[4/3] group overflow-hidden border border-white/5"
+              className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[35vw] lg:min-w-[32vw] snap-start relative aspect-[4/3] group overflow-hidden border border-white/5"
             >
               {/* Product Background Image */}
               <ResponsiveImage 
