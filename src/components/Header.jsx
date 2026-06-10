@@ -209,12 +209,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
   return (
     <>
       {/* Promo Ticker Bar */}
-      <div className="w-full bg-black py-2 md:py-3 border-b border-white/5 flex items-center justify-between px-3 md:px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
+      <div className="w-full bg-black py-2 md:py-3 border-b border-white/5 flex items-center justify-between px-2 md:px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
         <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none z-10 flex-none">
           <span className="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
         </button>
         
-        <div className="flex-1 text-center font-bold tracking-wider overflow-hidden px-2 md:px-4 flex items-center justify-center relative h-full">
+        <div className="flex-1 text-center font-bold tracking-wider overflow-hidden px-1 md:px-4 flex items-center justify-center relative h-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={tickerIndex}
@@ -224,7 +224,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               transition={{ duration: 0.25, ease: "easeInOut" }}
               className="flex items-center justify-center gap-2 md:gap-4 w-full h-full"
             >
-              <span className="text-[8.5px] md:text-xs tracking-[0.08em] md:tracking-[0.15em] font-sans whitespace-normal leading-tight md:leading-normal max-w-[180px] sm:max-w-none text-center">
+              <span className="text-[9.5px] md:text-xs tracking-[0.05em] md:tracking-[0.15em] font-sans whitespace-normal leading-tight md:leading-normal text-center">
                 {TICKER_ITEMS[tickerIndex].text}
               </span>
               <Link 
