@@ -14,132 +14,108 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* overlay */}
-          <motion.div
-            className="cart-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-          {/* drawer */}
-          <motion.div
-            className="cart-drawer"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.35, ease: [0.25,0.46,0.45,0.94] }}
-          >
-            {/* Header */}
-            <div className="cart-drawer-header">
-              <h2 className="label-caps text-on-surface tracking-[0.2em]">ВАША КОРЗИНА</h2>
-              <button className="header-icon" onClick={onClose}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
+    <>
+      {/* Cart Overlay */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200] transition-opacity duration-500 opacity-100" 
+        id="cart-overlay"
+        onClick={onClose}
+      ></div>
+      {/* Cart Drawer */}
+      <div 
+        className="fixed top-0 right-0 h-full w-full max-w-md bg-surface-container-lowest z-[201] shadow-2xl transform transition-transform duration-500 translate-x-0 flex flex-col" 
+        id="cart-drawer"
+      >
+        {/* Header */}
+        <div className="p-8 border-b border-white/10 flex justify-between items-center">
+          <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">ВАША КОРЗИНА</h2>
+          <button className="text-on-surface-variant hover:text-primary transition-colors" onClick={onClose}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        
+        {/* Items List */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center gap-4">
+              <span className="material-symbols-outlined text-5xl text-outline">shopping_bag</span>
+              <p className="font-label-caps text-on-surface-variant">Корзина пуста</p>
             </div>
-
-            {/* Items */}
-            <div className="cart-drawer-items">
-              {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center gap-4">
-                  <span className="material-symbols-outlined text-5xl text-outline">shopping_bag</span>
-                  <p className="label-caps text-on-surface-variant">Корзина пуста</p>
+          ) : (
+            items.map(item => (
+              <div key={item.id + (item.variant || '')} className="flex gap-6">
+                <div className="w-24 h-24 bg-surface-container-low flex-none">
+                  {item.image ? (
+                    <img alt={item.name} className="w-full h-full object-contain" src={item.image} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl bg-surface-container">{item.emoji || '🌸'}</div>
+                  )}
                 </div>
-              ) : (
-                <AnimatePresence>
-                  {items.map(item => (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: 40 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex gap-4"
-                    >
-                      {/* image */}
-                      <div className="w-24 h-24 bg-surface-container-low flex-none overflow-hidden">
-                        {item.image
-                          ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                          : <div className="product-card-placeholder text-2xl">{item.emoji || '🛍️'}</div>
-                        }
-                      </div>
-                      {/* info */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <p className="label-caps text-on-surface mb-1">{item.name}</p>
-                          {item.variant && (
-                            <p className="text-xs text-on-surface-variant mb-1">{item.variant}</p>
-                          )}
-                          <p className="text-primary font-body-md">{(item.price * item.qty).toLocaleString('ru-KZ')} ₸</p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          {/* qty stepper */}
-                          <div className="flex items-center border border-white/10">
-                            <button
-                              className="px-3 py-1 text-on-surface-variant hover:text-primary transition-colors"
-                              onClick={() => onUpdateQty(item.id, Math.max(1, item.qty - 1))}
-                            >−</button>
-                            <span className="px-3 py-1 text-body-md min-w-[2rem] text-center">{item.qty}</span>
-                            <button
-                              className="px-3 py-1 text-on-surface-variant hover:text-primary transition-colors"
-                              onClick={() => onUpdateQty(item.id, item.qty + 1)}
-                            >+</button>
-                          </div>
-                          <button
-                            className="label-caps text-[10px] text-on-surface-variant hover:text-error transition-colors"
-                            onClick={() => onRemove(item.id)}
-                          >Удалить</button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              )}
-            </div>
-
-            {/* Footer */}
-            {items.length > 0 && (
-              <div className="cart-drawer-footer">
-                {/* promo */}
-                <div>
-                  <p className="field-label mb-2">ПРОМОКОД</p>
-                  <div className="flex gap-2">
-                    <input
-                      className="promo-input"
-                      placeholder="Введите код"
-                      value={promo}
-                      onChange={e => setPromo(e.target.value)}
-                    />
-                    <button className="btn-outline px-4 py-0 text-[10px]">ПРИМЕНИТЬ</button>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-label-caps text-label-caps text-on-surface uppercase mb-1">{item.name}</h3>
+                    {item.variant && <p className="text-xs text-on-surface-variant">{item.variant}</p>}
+                    <p className="text-primary font-body-md">{item.price.toLocaleString('ru-KZ')} ₸</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center border border-white/10">
+                      <button 
+                        className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                        onClick={() => onUpdateQty(item.id, Math.max(1, item.qty - 1))}
+                      >-</button>
+                      <span className="px-3 py-1 font-body-md">{item.qty}</span>
+                      <button 
+                        className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                        onClick={() => onUpdateQty(item.id, item.qty + 1)}
+                      >+</button>
+                    </div>
+                    <button 
+                      className="text-xs text-on-surface-variant hover:text-error uppercase tracking-widest"
+                      onClick={() => onRemove(item.id)}
+                    >Удалить</button>
                   </div>
                 </div>
-                {/* divider */}
-                <div className="h-px bg-white/10" />
-                {/* total */}
-                <div className="flex items-end justify-between">
-                  <span className="label-caps text-on-surface-variant">ИТОГО</span>
-                  <span className="text-primary font-medium text-xl tracking-wide">
-                    {total.toLocaleString('ru-KZ')} ₸
-                  </span>
-                </div>
-                {/* CTA */}
-                <button
-                  className="btn-primary w-full py-5"
-                  onClick={() => { onClose(); navigate('/checkout'); }}
-                >
-                  ОФОРМИТЬ ЗАКАЗ
-                </button>
               </div>
-            )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        {items.length > 0 && (
+          <div className="p-8 bg-surface-container-low space-y-6">
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <label className="font-label-caps text-[10px] text-on-surface-variant uppercase">ПРОМОКОД</label>
+                <div className="flex gap-2">
+                  <input 
+                    className="flex-1 bg-background border border-white/10 px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors" 
+                    placeholder="Введите код" 
+                    type="text"
+                    value={promo}
+                    onChange={e => setPromo(e.target.value)}
+                  />
+                  <button className="px-4 py-2 border border-primary text-primary font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-all">ПРИМЕНИТЬ</button>
+                </div>
+              </div>
+              <div className="h-px bg-white/10"></div>
+              <div className="flex justify-between items-end">
+                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">ИТОГО</span>
+                <span className="font-title-md text-title-md text-primary">{total.toLocaleString('ru-KZ')} ₸</span>
+              </div>
+            </div>
+            <button 
+              className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase py-5 hover:bg-primary-container transition-colors tracking-widest"
+              onClick={() => { onClose(); navigate('/checkout'); }}
+            >
+              ОФОРМИТЬ ЗАКАЗ
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
