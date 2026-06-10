@@ -9,9 +9,9 @@ module.exports = {
     extend: {
       colors: {
         // ── Stitch "Ethereal Noir" palette ──────────
-        'background':                '#131313',
-        'surface':                   '#131313',
-        'surface-dim':               '#131313',
+        'background':                '#000000',
+        'surface':                   '#000000',
+        'surface-dim':               '#000000',
         'surface-bright':            '#3a3939',
         'surface-container-lowest':  '#0e0e0e',
         'surface-container-low':     '#1c1b1b',
