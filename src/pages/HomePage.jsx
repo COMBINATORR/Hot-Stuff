@@ -12,7 +12,6 @@ const HERO = {
   sub: 'Премиальные интимные аксессуары для тех, кто ценит эстетику, качество и новые ощущения.',
 };
 
-// Popular Categories matching the second screenshot ("ПОПУЛЯРНЫЕ КАТЕГОРИИ")
 const POPULAR_CATEGORIES = [
   {
     id: 1,
@@ -38,6 +37,13 @@ const POPULAR_CATEGORIES = [
     image: logoNoirDress,
     link: '/catalog?cat=couples'
   }
+];
+
+const ALL_PRODUCTS = [
+  { id: 1, name: 'NOIR SILHOUETTE DRESS', price: 210000, image: logoNoirDress },
+  { id: 2, name: 'ETHEREAL SILK WRAP', price: 92500, image: logoEtherealWrap },
+  { id: 3, name: 'GOLD-TRIMMED BOOTS', price: 280000, image: logoGoldBoots },
+  { id: 4, name: 'VELVET MIDNIGHT CLOAK', price: 445000, image: logoNoirDress },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
@@ -130,7 +136,7 @@ export default function HomePage({ onAddToCart }) {
       <section className="bg-background py-16 border-b border-white/5">
         <div className="container-hs">
           <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
-            ПОПУЛЯРНЫЕ КАТЕГОРИИ
+            ПОПУЛЯРНЫЕ ТОВАРЫ
           </h2>
         </div>
         
@@ -160,7 +166,7 @@ export default function HomePage({ onAddToCart }) {
                   to={cat.link} 
                   className="bg-white text-black font-label-caps text-[10px] font-black tracking-widest py-3 px-8 transition-transform hover:scale-105"
                 >
-                  УЗНАТЬ БОЛЬШЕ
+                  СМОТРЕТЬ
                 </Link>
               </div>
             </div>
@@ -174,6 +180,43 @@ export default function HomePage({ onAddToCart }) {
               className="bg-white h-full transition-all duration-100" 
               style={{ width: '25%', transform: `translateX(${scrollProgress * 3}%)` }}
             ></div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ BESTSELLERS ═══════════════════════════ */}
+      <section className="bg-background py-16 border-b border-white/5">
+        <div className="container-hs">
+          <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
+            БЕСТСЕЛЛЕРЫ
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            {ALL_PRODUCTS.map((p) => (
+              <div key={p.id} className="relative group">
+                {/* Background and border that expands on hover */}
+                <div className="absolute inset-0 bg-surface-container-low border border-white/5 transition-all duration-300 md:group-hover:-bottom-[68px] z-0 pointer-events-none"></div>
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  <Link to={`/product/${p.id}`} className="block relative overflow-hidden aspect-[3/4]">
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  </Link>
+                  
+                  <div className="p-4 flex flex-col">
+                    <Link to={`/product/${p.id}`}>
+                      <h3 className="font-bold text-[10px] md:text-xs tracking-widest text-on-surface uppercase mb-1 line-clamp-1">{p.name}</h3>
+                    </Link>
+                    <p className="text-[10px] md:text-xs text-on-surface-variant mb-3 md:mb-0">{p.price.toLocaleString('ru-KZ')} ₸</p>
+                    
+                    {/* Action Button - Visible on mobile, absolute and fade in on hover on desktop */}
+                    <div className="md:absolute md:left-0 md:right-0 md:top-full md:px-4 md:opacity-0 md:pointer-events-none md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:transition-all md:duration-300">
+                      <Link to={`/product/${p.id}`} className="block w-full bg-white text-black text-center font-label-caps text-[10px] md:text-xs tracking-widest py-3 hover:bg-white/90 transition-colors">
+                        ПРЕДПРОСМОТР
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

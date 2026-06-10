@@ -190,7 +190,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               HOT STUFF
             </Link>
             <span className="text-[9px] md:text-[10px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
-              ATYRAU
+              АТЫРАУ
             </span>
           </div>
 
@@ -234,7 +234,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               <div className="flex justify-between items-center p-8 border-b border-white/10">
                 <div className="flex flex-col">
                   <span className="text-xl font-medium tracking-[0.3em] text-white uppercase">HOT STUFF</span>
-                  <span className="text-[9px] tracking-[0.4em] text-on-surface-variant uppercase mt-0.5">ATYRAU</span>
+                  <span className="text-[9px] tracking-[0.4em] text-on-surface-variant uppercase mt-0.5">АТЫРАУ</span>
                 </div>
                 <button className="header-icon" onClick={() => setNavOpen(false)}>
                   <span className="material-symbols-outlined">close</span>
