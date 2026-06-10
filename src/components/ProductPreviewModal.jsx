@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveImage from './ResponsiveImage';
@@ -24,6 +24,9 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [expandedSection, setExpandedSection] = useState('description');
+  
+  // Ref для мобильного контейнера — сброс скролла при открытии
+  const mobileModalRef = useRef(null);
   
   // Mobile check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -51,12 +54,14 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   }, [product]);
 
-  // Lock body scroll when open (desktop only to prevent iOS scroll lock conflict)
+  // Lock body scroll when open (both mobile and desktop)
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('preview-modal-open');
-      if (!isMobile) {
-        document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      // На мобильном сбрасываем скролл модала в начало (к фото товара)
+      if (isMobile && mobileModalRef.current) {
+        mobileModalRef.current.scrollTop = 0;
       }
     } else {
       document.body.classList.remove('preview-modal-open');
@@ -67,6 +72,13 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
       document.body.style.overflow = '';
     };
   }, [isOpen, isMobile]);
+
+  // Дополнительный сброс скролла при смене товара (если модал уже открыт)
+  useEffect(() => {
+    if (isOpen && isMobile && mobileModalRef.current) {
+      mobileModalRef.current.scrollTop = 0;
+    }
+  }, [product, isOpen, isMobile]);
 
   if (!product) return null;
 
@@ -152,12 +164,19 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
           {isMobile ? (
             /* MOBILE FULL SCREEN SHEET */
             <motion.div
+              ref={mobileModalRef}
               className="fixed inset-0 w-full h-full bg-white z-[300] block overflow-y-auto text-black font-sans overscroll-y-contain"
               style={{ WebkitOverflowScrolling: 'touch' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+              onAnimationComplete={() => {
+                // Гарантированный сброс скролла после завершения анимации входа
+                if (mobileModalRef.current) {
+                  mobileModalRef.current.scrollTop = 0;
+                }
+              }}
             >
               {/* Floating Controls at Top Right */}
               <div className="absolute top-4 right-4 flex gap-2.5 z-40">
