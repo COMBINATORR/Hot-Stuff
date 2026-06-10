@@ -106,7 +106,8 @@ export default function HomePage({ onAddToCart }) {
   // Quiz State
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizStep, setQuizStep] = useState(1);
-  const [quizAnswers, setQuizAnswers] = useState({ target: '', area: '', tech: '' });
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [selectedStimulation, setSelectedStimulation] = useState({ clitoris: false, penis: false });
 
   // Lock scroll when quiz modal is active
   useEffect(() => {
@@ -125,8 +126,27 @@ export default function HomePage({ onAddToCart }) {
     setQuizStep(prev => prev + 1);
   };
 
+  const submitQuiz = () => {
+    setQuizStep(10);
+  };
+
   const getRecommendation = () => {
-    if (quizAnswers.target === 'him') {
+    const isPen = selectedStimulation.penis;
+    const isClit = selectedStimulation.clitoris;
+
+    // 1. Both selected (Clitoris + Penis Contact) or Couples Mode
+    if ((isClit && isPen) || quizAnswers.mode === 'В паре') {
+      return {
+        id: 2,
+        name: 'LELO BOOMERANG™',
+        price: 114500,
+        image: logoEtherealWrap,
+        desc: 'Эргономичный вибратор для пар LELO Boomerang, идеально адаптирующийся к изгибам тела во время секса. Лучший выбор для совместного оргазма.'
+      };
+    }
+
+    // 2. Penis stimulation or Male Orgasm
+    if (isPen || quizAnswers.orgasm === 'Мужской') {
       return {
         id: 7,
         name: 'HUGO™ 2 REMOTE',
@@ -134,100 +154,294 @@ export default function HomePage({ onAddToCart }) {
         image: logoGoldBoots,
         desc: 'Премиальный вибромассажер простаты с пультом управления SenseMotion™. Идеальный выбор для глубокого расслабления и ярких мужских оргазмов.'
       };
-    } else if (quizAnswers.target === 'both') {
-      return {
-        id: 1,
-        name: 'INA™ THRUST',
-        price: 119500,
-        image: logoGoldBoots,
-        desc: 'Роскошный вибратор-кролик с функцией массажа точки G и клитора. Премиальный дизайн и невероятная мощность для совместных открытий.'
-      };
-    } else {
-      if (quizAnswers.area === 'external' || quizAnswers.tech === 'waves') {
-        return {
-          id: 4,
-          name: 'SONA™ 3 CRUISE',
-          price: 71800,
-          image: logoNoirDress,
-          desc: 'Легендарный вакуумно-волновой стимулятор клитора с запатентованной технологией Cruise Control. Интенсивное бесконтактное наслаждение.'
-        };
-      } else {
+    }
+
+    // 3. Clitoral / Female Orgasm
+    if (isClit || quizAnswers.orgasm === 'Женский') {
+      // Premium budget / expert experience
+      if (quizAnswers.budget === 'Деньги — не проблема' || quizAnswers.experience === 'Сексперт') {
         return {
           id: 8,
           name: 'SORAYA WAVE™',
           price: 124500,
           image: logoNoirDress,
-          desc: 'Премиальный кролик-вибратор с технологией волнообразных движений WaveMotion™ и гибким внешним стимулятором клитора.'
+          desc: 'Премиальный вибратор-кролик с технологией волнообразных движений WaveMotion™ и гибким внешним стимулятором клитора для двойного оргазма.'
         };
       }
+      
+      // Middle budget
+      if (quizAnswers.budget === 'Средний') {
+        return {
+          id: 4,
+          name: 'SONA™ 3 CRUISE',
+          price: 71800,
+          image: logoNoirDress,
+          desc: 'Легендарный вакуумно-волновой стимулятор клитора с запатентованной технологией Cruise Control для беспрерывного бесконтактного наслаждение.'
+        };
+      }
+
+      // Default G-spot choice
+      return {
+        id: 9,
+        name: 'LELO GIGI™ 2',
+        price: 89500,
+        image: logoGoldBoots,
+        desc: 'Чувственный вибратор LELO GIGI™ 2 с плоской формой наконечника, идеально приспособленной для глубокой стимуляции точки G.'
+      };
     }
+
+    // Fallback: INA™ THRUST
+    return {
+      id: 1,
+      name: 'INA™ THRUST',
+      price: 119500,
+      image: logoGoldBoots,
+      desc: 'Роскошный вибратор-кролик с функцией массажа точки G и клитора. Премиальный дизайн и невероятная мощность.'
+    };
   };
 
   const renderQuizContent = () => {
+    // Helper to render "Назад" button
+    const renderBackButton = () => {
+      if (quizStep > 1 && quizStep < 10) {
+        return (
+          <button 
+            onClick={() => setQuizStep(prev => prev - 1)}
+            className="mt-6 text-white/50 hover:text-white text-xs tracking-wider uppercase flex items-center gap-1 self-start font-sans"
+          >
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            Назад
+          </button>
+        );
+      }
+      return null;
+    };
+
+    // Calculate progress percentage
+    const progress = (quizStep / 9) * 100;
+
+    const progressHeader = (title) => (
+      <div className="mb-6">
+        <div className="w-full bg-white/10 h-1 mb-6 rounded-full overflow-hidden">
+          <div className="bg-primary h-full transition-all duration-300" style={{ width: `${progress}%` }} />
+        </div>
+        <h3 className="text-white text-lg font-bold font-sans text-left uppercase tracking-wider">{title}</h3>
+      </div>
+    );
+
     if (quizStep === 1) {
       return (
-        <div>
-          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
-            <div className="bg-primary h-full w-1/3" />
+        <div className="flex flex-col">
+          {progressHeader("1. Сколько тебе лет?")}
+          <div className="grid grid-cols-2 gap-4">
+            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('age', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-center text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
           </div>
-          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">1. Для кого предназначена игрушка?</h3>
-          <div className="flex flex-col gap-4">
-            <button onClick={() => handleQuizAnswer('target', 'her')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Для нее
-            </button>
-            <button onClick={() => handleQuizAnswer('target', 'him')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Для него
-            </button>
-            <button onClick={() => handleQuizAnswer('target', 'both')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Для двоих (для пар)
-            </button>
-          </div>
+          {renderBackButton()}
         </div>
       );
     }
+
     if (quizStep === 2) {
       return (
-        <div>
-          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
-            <div className="bg-primary h-full w-2/3" />
+        <div className="flex flex-col">
+          {progressHeader("2. Как ты себя идентифицируешь?")}
+          <div className="grid grid-cols-2 gap-4">
+            {['Гетеро', 'Гей', 'Лесбиянка', 'Би', 'Квир', 'Другое'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('identity', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-center text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
           </div>
-          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">2. Какая область стимуляции предпочтительна?</h3>
-          <div className="flex flex-col gap-4">
-            <button onClick={() => handleQuizAnswer('area', 'external')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Внешняя (клитор / поверхностная)
-            </button>
-            <button onClick={() => handleQuizAnswer('area', 'internal')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Внутренняя (точка G / простата)
-            </button>
-            <button onClick={() => handleQuizAnswer('area', 'dual')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Двойная стимуляция (внешняя + внутренняя)
-            </button>
-          </div>
+          {renderBackButton()}
         </div>
       );
     }
+
     if (quizStep === 3) {
+      const expOptions = [
+        { label: 'Новичок', desc: 'Только начинаю исследовать мир удовольствий' },
+        { label: 'Средний', desc: 'Имею опыт использования девайсов и знаю свои предпочтения' },
+        { label: 'Сексперт', desc: 'Ищу новые продвинутые технологии и глубокие ощущения' }
+      ];
       return (
-        <div>
-          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
-            <div className="bg-primary h-full w-full" />
-          </div>
-          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">3. Какая технология привлекает больше всего?</h3>
+        <div className="flex flex-col">
+          {progressHeader("3. Какой у тебя опыт?")}
           <div className="flex flex-col gap-4">
-            <button onClick={() => handleQuizAnswer('tech', 'waves')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Вакуумно-звуковые волны (нежное бесконтактное воздействие)
+            {expOptions.map(opt => (
+              <button 
+                key={opt.label}
+                onClick={() => handleQuizAnswer('experience', opt.label)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white transition-colors"
+              >
+                <div className="font-bold text-sm font-sans mb-1 text-left">{opt.label}</div>
+                <div className="text-white/60 text-xs font-sans leading-relaxed text-left">{opt.desc}</div>
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 4) {
+      return (
+        <div className="flex flex-col">
+          {progressHeader("4. Уже пробовали товары HOT STUFF?")}
+          <div className="flex flex-col gap-4">
+            {['Еще нет', 'Только один раз', 'Большой поклонник', 'Предпочитаю другие бренды'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('triedBrand', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 5) {
+      return (
+        <div className="flex flex-col">
+          {progressHeader("5. Ищешь для себя или как подарок?")}
+          <div className="grid grid-cols-2 gap-4">
+            {['Для себя', 'Подарок'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('purpose', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-center text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 6) {
+      return (
+        <div className="flex flex-col">
+          {progressHeader("6. Какой у тебя бюджет?")}
+          <div className="flex flex-col gap-4">
+            {['Решу потом', 'Средний', 'Деньги — не проблема'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('budget', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 7) {
+      return (
+        <div className="flex flex-col">
+          {progressHeader("7. Какой тип оргазма ты хочешь получить?")}
+          <div className="grid grid-cols-2 gap-4">
+            {['Женский', 'Мужской'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('orgasm', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-center text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 8) {
+      return (
+        <div className="flex flex-col">
+          {progressHeader("8. Предпочитаешь соло или с кем-то?")}
+          <div className="grid grid-cols-2 gap-4">
+            {['Соло', 'В паре'].map(opt => (
+              <button 
+                key={opt}
+                onClick={() => handleQuizAnswer('mode', opt)}
+                className="bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-center text-white text-sm font-sans tracking-wide transition-colors font-bold"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {renderBackButton()}
+        </div>
+      );
+    }
+
+    if (quizStep === 9) {
+      const isAnySelected = selectedStimulation.clitoris || selectedStimulation.penis;
+      return (
+        <div className="flex flex-col">
+          {progressHeader("9. Какой тип стимуляции ты ищешь? (можно выбрать оба)")}
+          <div className="flex flex-col gap-4 mb-6">
+            <button 
+              onClick={() => setSelectedStimulation(prev => ({ ...prev, clitoris: !prev.clitoris }))}
+              className={`py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors flex items-center justify-between border ${selectedStimulation.clitoris ? 'bg-surface-container border-primary' : 'bg-surface-container-low hover:bg-surface-container-high border-white/5'}`}
+            >
+              <span className="font-bold">Клитор</span>
+              <span className="material-symbols-outlined text-primary">
+                {selectedStimulation.clitoris ? 'check_box' : 'check_box_outline_blank'}
+              </span>
             </button>
-            <button onClick={() => handleQuizAnswer('tech', 'movements')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Волнообразные движения (массажный эффект)
+            <button 
+              onClick={() => setSelectedStimulation(prev => ({ ...prev, penis: !prev.penis }))}
+              className={`py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors flex items-center justify-between border ${selectedStimulation.penis ? 'bg-surface-container border-primary' : 'bg-surface-container-low hover:bg-surface-container-high border-white/5'}`}
+            >
+              <span className="font-bold">Пенис</span>
+              <span className="material-symbols-outlined text-primary">
+                {selectedStimulation.penis ? 'check_box' : 'check_box_outline_blank'}
+              </span>
             </button>
-            <button onClick={() => handleQuizAnswer('tech', 'smart')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
-              Дистанционное управление с датчиками движения
+          </div>
+          
+          <div className="flex justify-between items-center mt-6">
+            <button 
+              onClick={() => setQuizStep(8)}
+              className="text-white/50 hover:text-white text-xs tracking-wider uppercase flex items-center gap-1 font-sans"
+            >
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              Назад
+            </button>
+            <button
+              disabled={!isAnySelected}
+              onClick={submitQuiz}
+              className={`font-sans font-bold text-xs tracking-wider py-3 px-8 rounded-full transition-all uppercase ${isAnySelected ? 'bg-white hover:bg-gray-200 text-black cursor-pointer' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}
+            >
+              Подобрать товар
             </button>
           </div>
         </div>
       );
     }
-    if (quizStep === 4) {
+
+    if (quizStep === 10) {
       const rec = getRecommendation();
       return (
         <div className="flex flex-col items-center text-center">
@@ -253,7 +467,7 @@ export default function HomePage({ onAddToCart }) {
               Подробнее о товаре
             </Link>
             <button 
-              onClick={() => setQuizStep(1)}
+              onClick={() => { setQuizStep(1); setSelectedStimulation({ clitoris: false, penis: false }); setQuizAnswers({}); }}
               className="flex-1 border border-white/20 hover:bg-white/5 text-white font-sans font-bold text-xs tracking-wider py-3.5 px-6 rounded-full text-center transition-colors uppercase"
             >
               Пройти заново
@@ -524,7 +738,7 @@ export default function HomePage({ onAddToCart }) {
               Ответь на ряд анонимных вопросов и найди свою идеальную пару.
             </p>
             <button 
-              onClick={() => { setQuizStep(1); setQuizOpen(true); }}
+              onClick={() => { setQuizAnswers({}); setSelectedStimulation({ clitoris: false, penis: false }); setQuizStep(1); setQuizOpen(true); }}
               className="border border-white hover:bg-white hover:text-black text-white font-sans font-bold text-xs sm:text-sm tracking-[0.2em] py-3 px-10 rounded-full transition-all bg-transparent cursor-pointer"
             >
               Начать
