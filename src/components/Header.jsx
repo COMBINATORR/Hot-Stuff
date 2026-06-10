@@ -243,36 +243,69 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               onClick={() => setNavOpen(false)}
             />
             <motion.div
-              className="mobile-nav-panel open"
+              className="mobile-nav-panel open flex flex-col"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.32, ease: [0.25,0.46,0.45,0.94] }}
               style={{ left: 0, right: 'auto' }} // Slide from left instead of right for menu
             >
-              <div className="flex justify-between items-center p-8 border-b border-white/10">
-                <div className="flex flex-col">
-                  <span className="text-xl font-medium tracking-[0.3em] text-white uppercase">HOT STUFF</span>
-                  <span className="text-[9px] tracking-[0.4em] text-on-surface-variant uppercase mt-0.5">АТЫРАУ</span>
+              {/* Drawer Header matching screenshot */}
+              <div className="flex justify-between items-center p-8 pb-6">
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-8 h-8 border border-white/40 flex flex-col justify-center items-center gap-[4px] cursor-pointer hover:border-primary transition-colors group rounded-[2px]" 
+                    onClick={() => setNavOpen(false)}
+                  >
+                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors"></span>
+                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors"></span>
+                  </div>
+                  <span className="font-bold text-[11px] tracking-[0.2em] uppercase text-white">МЕНЮ</span>
                 </div>
-                <button className="header-icon" onClick={() => setNavOpen(false)}>
-                  <span className="material-symbols-outlined">close</span>
-                </button>
+                <div className="flex items-center gap-1 cursor-pointer text-white hover:text-primary transition-colors">
+                  <span className="font-bold text-[11px] tracking-wider uppercase mt-[1px]">RU</span>
+                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                </div>
               </div>
-              <nav className="flex flex-col p-8 gap-8">
-                <Link to="/catalog" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
-                  Collections <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
-                </Link>
-                <Link to="/catalog?cat=wellness" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
-                  Wellness <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
-                </Link>
-                <Link to="/catalog?cat=philosophy" className="label-caps text-on-surface flex items-center justify-between" onClick={() => setNavOpen(false)}>
-                  Philosophy <span className="material-symbols-outlined text-xl text-outline">chevron_right</span>
-                </Link>
+
+              {/* Navigation Links */}
+              <nav className="flex flex-col px-10 py-2 gap-5 overflow-y-auto flex-1">
+                {[
+                  { label: 'популярные секс-игрушки', link: '/catalog' },
+                  { label: 'секс-игрушки для женщин', link: '/catalog', hasSub: true },
+                  { label: 'секс-игрушки для мужчин', link: '/catalog', hasSub: true },
+                  { label: 'секс-игрушки для пар', link: '/catalog', hasSub: true },
+                  { label: 'новинки секс-игрушек', link: '/catalog' },
+                  { label: 'секс-игрушки с приложением', link: '/catalog' },
+                  { label: 'добавки', link: '/catalog' },
+                  { label: 'наборы', link: '/catalog' },
+                  { label: 'смазки', link: '/catalog' },
+                  { label: 'секс-аксессуары', link: '/catalog', hasSub: true },
+                  { label: 'intimina by lelo', link: '/catalog' },
+                  { label: 'люксовые секс-игрушки', link: '/catalog' },
+                  { label: 'lelo makeup™', link: '/catalog' },
+                  { label: 'презервативы', link: '/catalog' },
+                  { label: 'секс-игрушки для лгбт', link: '/catalog' },
+                  { label: 'блог', link: '/blog' },
+                ].map((item, idx) => (
+                  <Link 
+                    key={idx} 
+                    to={item.link} 
+                    className="relative text-white font-bold text-[13px] hover:text-primary transition-colors pl-5 -ml-5"
+                    onClick={() => setNavOpen(false)}
+                  >
+                    {item.hasSub && (
+                      <span className="absolute left-0 top-1/2 -translate-y-[55%] font-normal text-[15px] leading-none">+</span>
+                    )}
+                    <span className="lowercase tracking-wide">{item.label}</span>
+                  </Link>
+                ))}
               </nav>
-              <div className="mt-auto p-8 border-t border-white/10">
-                <NavLink to="/account" className="label-caps text-on-surface-variant flex items-center gap-3" onClick={() => setNavOpen(false)}>
-                  <span className="material-symbols-outlined text-xl">person</span> Личный кабинет
+
+              <div className="p-8 border-t border-white/10 mt-4">
+                <NavLink to="/account" className="font-bold text-[13px] text-white flex items-center gap-3 hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>
+                  <span className="material-symbols-outlined text-xl font-light">person</span> 
+                  <span className="lowercase tracking-wide">личный кабинет</span>
                 </NavLink>
               </div>
             </motion.div>
