@@ -29,8 +29,10 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   // Swipe state
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchStartY, setTouchStartY] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
+  const [touchEndY, setTouchEndY] = useState(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -49,9 +51,9 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   }, [product]);
 
-  // Lock body scroll when open
+  // Lock body scroll when open (desktop only to prevent iOS scroll lock conflict)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isMobile) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -59,7 +61,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   if (!product) return null;
 
@@ -104,27 +106,37 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     setExpandedSection(expandedSection === section ? '' : section);
   };
 
-  // Swipe gesture handlers
+  // Swipe gesture handlers (prevent fighting with vertical page scroll)
   const minSwipeDistance = 50;
 
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEndX(null);
+    setTouchEndY(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchStartY(e.targetTouches[0].clientY);
   };
 
   const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEndX(e.targetTouches[0].clientX);
+    setTouchEndY(e.targetTouches[0].clientY);
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      setSelectedImageIndex((prev) => (prev + 1) % galleryImages.length);
-    } else if (isRightSwipe) {
-      setSelectedImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+    if (touchStartX === null || touchEndX === null || touchStartY === null || touchEndY === null) return;
+    const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
+
+    // Only swipe if horizontal movement is greater than vertical movement
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (Math.abs(diffX) > minSwipeDistance) {
+        if (diffX > 0) {
+          // Swipe left -> Next image
+          setSelectedImageIndex((prev) => (prev + 1) % galleryImages.length);
+        } else {
+          // Swipe right -> Previous image
+          setSelectedImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+        }
+      }
     }
   };
 
@@ -135,7 +147,8 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
           {isMobile ? (
             /* MOBILE FULL SCREEN SHEET */
             <motion.div
-              className="fixed inset-0 w-full h-full bg-white z-[300] flex flex-col overflow-y-auto text-black font-sans"
+              className="fixed inset-0 w-full h-full bg-white z-[300] block overflow-y-auto text-black font-sans overscroll-y-contain"
+              style={{ WebkitOverflowScrolling: 'touch' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
