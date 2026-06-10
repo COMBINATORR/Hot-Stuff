@@ -419,7 +419,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
             </motion.div>
           ) : (
             /* DESKTOP CENTERED MODAL */
-            <div className="fixed inset-0 z-[300] flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+            <div className="fixed inset-0 z-[300] flex items-start justify-center overflow-x-hidden overflow-y-auto py-8 outline-none focus:outline-none">
               {/* Backdrop */}
               <motion.div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm"
@@ -438,7 +438,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 transition={{ type: 'spring', damping: 25, stiffness: 180 }}
               >
                 {/* Modal Content */}
-                <div className="relative flex flex-col md:flex-row w-full bg-white text-black shadow-2xl border-none outline-none overflow-hidden max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible">
+                <div className="relative flex flex-col md:flex-row w-full bg-white text-black shadow-2xl border-none outline-none overflow-hidden max-h-[85vh]">
                   
                   {/* LEFT SIDEBAR: Thumbnails */}
                   <div className="flex md:flex-col items-center gap-3 p-4 bg-white border-r border-gray-100 flex-row w-full md:w-20 order-2 md:order-1 justify-center md:justify-start">
@@ -469,7 +469,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                   </div>
 
                   {/* RIGHT SIDE: Product Info */}
-                  <div className="w-full md:w-[420px] p-8 md:p-10 bg-white flex flex-col order-3 border-l border-gray-100 max-h-none md:max-h-[90vh] overflow-y-auto">
+                  <div className="w-full md:w-[420px] p-8 md:p-10 bg-white flex flex-col order-3 border-l border-gray-100 overflow-y-auto">
                     {/* Header Controls */}
                     <div className="absolute top-0 right-0 flex z-20">
                       {/* Heart / Favorite Button */}
