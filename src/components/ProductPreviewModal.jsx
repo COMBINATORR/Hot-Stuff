@@ -55,33 +55,47 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   }, [product]);
 
-  // Lock body scroll when open (desktop only — на мобильном overflow:hidden ломает отображение)
+  // Блокировка скролла body при открытии модала (iOS-совместимый метод)
   useEffect(() => {
     if (isOpen) {
+      // Сохраняем текущую позицию скролла
+      const scrollY = window.scrollY;
       document.body.classList.add('preview-modal-open');
-      if (!isMobile) {
-        document.body.style.overflow = 'hidden';
-      }
-      // На мобильном сбрасываем скролл модала в начало (к фото товара)
+      // Фиксируем body чтобы предотвратить скролл страницы под модалом
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+
+      // Сбрасываем скролл мобильного модала в начало
       if (isMobile && mobileModalRef.current) {
         mobileModalRef.current.scrollTop = 0;
       }
     } else {
+      // Восстанавливаем позицию скролла при закрытии
+      const scrollY = document.body.style.top;
       document.body.classList.remove('preview-modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       document.body.style.overflow = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
     return () => {
+      const scrollY = document.body.style.top;
       document.body.classList.remove('preview-modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY) * -1);
+      }
     };
   }, [isOpen, isMobile]);
-
-  // Дополнительный сброс скролла при смене товара (если модал уже открыт)
-  useEffect(() => {
-    if (isOpen && isMobile && mobileModalRef.current) {
-      mobileModalRef.current.scrollTop = 0;
-    }
-  }, [product, isOpen, isMobile]);
 
   if (!product) return null;
 
