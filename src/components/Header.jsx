@@ -195,14 +195,14 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
           </div>
 
           {/* RIGHT: Search, Profile, Cart */}
-          <div className="flex items-center gap-6">
-            <button className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+          <div className="flex items-center justify-end gap-5 md:gap-6">
+            <button className="flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[22px] font-light">search</span>
             </button>
-            <NavLink to="/account" className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors hidden sm:inline-block">
+            <NavLink to="/account" className="hidden sm:flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[22px] font-light">person</span>
             </NavLink>
-            <button onClick={() => setCartOpen(true)} className="bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors relative flex items-center">
+            <button onClick={() => setCartOpen(true)} className="relative flex items-center justify-center bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
