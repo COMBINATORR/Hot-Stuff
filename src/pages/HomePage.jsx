@@ -57,7 +57,8 @@ const ALL_PRODUCTS = [
     image: logoGoldBoots,
     gallery: [logoGoldBoots, logoNoirDress, logoEtherealWrap],
     colors: ['#111111', '#004d40'],
-    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения для тех, кто хочет разжечь в себе искру любви. Благодаря технологии SenseMotion™ беспроводной пульт обеспечивает непревзойденное удобство.'
+    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения для тех, кто хочет разжечь в себе искру любви. Благодаря технологии SenseMotion™ беспроводной пульт обеспечивает непревзойденное удобство.',
+    socialProof: '🔥 48 куплено сегодня'
   },
   { 
     id: 1, 
@@ -69,7 +70,8 @@ const ALL_PRODUCTS = [
     image: logoNoirDress, 
     gallery: [logoNoirDress, logoGoldBoots],
     colors: ['#4A4A4A', '#2D5E87', '#B8860B'],
-    description: 'Премиальное шелковое платье NOIR SILHOUETTE DRESS, создающее идеальный силуэт. Роскошная ткань, тонкая проработка швов и чувственный крой.'
+    description: 'Премиальное шелковое платье NOIR SILHOUETTE DRESS, создающее идеальный силуэт. Роскошная ткань, тонкая проработка швов и чувственный крой.',
+    socialProof: '🌟 Топ-выбор покупателей'
   },
   { 
     id: 2, 
@@ -81,7 +83,8 @@ const ALL_PRODUCTS = [
     image: logoEtherealWrap, 
     gallery: [logoEtherealWrap, logoNoirDress],
     colors: ['#FFFFFF', '#FFD700'],
-    description: 'Легкая шелковая накидка ETHEREAL SILK WRAP для создания чувственной атмосферы дома или на отдыхе. Натуральный шелк высочайшего класса.'
+    description: 'Легкая шелковая накидка ETHEREAL SILK WRAP для создания чувственной атмосферы дома или на отдыхе. Натуральный шелк высочайшего класса.',
+    socialProof: '🔥 19 человек добавили в корзину'
   },
   { 
     id: 3, 
@@ -93,7 +96,8 @@ const ALL_PRODUCTS = [
     image: logoGoldBoots, 
     gallery: [logoGoldBoots, logoEtherealWrap],
     colors: ['#FFD700', '#4A4A4A'],
-    description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.'
+    description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.',
+    socialProof: '⭐ 99% рекомендаций'
   },
 ];
 
@@ -574,6 +578,50 @@ export default function HomePage({ onAddToCart }) {
           </motion.div>
         </motion.div>
       </section>
+      
+      {/* ═══ TRUST GRID SECTION ═══ */}
+      <section className="bg-[#0A090C] border-b border-white/5 py-12 px-6">
+        <div className="container-hs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: 'inventory_2',
+                title: '100% Анонимная Доставка',
+                desc: 'Непрозрачные коробки или сейф-пакеты без упоминания бренда или интимного содержимого.'
+              },
+              {
+                icon: 'local_shipping',
+                title: 'Бесплатная Доставка',
+                desc: 'Для всех заказов на сумму от 30 000 ₸ в любой регион Казахстана.'
+              },
+              {
+                icon: 'health_and_safety',
+                title: 'Безопасные Материалы',
+                desc: 'Только сертифицированный гипоаллергенный премиум-силикон, безопасный для тела.'
+              },
+              {
+                icon: 'verified',
+                title: 'Официальная Гарантия',
+                desc: 'Фирменная гарантия качества, поддержка клиентов и простой возврат.'
+              }
+            ].map((item, idx) => (
+              <div key={idx} className="flex gap-4 items-start text-left">
+                <span className="material-symbols-outlined text-[24px] text-[#f2ca50] flex-none mt-0.5">
+                  {item.icon}
+                </span>
+                <div className="flex flex-col">
+                  <h3 className="font-sans font-bold text-[11px] tracking-wider text-white uppercase mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-[10px] text-gray-400 font-sans leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ═══ BRAND INTRODUCTION SECTION ═══ */}
       <section className="bg-background py-20 px-6">
@@ -664,6 +712,11 @@ export default function HomePage({ onAddToCart }) {
                   </Link>
                   
                   <div className="p-4 flex flex-col">
+                    {p.socialProof && (
+                      <span className="text-[8px] sm:text-[9px] text-[#f2ca50] font-sans font-bold tracking-wider uppercase mb-1.5 block">
+                        {p.socialProof}
+                      </span>
+                    )}
                     <Link to={`/product/${p.id}`}>
                       <h3 className="font-bold text-[10px] md:text-xs tracking-widest text-on-surface uppercase mb-1 line-clamp-1">{p.name}</h3>
                     </Link>
