@@ -570,10 +570,10 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
    MOBILE PREMIUM HEADER (LELO STYLE OVERLAY)
    ════════════════════════════════════════════════ */
 .mobile-premium-header {
-  background: linear-gradient(to bottom, rgba(30,15,10,0.95), rgba(40,25,20,0.8));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(to bottom, rgba(20, 10, 15, 0.75) 0%, rgba(20, 10, 15, 0.3) 70%, rgba(20, 10, 15, 0.0) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 @media (min-width: 768px) {
