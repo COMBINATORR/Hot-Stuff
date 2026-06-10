@@ -7,6 +7,7 @@ import AppRouter from './router.jsx';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import SecureProvider from './components/SecureProvider.jsx';
+import PanicButton from './components/PanicButton.jsx';
 
 function App() {
   /* ── Cart state (lifted to App so Header + pages share it) ── */
@@ -41,6 +42,7 @@ function App() {
       <HelmetProvider>
         <SecureProvider>
           <BrowserRouter>
+            <PanicButton />
             <Header
               cartItems={cartItems}
               onUpdateQty={updateQty}
