@@ -576,7 +576,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ BRAND INTRODUCTION SECTION ═══ */}
-      <section className="bg-background py-20 px-6 border-b border-white/5">
+      <section className="bg-background py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-sm md:text-base text-on-surface-variant font-medium leading-relaxed max-w-2xl mx-auto font-sans tracking-wide">
             За годы работы HOT STUFF стал признанным лидером на рынке товаров для взрослых и эксклюзивного нижнего белья. 
@@ -589,7 +589,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ POPULAR CATEGORIES / TOYS (Horizontal Scroll) ═══ */}
-      <section className="bg-background py-16 border-b border-white/5">
+      <section className="bg-background py-16">
         <div className="container-hs">
           <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
             ПОПУЛЯРНЫЕ ТОВАРЫ
@@ -647,7 +647,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ BESTSELLERS ═══════════════════════════ */}
-      <section className="bg-background py-16 border-b border-white/5">
+      <section className="bg-background py-16">
         <div className="container-hs">
           <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
             БЕСТСЕЛЛЕРЫ
@@ -687,7 +687,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ INA THRUST PROMO BANNER ═══════════════ */}
-      <section className="relative w-full aspect-[21/9] min-h-[350px] md:min-h-[500px] flex items-center overflow-hidden border-b border-white/5">
+      <section className="relative w-full aspect-[21/9] min-h-[350px] md:min-h-[500px] flex items-center overflow-hidden">
         <ResponsiveImage 
           src={logoInaThrustPromo} 
           alt="INA™ Thrust" 
@@ -715,7 +715,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
-      <section className="bg-black py-16 md:py-24 border-b border-white/5">
+      <section className="bg-black py-16 md:py-24">
         <div className="container-hs grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
           {/* Left Column: Image with rounded corners */}
           <div className="w-full aspect-[4/3] md:aspect-square overflow-hidden rounded-lg border border-white/10">
@@ -775,7 +775,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
 
       {/* ═══ NEWSLETTER ════════════════════════════ */}
-      <section className="relative w-full aspect-[21/9] min-h-[400px] md:min-h-[500px] flex items-center justify-center overflow-hidden border-b border-white/5">
+      <section className="relative w-full aspect-[21/9] min-h-[400px] md:min-h-[500px] flex items-center justify-center overflow-hidden">
         <ResponsiveImage 
           src={logoNewsletterBg} 
           alt="Newsletter Discount" 
