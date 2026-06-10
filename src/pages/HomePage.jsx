@@ -580,7 +580,7 @@ export default function HomePage({ onAddToCart }) {
       </section>
       
       {/* ═══ TRUST GRID SECTION ═══ */}
-      <section className="bg-[#0A090C] border-b border-white/5 py-12 px-6">
+      <section className="bg-black border-b border-white/5 py-12 px-6">
         <div className="container-hs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
