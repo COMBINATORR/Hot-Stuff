@@ -530,11 +530,11 @@ export default function HomePage({ onAddToCart }) {
         <ResponsiveImage 
           src={heroBg} 
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-60" 
+          className="absolute inset-0 w-full h-full object-cover opacity-100" 
           loading="eager"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
+        {/* Subtle bottom fade to black for seamless transition */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
         {/* Subtle gold glow */}
         <div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
