@@ -539,6 +539,8 @@ export default function HomePage({ onAddToCart }) {
         />
         {/* Subtle bottom fade to black for seamless transition */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
+        {/* Taller bottom gradient overlay to completely hide the hard image boundary */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black to-transparent z-[1]" />
         {/* Subtle gold glow */}
         <div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
