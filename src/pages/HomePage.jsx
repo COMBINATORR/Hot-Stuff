@@ -11,8 +11,8 @@ import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
 const HERO = {
-  headline: 'ИСКУССТВО\nЧУВСТВЕННОСТИ',
-  sub: 'Премиальные интимные аксессуары для тех, кто ценит эстетику, качество и новые ощущения.',
+  headline: 'в погоне за наслаждением',
+  sub: 'Скидки в месяц самонаслаждения',
 };
 
 const POPULAR_CATEGORIES = [
@@ -163,19 +163,14 @@ export default function HomePage({ onAddToCart }) {
         />
 
         <motion.div
-          className="relative z-10 text-center max-w-3xl mx-auto px-6"
+          className="relative z-10 text-left w-full container-hs flex flex-col items-start"
           initial="hidden" animate="visible" variants={stagger}
         >
-          {/* Category label */}
-          <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="label-caps text-primary mb-8">
-            PREMIUM INTIMATE COLLECTION
-          </motion.p>
-
           {/* Headline */}
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-display-lg md:text-display-lg text-headline-lg-mobile whitespace-pre-line mb-8"
+            className="text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-bold leading-[1.1] tracking-[-0.02em] mb-4 text-white lowercase text-left max-w-4xl"
           >
             {HERO.headline}
           </motion.h1>
@@ -184,27 +179,19 @@ export default function HomePage({ onAddToCart }) {
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-body-lg text-on-surface-variant max-w-lg mx-auto mb-12"
+            className="text-body-lg md:text-xl text-white/90 max-w-xl mb-12 text-left"
           >
             {HERO.sub}
           </motion.p>
 
           {/* CTA */}
-          <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.3 }} className="flex items-center justify-center gap-5 flex-wrap">
-            <Link to="/catalog" className="btn-primary">КАТАЛОГ</Link>
-            <Link to="/catalog?cat=wellness" className="btn-outline">WELLNESS</Link>
-          </motion.div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-20 flex flex-col items-center gap-2 text-outline"
-          >
-            <span className="label-caps text-[10px]">scroll</span>
-            <span className="material-symbols-outlined text-xl animate-bounce" style={{ animationDuration: '2s' }}>
-              expand_more
-            </span>
+          <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.3 }} className="flex items-start">
+            <Link 
+              to="/catalog" 
+              className="bg-white text-black font-sans font-bold text-[12px] tracking-[0.2em] py-4 px-10 uppercase transition-all hover:bg-gray-200 inline-block"
+            >
+              ПОДРОБНЕЕ
+            </Link>
           </motion.div>
         </motion.div>
       </section>
