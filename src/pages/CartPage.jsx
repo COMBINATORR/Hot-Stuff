@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
+import ResponsiveImage from '../components/ResponsiveImage';
 
 /* Mock cart state — later replace with Context/Zustand */
 const MOCK_ITEMS = [
@@ -38,8 +39,8 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
     >
       {/* Image */}
       <div className="cart-item-image">
-        {item.image_url
-          ? <img src={item.image_url} alt={item.name} />
+        {(item.image_url || item.image)
+          ? <ResponsiveImage src={item.image_url || item.image} alt={item.name} loading="lazy" />
           : (
             <div style={{
               width: '100%', height: '100%',

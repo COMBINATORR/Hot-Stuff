@@ -112,6 +112,7 @@ export default function ProductPage({ onAddToCart }) {
               alt="Macro texture of product" 
               className="w-full h-full object-cover" 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm0netM0VEG4-KSXkwu2BgS1iXKGqAVsXjR0pG2uuNzv_s9-dxVvFRmdA1NZntDyit89lBQFNQCUlNGVAWWj-0Qxc7dy2aocCcHbDpbREYDw3Torhhx-NJOfEXJxW-b8xrCK3j36ajbHAFrUFxNkXCNd1uqhjHEjczESxjJviya9XE4U93F40tQH0oCmZyWEdudNk-hveqGOQkwTNRKt8q0x--mZVu6nSs2RMz5EhoKcehP4s7CIoNulqiGKuSH8NQ8YNdmfRdJSA"
+              loading="lazy"
             />
           </div>
         </section>
@@ -167,6 +168,7 @@ export default function ProductPage({ onAddToCart }) {
             alt="Lifestyle shot on dark silk sheets" 
             className="absolute inset-0 w-full h-full object-cover z-0" 
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEHeDiealyOW57R_zYXMkviBV4EUx0LiFb9N60NHhOB59AwTAMqQwQPDBj6sklNyCawZIK0GnB2JDJ_JUv9K4XL2yhlOP61fvYvj_nzBXEULPcng9i60iYDuVytTIVrNzwCmDJ0Oe1aLa-TCzE2kAv_ju7wK-hIq_rX8uGjTr8b6VIqSk86LEeDIQ1eRiDRgCyEPJx9KufEGPnHWPyoJPZz-D_lMxNcGiL6xHSiQ2b47ZxlcC3SNtc7YrWxEcJG7ly5cHwxhTR1QA"
+            loading="lazy"
           />
           <div className="z-20 text-center px-6">
             <p className="font-display-lg text-display-lg text-pure-white italic max-w-4xl mx-auto drop-shadow-2xl">
@@ -189,6 +191,7 @@ export default function ProductPage({ onAddToCart }) {
                   alt="Personal Moisturizer" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqziSFCyLTp7ZLVXgrCSd1GePgC3HAKS0mYEaBM-cogjUvU_IbGOr54AhzAV7l17BSBJ8NToWG7P-Q90rpYo5VJ1jqo8fCDomA-W_8En_-faig-jbzpJ5AJIodEagawEFD8vfZML54fFo-Sn9JRKUbC5QzPZmS4zXpS3zcgjUbqGrP0C5ph9rNp6L5u9VBJjPoRmOBmKAOPQQBKi_EQvllMByBqf0tUmIufN2l5MnAyRhIebm3WCk-pYy9CmcRBs-_mXpPt5Gsjtg"
+                  loading="lazy"
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
@@ -210,6 +213,7 @@ export default function ProductPage({ onAddToCart }) {
                   alt="Cleaning Spray" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmig59xczUoR-n2aVFxU9txL_56FEhxwyEgECdo2yXniir4QXBo1bxBWPcJctm2VSIeih2xnJmMlChC4VNROdjPoFBbxjpL7zErkfbsK7D3f7bFeaD6wOZckEKNOs9ePZNaP7TOJZ6L8vS2N6g90pjVD1ATcpbCRjle14oV7cgW7WxoDuWmc7ctiae-gTKrWMNuCsiGLgado_cEuxAO4H-cBYUKUyIjQmG0AFQJ7FHOpcY99mtq_Ak6Bw88XX9VFP91aEB2aqVauw"
+                  loading="lazy"
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
@@ -231,6 +235,7 @@ export default function ProductPage({ onAddToCart }) {
                   alt="Scented Candle" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmCMa-6UB3n17ENxC8klc0m-CCMwCLMksjHuQVb8I4mF-4GxB6NyhN0aFjfQFyPdTmmo4Ll3b-dtMUYbvPo7HN1cpkBWLq-gqa-1vxhWsS97tPE_YxriZOsQ7QcRwhGX6P8_XklTHxbIp6_xmqZWyNdsF3xwk1JRMeifaMH5SlRqvU0TTQ2R8Ro4og8Xvz3Vx7AfYIa6kzgxCJV9FKk9ojiZGkxh0kR-WbCQ60Bqu3y3l878T_M4FsrPDqtWZpAiBGJtAq55z7-pQ"
+                  loading="lazy"
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">

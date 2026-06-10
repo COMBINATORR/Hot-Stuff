@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import ResponsiveImage from './ResponsiveImage';
 
 // Promo Ticker Data
 const TICKER_ITEMS = [
@@ -109,7 +110,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove }) {
               <div key={item.id + (item.variant || '')} className="flex gap-6">
                 <div className="w-24 h-24 bg-surface-container-low flex-none">
                   {item.image ? (
-                    <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
+                    <ResponsiveImage alt={item.name} className="w-full h-full object-cover" src={item.image} loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl bg-surface-container">{item.emoji || '🌸'}</div>
                   )}

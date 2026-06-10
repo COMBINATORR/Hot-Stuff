@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Import local product images generated for the shop to keep consistency
 import logoNoirDress from '../assets/images/products/noir_silhouette_dress.png';
 import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
 import heroBg from '../assets/images/hero-bg.png';
+import ResponsiveImage from '../components/ResponsiveImage';
+import ProductPreviewModal from '../components/ProductPreviewModal';
 
 const HERO = {
   headline: 'ИСКУССТВО\nЧУВСТВЕННОСТИ',
@@ -42,10 +43,54 @@ const POPULAR_CATEGORIES = [
 ];
 
 const ALL_PRODUCTS = [
-  { id: 1, name: 'NOIR SILHOUETTE DRESS', price: 210000, image: logoNoirDress },
-  { id: 2, name: 'ETHEREAL SILK WRAP', price: 92500, image: logoEtherealWrap },
-  { id: 3, name: 'GOLD-TRIMMED BOOTS', price: 280000, image: logoGoldBoots },
-  { id: 4, name: 'VELVET MIDNIGHT CLOAK', price: 445000, image: logoNoirDress },
+  { 
+    id: 7, 
+    name: 'HUGO™ 2 REMOTE', 
+    price: 166440, 
+    oldPrice: 219000,
+    category: 'massagers', 
+    categoryLabel: 'МАССАЖЕРЫ ПРОСТАТЫ',
+    image: logoGoldBoots,
+    gallery: [logoGoldBoots, logoNoirDress, logoEtherealWrap],
+    colors: ['#111111', '#004d40'],
+    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения для тех, кто хочет разжечь в себе искру любви. Благодаря технологии SenseMotion™ беспроводной пульт обеспечивает непревзойденное удобство.'
+  },
+  { 
+    id: 1, 
+    name: 'NOIR SILHOUETTE DRESS', 
+    price: 210000, 
+    oldPrice: 280000,
+    category: 'vibrators', 
+    categoryLabel: 'ВЕЧЕРНИЕ ПЛАТЬЯ',
+    image: logoNoirDress, 
+    gallery: [logoNoirDress, logoGoldBoots],
+    colors: ['#4A4A4A', '#2D5E87', '#B8860B'],
+    description: 'Премиальное шелковое платье NOIR SILHOUETTE DRESS, создающее идеальный силуэт. Роскошная ткань, тонкая проработка швов и чувственный крой.'
+  },
+  { 
+    id: 2, 
+    name: 'ETHEREAL SILK WRAP', 
+    price: 92500, 
+    oldPrice: 135000,
+    category: 'vibrators', 
+    categoryLabel: 'ШЕЛКОВЫЕ НАКИДКИ',
+    image: logoEtherealWrap, 
+    gallery: [logoEtherealWrap, logoNoirDress],
+    colors: ['#FFFFFF', '#FFD700'],
+    description: 'Легкая шелковая накидка ETHEREAL SILK WRAP для создания чувственной атмосферы дома или на отдыхе. Натуральный шелк высочайшего класса.'
+  },
+  { 
+    id: 3, 
+    name: 'GOLD-TRIMMED BOOTS', 
+    price: 280000, 
+    oldPrice: 380000,
+    category: 'vibrators', 
+    categoryLabel: 'ОБУВЬ И АКСЕССУАРЫ',
+    image: logoGoldBoots, 
+    gallery: [logoGoldBoots, logoEtherealWrap],
+    colors: ['#FFD700', '#4A4A4A'],
+    description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.'
+  },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
@@ -53,6 +98,7 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 
 export default function HomePage({ onAddToCart }) {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
 
   const handleScroll = (e) => {
     const element = e.target;
@@ -66,10 +112,12 @@ export default function HomePage({ onAddToCart }) {
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
-          style={{ backgroundImage: `url(${heroBg})` }}
+        {/* Background Image using ResponsiveImage for WebP/AVIF support */}
+        <ResponsiveImage 
+          src={heroBg} 
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover opacity-60" 
+          loading="eager"
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
@@ -159,10 +207,11 @@ export default function HomePage({ onAddToCart }) {
               className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[32vw] lg:min-w-[24vw] snap-start relative aspect-[4/3] group overflow-hidden border border-white/5"
             >
               {/* Product Background Image */}
-              <img 
+              <ResponsiveImage 
                 src={cat.image} 
                 alt={cat.title} 
                 className="w-full h-full object-cover brightness-[0.8] group-hover:scale-105 transition-transform duration-700"
+                loading="lazy"
               />
               {/* Overlay with title & CTA button */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end items-start">
@@ -205,7 +254,7 @@ export default function HomePage({ onAddToCart }) {
                 
                 <div className="relative z-10 flex flex-col h-full">
                   <Link to={`/product/${p.id}`} className="block relative overflow-hidden aspect-[3/4]">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <ResponsiveImage src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   </Link>
                   
                   <div className="p-4 flex flex-col">
@@ -216,9 +265,12 @@ export default function HomePage({ onAddToCart }) {
                     
                     {/* Action Button - Visible on mobile, absolute and fade in on hover on desktop */}
                     <div className="md:absolute md:left-0 md:right-0 md:top-full md:px-4 md:opacity-0 md:pointer-events-none md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:transition-all md:duration-300">
-                      <Link to={`/product/${p.id}`} className="block w-full bg-white text-black text-center font-label-caps text-[10px] md:text-xs tracking-widest py-3 hover:bg-white/90 transition-colors">
+                      <button 
+                        onClick={() => setSelectedPreviewProduct(p)} 
+                        className="block w-full bg-white text-black text-center font-label-caps text-[10px] md:text-xs tracking-widest py-3 hover:bg-white/90 transition-colors"
+                      >
                         ПРЕДПРОСМОТР
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -277,6 +329,14 @@ export default function HomePage({ onAddToCart }) {
           </motion.form>
         </motion.div>
       </section>
+
+      {/* Product Preview Modal */}
+      <ProductPreviewModal 
+        product={selectedPreviewProduct}
+        isOpen={!!selectedPreviewProduct}
+        onClose={() => setSelectedPreviewProduct(null)}
+        onAddToCart={onAddToCart}
+      />
     </div>
   );
 }
