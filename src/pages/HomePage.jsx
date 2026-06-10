@@ -591,8 +591,8 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ POPULAR CATEGORIES / TOYS (Horizontal Scroll) ═══ */}
       <section className="bg-background py-16">
         <div className="container-hs">
-          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
-            ПОПУЛЯРНЫЕ ТОВАРЫ
+          <h2 className="font-sans font-black text-[16px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
+            ПОПУЛЯРНЫЕ КАТЕГОРИИ
           </h2>
         </div>
         
@@ -649,7 +649,7 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ BESTSELLERS ═══════════════════════════ */}
       <section className="bg-background py-16">
         <div className="container-hs">
-          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
+          <h2 className="font-sans font-black text-[16px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
             БЕСТСЕЛЛЕРЫ
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
