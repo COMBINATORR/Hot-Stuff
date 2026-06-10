@@ -167,6 +167,25 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="w-full h-px bg-white/5 my-8" />
+
+        {/* 18+ Discretion & Warning Sub-bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-outline font-sans text-[10px] sm:text-[11px] tracking-wider leading-relaxed select-none">
+          <div className="flex items-center gap-2.5 text-center md:text-left justify-center md:justify-start">
+            <span className="w-5 h-5 bg-[#FF5C3F] text-white rounded-[3px] flex items-center justify-center font-sans font-black text-[9px] flex-none">
+              18
+            </span>
+            <span>Этот сайт предназначен для просмотра и покупок только совершеннолетними (18+).</span>
+          </div>
+          <div>
+            <a href="#" className="underline hover:text-white transition-colors">Мобильная версия</a>
+          </div>
+          <div className="text-center md:text-right">
+            Все модели на сайте достигли возраста 18 лет.
+          </div>
+        </div>
+
       </div>
     </footer>
   );
