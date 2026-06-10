@@ -60,6 +60,145 @@ const SIDEBAR_CATEGORIES = [
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
+// ProductCard Component to manage hover and color swatch state
+function ProductCard({ product, setSelectedPreviewProduct }) {
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const colors = product.colors || [];
+  const gallery = product.gallery || [];
+
+  // Determine active display image
+  // 1. If hovered, show alternative view: (selectedColorIndex + 1) % gallery.length
+  // 2. Otherwise, show gallery[selectedColorIndex] or product.image
+  const activeImage = isHovered 
+    ? (gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : product.image)
+    : (gallery.length > 0 ? gallery[selectedColorIndex] : product.image);
+
+  return (
+    <div 
+      className="relative group h-[400px] z-10 hover:z-20 text-left"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* The expanding border box */}
+      <div className="absolute -inset-px border border-black bg-white transition-all duration-300 group-hover:-bottom-16 pointer-events-none" />
+      
+      {/* Transparent hover bridge to prevent losing hover when moving cursor down */}
+      <div className="absolute top-full left-0 right-0 h-16 bg-transparent opacity-0 pointer-events-none group-hover:pointer-events-auto z-10" />
+      
+      {/* The card content */}
+      <div className="relative h-full p-4 flex flex-col justify-between z-10">
+        {/* Top Badges */}
+        <div className="flex justify-between items-start w-full">
+          <span>
+            {product.isNew && (
+              <span className="text-[9px] font-bold tracking-widest text-[#FF5C3F] uppercase">NEW</span>
+            )}
+          </span>
+          {product.discount ? (
+            <span className="bg-[#FF5C3F] text-white text-[9px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
+              -{product.discount}%
+            </span>
+          ) : <div />}
+        </div>
+
+        {/* Center Image */}
+        <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
+          <Link to={`/product/${product.id}`} className="w-full h-full flex items-center justify-center">
+            <ResponsiveImage 
+              src={activeImage} 
+              alt={product.name} 
+              className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500" 
+              loading="lazy" 
+            />
+          </Link>
+        </div>
+
+        {/* Info & Meta */}
+        <div className="mt-2">
+          {/* Heart Favorite */}
+          <button className="text-black hover:text-[#FF5C3F] transition-colors mb-2 block">
+            <span className="material-symbols-outlined font-light text-[20px]">favorite_border</span>
+          </button>
+          
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <Link to={`/product/${product.id}`} className="font-sans font-bold text-[10px] tracking-wider uppercase text-black leading-tight truncate hover:text-primary transition-colors block">
+                {product.name}
+              </Link>
+              <p className="text-[8px] text-gray-500 font-sans mt-0.5 truncate">
+                {product.categoryLabel}
+              </p>
+            </div>
+            
+            {/* Color dots swatches (Interactive!) */}
+            <div className="flex gap-1 mt-0.5 flex-none z-20">
+              {colors.map((c, idx) => (
+                <button 
+                  key={c.name} 
+                  aria-label={c.name}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedColorIndex(idx);
+                  }}
+                  className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                    selectedColorIndex === idx 
+                      ? 'border-black scale-110 ring-1 ring-black/20' 
+                      : 'border-black/10 hover:border-black/30'
+                  }`}
+                  style={{ background: c.hex }} 
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Pricing block */}
+          <div className="mt-3 flex flex-col font-sans">
+            {product.oldPrice ? (
+              <>
+                <span className="text-[9px] text-gray-400 line-through">
+                  {product.oldPrice.toLocaleString('ru-KZ')} ₸
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="text-[#FF5C3F] font-bold text-[12px]">
+                    {product.price.toLocaleString('ru-KZ')} ₸
+                  </span>
+                  <span className="text-gray-500 text-[8px]">
+                    сохранить {(product.oldPrice - product.price).toLocaleString('ru-KZ')} ₸
+                  </span>
+                </div>
+              </>
+            ) : (
+              <span className="text-black font-bold text-[12px]">
+                {product.price.toLocaleString('ru-KZ')} ₸
+              </span>
+            )}
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Hover-revealed button */}
+      <div className="absolute bottom-0 group-hover:-bottom-12 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 pointer-events-none group-hover:pointer-events-auto">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSelectedPreviewProduct(product);
+          }}
+          className="w-full bg-black text-white text-center font-sans font-bold text-[9px] tracking-[0.2em] py-3 uppercase hover:bg-gray-800 transition-colors shadow-md border-none"
+        >
+          ПРЕДПРОСМОТР
+        </button>
+      </div>
+
+    </div>
+  );
+}
+
 export default function CatalogPage({ onAddToCart }) {
   const [params, setParams] = useSearchParams();
   const initialCat = params.get('cat') || 'vibrators'; // Women toys / vibrators by default as in screenshot
@@ -340,102 +479,7 @@ export default function CatalogPage({ onAddToCart }) {
               ) : (
                 filtered.map((p) => (
                   <motion.div key={p.id} variants={fadeUp} transition={{ duration: 0.35 }}>
-                    <div className="relative group h-[400px] z-10 hover:z-20">
-                      
-                      {/* The expanding border box */}
-                      <div className="absolute -inset-px border border-black bg-white transition-all duration-300 group-hover:-bottom-16 pointer-events-none" />
-                      
-                      {/* Transparent hover bridge to prevent losing hover when moving cursor down */}
-                      <div className="absolute top-full left-0 right-0 h-16 bg-transparent opacity-0 pointer-events-none group-hover:pointer-events-auto z-10" />
-                      
-                      {/* The card content */}
-                      <div className="relative h-full p-4 flex flex-col justify-between z-10">
-                        {/* Top Badges */}
-                        <div className="flex justify-between items-start w-full">
-                          <span>
-                            {p.isNew && (
-                              <span className="text-[9px] font-bold tracking-widest text-[#FF5C3F] uppercase">NEW</span>
-                            )}
-                          </span>
-                          {p.discount ? (
-                            <span className="bg-[#FF5C3F] text-white text-[9px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
-                              -{p.discount}%
-                            </span>
-                          ) : <div />}
-                        </div>
-
-                        {/* Center Image */}
-                        <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
-                          <ResponsiveImage src={p.image} alt={p.name} className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                        </div>
-
-                        {/* Info & Meta */}
-                        <div className="mt-2">
-                          {/* Heart Favorite */}
-                          <button className="text-black hover:text-[#FF5C3F] transition-colors mb-2 block">
-                            <span className="material-symbols-outlined font-light text-[20px]">favorite_border</span>
-                          </button>
-                          
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-sans font-bold text-[10px] tracking-wider uppercase text-black leading-tight truncate">
-                                {p.name}
-                              </h3>
-                              <p className="text-[8px] text-gray-500 font-sans mt-0.5 truncate">
-                                {p.categoryLabel}
-                              </p>
-                            </div>
-                            
-                            {/* Color dots swatches */}
-                            <div className="flex gap-1 mt-0.5 flex-none">
-                              {p.colors.map(c => (
-                                <span key={c.name} className="w-1.5 h-1.5 rounded-full border border-black/10" style={{ background: c.hex }} />
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Pricing block */}
-                          <div className="mt-3 flex flex-col font-sans">
-                            {p.oldPrice ? (
-                              <>
-                                <span className="text-[9px] text-gray-400 line-through">
-                                  {p.oldPrice.toLocaleString('ru-KZ')} ₸
-                                </span>
-                                <div className="flex items-baseline gap-1 mt-0.5">
-                                  <span className="text-[#FF5C3F] font-bold text-[12px]">
-                                    {p.price.toLocaleString('ru-KZ')} ₸
-                                  </span>
-                                  <span className="text-gray-500 text-[8px]">
-                                    сохранить {(p.oldPrice - p.price).toLocaleString('ru-KZ')} ₸
-                                  </span>
-                                </div>
-                              </>
-                            ) : (
-                              <span className="text-black font-bold text-[12px]">
-                                {p.price.toLocaleString('ru-KZ')} ₸
-                              </span>
-                            )}
-                          </div>
-
-                        </div>
-
-                      </div>
-
-                      {/* Hover-revealed button */}
-                      <div className="absolute bottom-0 group-hover:-bottom-12 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 pointer-events-none group-hover:pointer-events-auto">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setSelectedPreviewProduct(p);
-                          }}
-                          className="w-full bg-black text-white text-center font-sans font-bold text-[9px] tracking-[0.2em] py-3 uppercase hover:bg-gray-800 transition-colors shadow-md border-none"
-                        >
-                          ПРЕДПРОСМОТР
-                        </button>
-                      </div>
-
-                    </div>
+                    <ProductCard product={p} setSelectedPreviewProduct={setSelectedPreviewProduct} />
                   </motion.div>
                 ))
               )}
