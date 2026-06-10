@@ -330,36 +330,40 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
                     <div key={idx} className="flex flex-col">
                       {item.subItems ? (
                         <button 
-                          onClick={() => setExpandedCategory(isExpanded ? null : item.label)}
-                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase relative w-full"
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setExpandedCategory(isExpanded ? null : item.label);
+                          }}
+                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase w-full group"
                         >
-                          <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-white/50 text-[14px] font-light leading-none">
+                          <span className="w-5 text-[14px] font-light leading-none text-white/50 flex-none text-center -ml-5 group-hover:text-primary transition-colors">
                             {isExpanded ? '–' : '+'}
                           </span>
-                          {item.label}
+                          <span>{item.label}</span>
                         </button>
                       ) : (
                         <Link 
                           to={item.link} 
-                          className="text-white text-[11px] font-bold tracking-widest lowercase relative"
+                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase w-full"
                           onClick={() => setNavOpen(false)}
                         >
-                          <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-white/50 text-[14px] font-light leading-none">+</span>
-                          {item.label}
+                          <span>{item.label}</span>
                         </Link>
                       )}
 
                       {/* Sub-items accordion */}
                       {item.subItems && (
-                        <AnimatePresence>
+                        <AnimatePresence initial={false}>
                           {isExpanded && (
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden flex flex-col mt-5"
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
                             >
-                              <div className="flex flex-col gap-4 pb-4">
+                              <div className="flex flex-col gap-4 mt-5 pb-4">
                                 {item.subItems.map((sub, sIdx) => (
                                   <Link 
                                     key={sIdx} 
@@ -371,7 +375,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
                                   </Link>
                                 ))}
                               </div>
-                              <div className="w-full h-px bg-white/30 mt-2 mb-2"></div>
+                              <div className="w-full h-px bg-white/20 mt-2 mb-2"></div>
                             </motion.div>
                           )}
                         </AnimatePresence>
