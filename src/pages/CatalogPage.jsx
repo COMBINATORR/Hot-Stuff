@@ -21,7 +21,7 @@ const ALL_PRODUCTS = [
     gallery: [goldTrimmedBoots, noirSilhouetteDress],
     colors: ['#4A4A4A', '#b5585d'],
     description: 'Роскошный вибратор-кролик INA™ Thrust с функцией массажа точки G и клитора. Премиальный дизайн и невероятная мощность.',
-    isNew: true
+    isNew: false
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const ALL_PRODUCTS = [
     gallery: [etherealSilkWrap, goldTrimmedBoots],
     colors: ['#b5585d', '#ffd700', '#2D5E87'],
     description: 'Эргономичный вибратор для пар LELO Boomerang, адаптирующийся к изгибам тела для совместного наслаждения.',
-    isNew: true
+    isNew: false
   },
   {
     id: 3,
@@ -47,7 +47,7 @@ const ALL_PRODUCTS = [
     gallery: [goldTrimmedBoots, etherealSilkWrap],
     colors: ['#111111', '#2D5E87'],
     description: 'Компактный и мощный анальный массажер LELO Surfer 2 для деликатного и глубокого стимулирования.',
-    isNew: true
+    isNew: false
   },
   {
     id: 4,
@@ -60,7 +60,7 @@ const ALL_PRODUCTS = [
     gallery: [noirSilhouetteDress, goldTrimmedBoots],
     colors: ['#111111', '#2D5E87', '#b5585d'],
     description: 'Легендарный вакуумно-волновой стимулятор SONA 3 Cruise с запатентованной технологией Cruise Control для непрерывного удовольствия.',
-    isNew: true,
+    isNew: false,
     discount: 15
   },
   {
@@ -74,8 +74,36 @@ const ALL_PRODUCTS = [
     gallery: [goldTrimmedBoots, noirSilhouetteDress, etherealSilkWrap],
     colors: ['#111111', '#004d40'],
     description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения. Беспроводной пульт с технологией SenseMotion™.',
-    isNew: true,
+    isNew: false,
     discount: 24
+  },
+  {
+    id: 8,
+    name: 'SORAYA WAVE™',
+    price: 124500,
+    oldPrice: 169000,
+    category: 'vibrators',
+    categoryLabel: 'ВИБРАТОРЫ-КРОЛИКИ',
+    image: noirSilhouetteDress,
+    gallery: [noirSilhouetteDress, goldTrimmedBoots],
+    colors: ['#111111', '#B8860B'],
+    description: 'Премиальный кролик-вибратор SORAYA WAVE™ с революционной технологией волнообразных движений WaveMotion™ и гибким внешним стимулятором клитора для двойного оргазма.',
+    isNew: true,
+    discount: 26
+  },
+  {
+    id: 9,
+    name: 'LELO GIGI™ 2',
+    price: 89500,
+    oldPrice: 115000,
+    category: 'vibrators',
+    categoryLabel: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G',
+    image: goldTrimmedBoots,
+    gallery: [goldTrimmedBoots, etherealSilkWrap],
+    colors: ['#b5585d', '#111111'],
+    description: 'Чувственный вибратор LELO GIGI™ 2 с плоской анатомической формой наконечника, идеально приспособленной для точечной стимуляции точки G и максимального комфорта.',
+    isNew: true,
+    discount: 22
   }
 ];
 
@@ -126,7 +154,7 @@ const SIDEBAR_CATEGORIES = [
   {
     key: 'news',
     label: 'НОВИНКИ СЕКС-ИГРУШЕК',
-    cat: 'all',
+    cat: 'new',
   }
 ];
 
@@ -140,9 +168,20 @@ export default function CatalogPage({ onAddToCart }) {
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
   const [expandedSidebarCats, setExpandedSidebarCats] = useState({ women: true }); // Expanded by default for women
 
+  // React to search query params dynamically (e.g. when header navigation or homepage link is clicked)
+  useEffect(() => {
+    const cat = params.get('cat');
+    if (cat) {
+      setActiveCat(cat);
+    } else {
+      setActiveCat('vibrators');
+    }
+  }, [params]);
+
   // Filter products based on selected category label or ID
   const filtered = useMemo(() => {
     if (activeCat === 'all' || activeCat === 'popular') return ALL_PRODUCTS;
+    if (activeCat === 'new') return ALL_PRODUCTS.filter(p => p.isNew);
     return ALL_PRODUCTS.filter(p => 
       p.category === activeCat || 
       p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
@@ -167,6 +206,7 @@ export default function CatalogPage({ onAddToCart }) {
     if (activeCat === 'vibrators') return 'Секс-игрушки для женщин';
     if (activeCat === 'massagers') return 'Секс-игрушки для мужчин';
     if (activeCat === 'couples') return 'Секс-игрушки для пар';
+    if (activeCat === 'new') return 'Новинки секс-игрушек';
     return activeCat;
   }, [activeCat]);
 

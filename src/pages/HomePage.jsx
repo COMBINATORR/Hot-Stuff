@@ -187,7 +187,7 @@ export default function HomePage({ onAddToCart }) {
           {/* CTA */}
           <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.3 }} className="flex items-start">
             <Link 
-              to="/catalog" 
+              to="/catalog?cat=new" 
               className="bg-white text-black font-sans font-bold text-[12px] tracking-[0.2em] py-4 px-10 uppercase transition-all hover:bg-gray-200 inline-block"
             >
               ПОДРОБНЕЕ
