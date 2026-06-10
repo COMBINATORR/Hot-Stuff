@@ -209,12 +209,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
   return (
     <>
       {/* Promo Ticker Bar */}
-      <div className="w-full bg-black py-3 border-b border-white/5 flex items-center justify-between px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
-        <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none z-10">
+      <div className="w-full bg-black py-2 md:py-3 border-b border-white/5 flex items-center justify-between px-3 md:px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
+        <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none z-10 flex-none">
           <span className="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
         </button>
         
-        <div className="flex-1 text-center font-bold tracking-wider overflow-hidden px-4 flex items-center justify-center relative h-full">
+        <div className="flex-1 text-center font-bold tracking-wider overflow-hidden px-2 md:px-4 flex items-center justify-center relative h-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={tickerIndex}
@@ -222,14 +222,14 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="flex items-center justify-center gap-4 w-full h-full"
+              className="flex items-center justify-center gap-2 md:gap-4 w-full h-full"
             >
-              <span className="text-[10px] md:text-xs tracking-[0.15em] font-sans truncate">
+              <span className="text-[8.5px] md:text-xs tracking-[0.08em] md:tracking-[0.15em] font-sans whitespace-normal leading-tight md:leading-normal max-w-[180px] sm:max-w-none text-center">
                 {TICKER_ITEMS[tickerIndex].text}
               </span>
               <Link 
                 to={TICKER_ITEMS[tickerIndex].link} 
-                className="bg-[#FF5C3F] text-black text-[9px] font-black tracking-widest uppercase py-1.5 px-4 transition-transform hover:scale-105 inline-block flex-none"
+                className="bg-[#FF5C3F] text-black text-[8px] md:text-[9px] font-black tracking-widest uppercase py-1 px-2.5 md:py-1.5 md:px-4 transition-transform hover:scale-105 inline-block flex-none"
               >
                 КУПИТЬ
               </Link>
@@ -237,7 +237,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
           </AnimatePresence>
         </div>
 
-        <button onClick={handleNextTicker} className="hover:text-primary transition-colors focus:outline-none z-10">
+        <button onClick={handleNextTicker} className="hover:text-primary transition-colors focus:outline-none z-10 flex-none">
           <span className="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
         </button>
       </div>
