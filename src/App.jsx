@@ -45,6 +45,7 @@ function App() {
               cartItems={cartItems}
               onUpdateQty={updateQty}
               onRemove={removeItem}
+              onAddToCart={addToCart}
             />
             <main className="min-h-screen">
               <AppRouter
