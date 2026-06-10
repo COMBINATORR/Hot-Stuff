@@ -549,7 +549,7 @@ export default function HomePage({ onAddToCart }) {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-bold leading-[1.1] tracking-[-0.02em] mb-4 text-white lowercase text-left max-w-4xl"
+            className="text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-black leading-[1.1] tracking-[-0.02em] mb-4 text-white lowercase text-left max-w-4xl font-sans"
           >
             {HERO.headline}
           </motion.h1>
@@ -591,7 +591,7 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ POPULAR CATEGORIES / TOYS (Horizontal Scroll) ═══ */}
       <section className="bg-background py-16">
         <div className="container-hs">
-          <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
+          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
             ПОПУЛЯРНЫЕ ТОВАРЫ
           </h2>
         </div>
@@ -649,7 +649,7 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ BESTSELLERS ═══════════════════════════ */}
       <section className="bg-background py-16">
         <div className="container-hs">
-          <h2 className="font-label-caps text-xs tracking-[0.2em] text-white uppercase mb-8">
+          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase mb-8">
             БЕСТСЕЛЛЕРЫ
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
@@ -699,7 +699,7 @@ export default function HomePage({ onAddToCart }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
         
         <div className="relative z-10 w-full container-hs flex flex-col items-start px-6 md:px-12 lg:px-16 text-left">
-          <h2 className="text-white text-[28px] sm:text-[40px] md:text-[48px] lg:text-[56px] font-bold leading-tight mb-2 max-w-lg">
+          <h2 className="text-white text-[28px] sm:text-[40px] md:text-[48px] lg:text-[56px] font-black leading-tight mb-2 max-w-lg font-sans">
             Самый глубокий ритм
           </h2>
           <p className="text-white text-[11px] sm:text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-8">
@@ -729,7 +729,7 @@ export default function HomePage({ onAddToCart }) {
 
           {/* Right Column: Text & CTA */}
           <div className="flex flex-col items-start text-left max-w-xl">
-            <h2 className="text-white text-[28px] sm:text-[36px] md:text-[42px] font-bold leading-tight mb-6 uppercase tracking-wider font-sans">
+            <h2 className="text-white text-[32px] sm:text-[40px] md:text-[48px] font-black leading-tight mb-6 uppercase tracking-wider font-sans">
               Опрос по секс-игрушкам
             </h2>
             <h3 className="text-white text-base sm:text-lg md:text-xl font-bold mb-4 font-sans">
@@ -787,7 +787,7 @@ export default function HomePage({ onAddToCart }) {
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex flex-col items-center">
-          <h2 className="text-white text-[28px] sm:text-[36px] md:text-[48px] lg:text-[56px] font-bold leading-tight mb-4 lowercase font-sans">
+          <h2 className="text-white text-[28px] sm:text-[36px] md:text-[48px] lg:text-[56px] font-black leading-tight mb-4 lowercase font-sans">
             получи скидку 15% сегодня
           </h2>
           <p className="text-white text-xs sm:text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
