@@ -565,3 +565,23 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
   background: #d4af37;
   margin-top: 1.5rem;
 }
+
+/* ════════════════════════════════════════════════
+   MOBILE PREMIUM HEADER (LELO STYLE OVERLAY)
+   ════════════════════════════════════════════════ */
+.mobile-premium-header {
+  background: linear-gradient(to bottom, rgba(30,15,10,0.95), rgba(40,25,20,0.8));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (min-width: 768px) {
+  .mobile-premium-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+  }
+}
+

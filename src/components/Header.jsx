@@ -223,7 +223,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
       </div>
 
       {/* Main Glassmorphic Header */}
-      <header className="w-full bg-transparent absolute top-12 left-0 z-40">
+      <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header">
         <div className="container-hs flex items-center justify-between h-20">
           
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
@@ -241,10 +241,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove }) {
 
             {/* Logo for Mobile */}
             <div className="flex md:hidden flex-col items-start justify-center select-none">
-              <Link to="/" className="text-[28px] font-medium tracking-[0.3em] text-white uppercase leading-none">
+              <Link to="/" className="text-[22px] font-light tracking-[0.25em] text-white uppercase leading-none font-sans">
                 HOT STUFF
               </Link>
-              <span className="text-[9px] tracking-[0.45em] text-on-surface-variant font-medium mt-1 uppercase">
+              <span className="text-[8px] tracking-[0.45em] text-white/50 font-normal mt-1.5 uppercase font-sans">
                 АТЫРАУ
               </span>
             </div>
