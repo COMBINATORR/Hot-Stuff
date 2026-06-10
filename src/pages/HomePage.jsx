@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -8,6 +9,7 @@ import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
 import heroBg from '../assets/images/hero-bg.png';
 import logoInaThrustPromo from '../assets/images/ina_thrust_promo.png';
+import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
@@ -100,6 +102,167 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 export default function HomePage({ onAddToCart }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
+
+  // Quiz State
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [quizStep, setQuizStep] = useState(1);
+  const [quizAnswers, setQuizAnswers] = useState({ target: '', area: '', tech: '' });
+
+  // Lock scroll when quiz modal is active
+  useEffect(() => {
+    if (quizOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [quizOpen]);
+
+  const handleQuizAnswer = (key, value) => {
+    setQuizAnswers(prev => ({ ...prev, [key]: value }));
+    setQuizStep(prev => prev + 1);
+  };
+
+  const getRecommendation = () => {
+    if (quizAnswers.target === 'him') {
+      return {
+        id: 7,
+        name: 'HUGO™ 2 REMOTE',
+        price: 166440,
+        image: logoGoldBoots,
+        desc: 'Премиальный вибромассажер простаты с пультом управления SenseMotion™. Идеальный выбор для глубокого расслабления и ярких мужских оргазмов.'
+      };
+    } else if (quizAnswers.target === 'both') {
+      return {
+        id: 1,
+        name: 'INA™ THRUST',
+        price: 119500,
+        image: logoGoldBoots,
+        desc: 'Роскошный вибратор-кролик с функцией массажа точки G и клитора. Премиальный дизайн и невероятная мощность для совместных открытий.'
+      };
+    } else {
+      if (quizAnswers.area === 'external' || quizAnswers.tech === 'waves') {
+        return {
+          id: 4,
+          name: 'SONA™ 3 CRUISE',
+          price: 71800,
+          image: logoNoirDress,
+          desc: 'Легендарный вакуумно-волновой стимулятор клитора с запатентованной технологией Cruise Control. Интенсивное бесконтактное наслаждение.'
+        };
+      } else {
+        return {
+          id: 8,
+          name: 'SORAYA WAVE™',
+          price: 124500,
+          image: logoNoirDress,
+          desc: 'Премиальный кролик-вибратор с технологией волнообразных движений WaveMotion™ и гибким внешним стимулятором клитора.'
+        };
+      }
+    }
+  };
+
+  const renderQuizContent = () => {
+    if (quizStep === 1) {
+      return (
+        <div>
+          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-1/3" />
+          </div>
+          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">1. Для кого предназначена игрушка?</h3>
+          <div className="flex flex-col gap-4">
+            <button onClick={() => handleQuizAnswer('target', 'her')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Для нее
+            </button>
+            <button onClick={() => handleQuizAnswer('target', 'him')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Для него
+            </button>
+            <button onClick={() => handleQuizAnswer('target', 'both')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Для двоих (для пар)
+            </button>
+          </div>
+        </div>
+      );
+    }
+    if (quizStep === 2) {
+      return (
+        <div>
+          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-2/3" />
+          </div>
+          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">2. Какая область стимуляции предпочтительна?</h3>
+          <div className="flex flex-col gap-4">
+            <button onClick={() => handleQuizAnswer('area', 'external')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Внешняя (клитор / поверхностная)
+            </button>
+            <button onClick={() => handleQuizAnswer('area', 'internal')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Внутренняя (точка G / простата)
+            </button>
+            <button onClick={() => handleQuizAnswer('area', 'dual')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Двойная стимуляция (внешняя + внутренняя)
+            </button>
+          </div>
+        </div>
+      );
+    }
+    if (quizStep === 3) {
+      return (
+        <div>
+          <div className="w-full bg-white/10 h-1 mb-8 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-full" />
+          </div>
+          <h3 className="text-white text-lg font-bold mb-6 font-sans text-left">3. Какая технология привлекает больше всего?</h3>
+          <div className="flex flex-col gap-4">
+            <button onClick={() => handleQuizAnswer('tech', 'waves')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Вакуумно-звуковые волны (нежное бесконтактное воздействие)
+            </button>
+            <button onClick={() => handleQuizAnswer('tech', 'movements')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Волнообразные движения (массажный эффект)
+            </button>
+            <button onClick={() => handleQuizAnswer('tech', 'smart')} className="w-full bg-surface-container-low hover:bg-surface-container-high border border-white/5 py-4 px-6 text-left text-white text-sm font-sans tracking-wide transition-colors">
+              Дистанционное управление с датчиками движения
+            </button>
+          </div>
+        </div>
+      );
+    }
+    if (quizStep === 4) {
+      const rec = getRecommendation();
+      return (
+        <div className="flex flex-col items-center text-center">
+          <span className="material-symbols-outlined text-4xl text-primary mb-3">celebration</span>
+          <h3 className="text-white text-xl font-bold mb-2 font-sans">Ваша идеальная пара найдена!</h3>
+          <p className="text-white/60 text-xs sm:text-sm mb-6">На основе ваших ответов мы подобрали лучшее решение:</p>
+          
+          <div className="w-full bg-surface-container-low border border-white/5 p-6 rounded-lg mb-6 flex flex-col items-center">
+            <div className="w-32 h-32 mb-4 overflow-hidden rounded bg-black/20">
+              <ResponsiveImage src={rec.image} alt={rec.name} className="w-full h-full object-cover" />
+            </div>
+            <h4 className="text-white font-bold text-base mb-1 tracking-wider uppercase font-sans">{rec.name}</h4>
+            <p className="text-primary text-sm font-bold mb-3">{rec.price.toLocaleString('ru-KZ')} ₸</p>
+            <p className="text-white/70 text-xs leading-relaxed max-w-sm">{rec.desc}</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <Link 
+              to={`/product/${rec.id}`}
+              onClick={() => setQuizOpen(false)}
+              className="flex-1 bg-white hover:bg-gray-200 text-black font-sans font-bold text-xs tracking-wider py-3.5 px-6 rounded-full text-center transition-colors uppercase"
+            >
+              Подробнее о товаре
+            </Link>
+            <button 
+              onClick={() => setQuizStep(1)}
+              className="flex-1 border border-white/20 hover:bg-white/5 text-white font-sans font-bold text-xs tracking-wider py-3.5 px-6 rounded-full text-center transition-colors uppercase"
+            >
+              Пройти заново
+            </button>
+          </div>
+        </div>
+      );
+    }
+  };
   
   // Mouse drag-to-scroll ref and states
   const sliderRef = useRef(null);
@@ -336,6 +499,40 @@ export default function HomePage({ onAddToCart }) {
         </div>
       </section>
 
+      {/* ═══ QUIZ SECTION ══════════════════════════ */}
+      <section className="bg-black py-16 md:py-24 border-b border-white/5">
+        <div className="container-hs grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+          {/* Left Column: Image with rounded corners */}
+          <div className="w-full aspect-[4/3] md:aspect-square overflow-hidden rounded-lg border border-white/10">
+            <ResponsiveImage 
+              src={logoQuizBg} 
+              alt="Опрос по секс-игрушкам" 
+              className="w-full h-full object-cover brightness-95"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Right Column: Text & CTA */}
+          <div className="flex flex-col items-start text-left max-w-xl">
+            <h2 className="text-white text-[28px] sm:text-[36px] md:text-[42px] font-bold leading-tight mb-6 uppercase tracking-wider font-sans">
+              Опрос по секс-игрушкам
+            </h2>
+            <h3 className="text-white text-base sm:text-lg md:text-xl font-bold mb-4 font-sans">
+              Не уверены, какая секс-игрушка вам подходит?
+            </h3>
+            <p className="text-white/60 text-xs sm:text-sm md:text-base leading-relaxed mb-8">
+              Ответь на ряд анонимных вопросов и найди свою идеальную пару.
+            </p>
+            <button 
+              onClick={() => { setQuizStep(1); setQuizOpen(true); }}
+              className="border border-white hover:bg-white hover:text-black text-white font-sans font-bold text-xs sm:text-sm tracking-[0.2em] py-3 px-10 rounded-full transition-all bg-transparent cursor-pointer"
+            >
+              Начать
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ BRAND QUOTE ═══════════════════════════ */}
       <section className="relative py-section-gap overflow-hidden">
         <div className="absolute inset-0 bg-surface-container-lowest" />
@@ -393,6 +590,22 @@ export default function HomePage({ onAddToCart }) {
         onClose={() => setSelectedPreviewProduct(null)}
         onAddToCart={onAddToCart}
       />
+
+      {/* Quiz Modal Portal */}
+      {quizOpen && createPortal(
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4 transition-opacity duration-300">
+          <div className="bg-[#121212] border border-white/10 w-full max-w-xl p-8 rounded-lg relative flex flex-col">
+            <button 
+              onClick={() => setQuizOpen(false)} 
+              className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+            {renderQuizContent()}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
