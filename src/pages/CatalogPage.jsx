@@ -2,124 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import noirSilhouetteDress from '../assets/images/products/noir_silhouette_dress.png';
-import etherealSilkWrap from '../assets/images/products/ethereal_silk_wrap.png';
-import goldTrimmedBoots from '../assets/images/products/gold_trimmed_boots.png';
+import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
-
-/* ── Rich product mock data aligning with shop screenshots ── */
-const ALL_PRODUCTS = [
-  {
-    id: 1,
-    name: 'INA™ THRUST',
-    price: 119500,
-    oldPrice: 159000,
-    category: 'vibrators',
-    categoryLabel: 'ВИБРАТОРЫ-КРОЛИКИ',
-    image: goldTrimmedBoots,
-    gallery: [goldTrimmedBoots, noirSilhouetteDress],
-    colors: ['#4A4A4A', '#b5585d'],
-    description: 'Роскошный вибратор-кролик INA™ Thrust с функцией массажа точки G и клитора. Премиальный дизайн и невероятная мощность.',
-    isNew: false,
-    stimulation: ['clitoris', 'g-spot'],
-    features: ['dual_stimulation']
-  },
-  {
-    id: 2,
-    name: 'LELO BOOMERANG™',
-    price: 114500,
-    oldPrice: 149500,
-    category: 'couples',
-    categoryLabel: 'СЕКС-ИГРУШКИ ДЛЯ ПАР',
-    image: etherealSilkWrap,
-    gallery: [etherealSilkWrap, goldTrimmedBoots],
-    colors: ['#b5585d', '#ffd700', '#2D5E87'],
-    description: 'Эргономичный вибратор для пар LELO Boomerang, адаптирующийся к изгибам тела для совместного наслаждения.',
-    isNew: false,
-    stimulation: ['couples'],
-    features: ['flexible_design']
-  },
-  {
-    id: 3,
-    name: 'LELO SURFER™ 2',
-    price: 59500,
-    oldPrice: 79500,
-    category: 'vibrators',
-    categoryLabel: 'АНАЛЬНЫЕ ПРОБКИ',
-    image: goldTrimmedBoots,
-    gallery: [goldTrimmedBoots, etherealSilkWrap],
-    colors: ['#111111', '#2D5E87'],
-    description: 'Компактный и мощный анальный массажер LELO Surfer 2 для деликатного и глубокого стимулирования.',
-    isNew: false,
-    stimulation: ['anal'],
-    features: ['compact_size']
-  },
-  {
-    id: 4,
-    name: 'SONA™ 3 CRUISE',
-    price: 71800,
-    oldPrice: 84500,
-    category: 'vibrators',
-    categoryLabel: 'ВИБРАТОРЫ ДЛЯ КЛИТОРА',
-    image: noirSilhouetteDress,
-    gallery: [noirSilhouetteDress, goldTrimmedBoots],
-    colors: ['#111111', '#2D5E87', '#b5585d'],
-    description: 'Легендарный вакуумно-волновой стимулятор SONA 3 Cruise с запатентованной технологией Cruise Control для непрерывного удовольствия.',
-    isNew: false,
-    discount: 15,
-    stimulation: ['clitoris'],
-    features: ['cruise_control', 'sonic_waves']
-  },
-  {
-    id: 7,
-    name: 'HUGO™ 2 REMOTE',
-    price: 166440,
-    oldPrice: 219000,
-    category: 'massagers',
-    categoryLabel: 'МАССАЖЕРЫ ПРОСТАТЫ',
-    image: goldTrimmedBoots,
-    gallery: [goldTrimmedBoots, noirSilhouetteDress, etherealSilkWrap],
-    colors: ['#111111', '#004d40'],
-    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения. Беспроводной пульт с технологией SenseMotion™.',
-    isNew: false,
-    discount: 24,
-    stimulation: ['prostate', 'anal'],
-    features: ['sense_motion', 'wireless_remote']
-  },
-  {
-    id: 8,
-    name: 'SORAYA WAVE™',
-    price: 124500,
-    oldPrice: 169000,
-    category: 'vibrators',
-    categoryLabel: 'ВИБРАТОРЫ-КРОЛИКИ',
-    image: noirSilhouetteDress,
-    gallery: [noirSilhouetteDress, goldTrimmedBoots],
-    colors: ['#111111', '#B8860B'],
-    description: 'Премиальный кролик-вибратор SORAYA WAVE™ с революционной технологией волнообразных движений WaveMotion™ и гибким внешним стимулятором клитора для двойного оргазма.',
-    isNew: true,
-    discount: 26,
-    stimulation: ['clitoris', 'g-spot'],
-    features: ['wave_motion', 'dual_stimulation']
-  },
-  {
-    id: 9,
-    name: 'LELO GIGI™ 2',
-    price: 89500,
-    oldPrice: 115000,
-    category: 'vibrators',
-    categoryLabel: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G',
-    image: goldTrimmedBoots,
-    gallery: [goldTrimmedBoots, etherealSilkWrap],
-    colors: ['#b5585d', '#111111'],
-    description: 'Чувственный вибратор LELO GIGI™ 2 с плоской анатомической формой наконечника, идеально приспособленной для точечной стимуляции точки G и максимального комфорта.',
-    isNew: true,
-    discount: 22,
-    stimulation: ['g-spot'],
-    features: ['waterproof']
-  }
-];
 
 const SIDEBAR_CATEGORIES = [
   {
@@ -504,7 +389,7 @@ export default function CatalogPage({ onAddToCart }) {
                             {/* Color dots swatches */}
                             <div className="flex gap-1 mt-0.5 flex-none">
                               {p.colors.map(c => (
-                                <span key={c} className="w-1.5 h-1.5 rounded-full border border-black/10" style={{ background: c }} />
+                                <span key={c.name} className="w-1.5 h-1.5 rounded-full border border-black/10" style={{ background: c.hex }} />
                               ))}
                             </div>
                           </div>
