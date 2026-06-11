@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import ResponsiveImage from './ResponsiveImage';
 
@@ -297,6 +297,8 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isLightPage = pathname.includes('/catalog');
 
   // Автоматическая смена сообщений каждые 12 секунд
   useEffect(() => {
@@ -371,22 +373,22 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
             {/* Sandwich for Desktop */}
-            <button onClick={() => setNavOpen(true)} className="hidden md:flex items-center justify-center gap-3 bg-transparent text-white border-none focus:outline-none group h-[24px]">
+            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none group h-[24px]`}>
               <div className="flex flex-col justify-between items-start w-6 h-[10px]">
-                <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
-                <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
+                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
               </div>
-              <span className="font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary transition-colors flex items-center mt-[1px]">
+              <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary transition-colors flex items-center mt-[1px]`}>
                 МЕНЮ
               </span>
             </button>
 
             {/* Logo for Mobile */}
             <div className="flex md:hidden flex-col items-start justify-center select-none">
-              <Link to="/" className="text-[22px] font-light tracking-[0.25em] text-white uppercase leading-none font-sans">
+              <Link to="/" className={`text-[22px] font-light tracking-[0.25em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none font-sans`}>
                 HOT STUFF
               </Link>
-              <span className="text-[12px] tracking-[0.45em] text-white font-normal mt-1.5 uppercase font-sans">
+              <span className={`text-[12px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-normal mt-1.5 uppercase font-sans`}>
                 АТЫРАУ
               </span>
             </div>
@@ -394,23 +396,23 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
           {/* CENTER: Logo (Desktop only) */}
           <div className="hidden md:flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
-            <Link to="/" className="text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none">
+            <Link to="/" className={`text-[36px] font-medium tracking-[0.3em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none`}>
               HOT STUFF
             </Link>
-            <span className="text-[18px] tracking-[0.45em] text-white font-medium mt-2 uppercase">
+            <span className={`text-[18px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-medium mt-2 uppercase`}>
               АТЫРАУ
             </span>
           </div>
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button onClick={() => setSearchOpen(true)} className="flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
-            <NavLink to="/account" className="hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+            <NavLink to="/account" className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
             </NavLink>
-            <button onClick={() => setCartOpen(true)} className="relative flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
@@ -420,10 +422,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             </button>
 
             {/* Sandwich for Mobile */}
-            <button onClick={() => setNavOpen(true)} className="flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none group">
+            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none group`}>
               <div className="flex flex-col justify-between items-end w-6 h-[10px]">
-                <span className="w-6 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
-                <span className="w-4 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></span>
+                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
+                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
               </div>
             </button>
           </div>
