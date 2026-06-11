@@ -555,7 +555,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-neutral-950/98 z-[999] flex flex-col justify-start p-6 pt-24 font-sans text-white"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col justify-start p-6 pt-24 font-sans text-white"
           >
             <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
               <div className="flex justify-between items-center border-b border-white/20 pb-4">
