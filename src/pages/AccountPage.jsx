@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
 
-export default function AccountPage({ onAddToCart }) {
+export default function AccountPage({ onAddToCart, isLoggedIn, setIsLoggedIn }) {
   const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
@@ -10,7 +10,6 @@ export default function AccountPage({ onAddToCart }) {
   const [code, setCode] = useState(['', '', '', '']); // 4 digit code inputs
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   const navigate = useNavigate();
@@ -82,7 +81,7 @@ export default function AccountPage({ onAddToCart }) {
       const registered = MOCK_REGISTERED_USERS.includes(cleanedVal);
       setIsRegistered(registered);
       setStep(2);
-    }, 800);
+    }, 1200);
   };
 
   const handleVerifySubmit = (e) => {
@@ -96,7 +95,7 @@ export default function AccountPage({ onAddToCart }) {
         if (password === 'password' || password === '123456' || password === '1234') {
           loginSuccess(identifier);
         } else {
-          setError('Неверный пароль. Попробуйте "1234" или "password"');
+          setError('Неверный пароль. Попробуйте "1234"');
         }
       } else {
         const enteredCode = code.join('');
@@ -106,7 +105,7 @@ export default function AccountPage({ onAddToCart }) {
           setError('Неверный код подтверждения. Введите "1234" для проверки');
         }
       }
-    }, 800);
+    }, 1200);
   };
 
   const loginSuccess = (userVal) => {
@@ -159,14 +158,15 @@ export default function AccountPage({ onAddToCart }) {
   };
 
   return (
-    <div className="bg-background text-on-surface min-h-screen font-sans flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-28 selection:bg-primary-container selection:text-on-primary-container relative overflow-hidden">
-      {/* Background radial highlight */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
+    <div className={`w-full min-h-screen flex flex-col justify-center items-center transition-all duration-300 ${isLoggedIn ? 'bg-background text-on-surface py-28 px-margin-mobile md:px-margin-desktop' : 'bg-white text-black py-16 px-6'}`}>
+      
+      {isLoggedIn ? (
+        /* Authenticated Dashboard view */
+        <div className="w-full max-w-5xl bg-surface-container-low border border-white/5 p-6 md:p-10 rounded-2xl shadow-2xl font-sans relative z-10">
+          {/* Background radial highlight for dark dashboard */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
 
-      <div className={`w-full ${isLoggedIn ? 'max-w-5xl' : 'max-w-[450px]'} bg-surface-container-low border border-white/5 p-6 md:p-10 rounded-2xl shadow-2xl relative z-10 font-sans transition-all duration-500`}>
-        
-        {isLoggedIn ? (
-          <div className="space-y-10 text-left">
+          <div className="relative z-10 space-y-10 text-left">
             {/* Dashboard Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/5">
               <div className="flex items-center gap-4">
@@ -306,221 +306,195 @@ export default function AccountPage({ onAddToCart }) {
 
             </div>
           </div>
-        ) : (
-          <div>
-            {/* Header logo/title */}
-            <div className="mb-8 text-center">
-              <span className="material-symbols-outlined text-4xl text-primary font-light mb-4 block">lock_open</span>
-              <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider">Вход в Кабинет</h1>
-              <p className="text-[10px] text-outline font-bold uppercase tracking-widest mt-2">HOT STUFF ATYRAU</p>
+        </div>
+      ) : (
+        /* Image-accurate Light Mobile login view */
+        <div className="w-full max-w-[343px] flex flex-col items-center font-sans text-black select-none py-10 px-4">
+          
+          {/* Header */}
+          <h1 className="text-xl font-light tracking-[0.2em] text-black uppercase mb-12 mt-4 text-center">
+            HOT STUFF
+          </h1>
+
+          {error && (
+            <div className="w-full text-center text-xs text-[#FF5C3F] font-bold pb-4">
+              ⚠️ {error}
             </div>
+          )}
 
-            {error && (
-              <div className="bg-[#FF5C3F]/10 border border-[#FF5C3F]/20 text-[#FF5C3F] text-xs py-3 px-4 rounded-[2px] mb-6 text-left font-bold">
-                ⚠️ {error}
+          {step === 1 ? (
+            <div className="w-full flex flex-col">
+              <form onSubmit={handleIdentifierSubmit} className="w-full flex flex-col text-left">
+                {/* Input block */}
+                <div className="flex flex-col mb-4">
+                  <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">
+                    Телефон или Email
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder="Телефон или Email"
+                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Continue button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  <span className="font-normal tracking-wide">Продолжить</span>
+                  {/* Rotating dotted/dashed circle spinner always visible to match image_2.png */}
+                  <svg 
+                    className="animate-spin h-[18px] w-[18px] text-white" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeDasharray="3 3"
+                  >
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" />
+                  </svg>
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="flex items-center justify-between mt-8 mb-6 w-full">
+                <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
+                <span className="px-4 text-[13px] text-neutral-400 font-normal whitespace-nowrap">Или через</span>
+                <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
               </div>
-            )}
 
-            {step === 1 ? (
-              <div className="space-y-6">
-                <form onSubmit={handleIdentifierSubmit} className="space-y-6 text-left">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black tracking-widest text-outline uppercase">Почта или Номер телефона</label>
+              {/* Social Buttons */}
+              <div className="flex justify-center gap-4 mb-14">
+                {/* Telegram */}
+                <button
+                  type="button"
+                  onClick={() => handleSsoLogin('Telegram', '@telegram_user')}
+                  className="w-[58px] h-[58px] bg-white border border-black rounded-full flex items-center justify-center hover:bg-neutral-50 transition-colors cursor-pointer flex-none"
+                  title="Войти через Telegram"
+                  disabled={loading}
+                >
+                  <svg className="w-[22px] h-[22px] fill-black ml-[-2px]" viewBox="0 0 24 24">
+                    <path d="M9.78 18.65l.28-4.24 7.68-6.92c.33-.29-.07-.45-.51-.16l-9.5 5.98-4.11-1.28c-.89-.28-.91-.89.19-1.32L20.2 3.65c.74-.27 1.39.18 1.15 1.2l-2.78 13.07c-.2 1-.8 1.24-1.63.78l-4.24-3.12-2.05 1.97-.92-1.9z"/>
+                  </svg>
+                </button>
+
+                {/* Apple */}
+                <button
+                  type="button"
+                  onClick={() => handleSsoLogin('Apple', 'apple_user@icloud.com')}
+                  className="w-[58px] h-[58px] bg-white border border-black rounded-full flex items-center justify-center hover:bg-neutral-50 transition-colors cursor-pointer flex-none"
+                  title="Войти через Apple ID"
+                  disabled={loading}
+                >
+                  <svg className="w-6 h-6 fill-black mb-[2px]" viewBox="0 0 24 24">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.1.09 2.23-.58 2.95-1.39z"/>
+                  </svg>
+                </button>
+
+                {/* Google */}
+                <button
+                  type="button"
+                  onClick={() => handleSsoLogin('Google', 'google_user@gmail.com')}
+                  className="w-[58px] h-[58px] bg-white border border-black rounded-full flex items-center justify-center hover:bg-neutral-50 transition-colors cursor-pointer flex-none"
+                  title="Войти через Google"
+                  disabled={loading}
+                >
+                  <svg className="w-[22px] h-[22px] fill-black" viewBox="0 0 24 24">
+                    <path d="M21.35 11.1H12v3.8h5.38c-.24 1.28-.96 2.37-2.04 3.1v2.57h3.3c1.93-1.78 3.04-4.4 3.04-7.57 0-.62-.05-1.22-.13-1.9z"/>
+                    <path d="M12 20.6c2.43 0 4.47-.8 5.96-2.2l-3.3-2.57c-.9.6-2.07.97-3.32.97-2.56 0-4.73-1.73-5.5-4.07H2.43v2.65c1.5 2.97 4.57 4.97 8.1 4.97z"/>
+                    <path d="M6.5 12.73a5.55 5.55 0 0 1 0-3.46V6.62H2.43a9.89 9.89 0 0 0 0 7.6L6.5 12.73z"/>
+                    <path d="M12 7.4c1.32 0 2.5.45 3.44 1.35l2.58-2.58C16.46 4.7 14.43 3.9 12 3.9c-3.53 0-6.6 2-8.1 4.97l4.07 3.15c.77-2.34 2.94-4.07 5.5-4.07z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Verify Step (OTP/Password) - Styled in same clean white minimalist theme */
+            <form onSubmit={handleVerifySubmit} className="w-full flex flex-col text-left">
+              {isRegistered ? (
+                <div className="flex flex-col mb-4">
+                  <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 ml-1">
+                    Вы зарегистрированы в системе. Пожалуйста, введите пароль.
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">Ваш Пароль</label>
                     <input
-                      type="text"
+                      type="password"
                       required
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="example@mail.com или +7..."
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-3 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
                       disabled={loading}
                     />
-                    <p className="text-[9px] text-outline/60 leading-relaxed mt-2 font-normal">
-                      * На указанный контакт будет отправлен одноразовый код для входа. Никаких паролей, рекламных рассылок и спама.
-                    </p>
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-[#ffe088] transition-colors rounded-[2px] flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      'ПРОДОЛЖИТЬ'
-                    )}
-                  </button>
-                </form>
-
-                {/* SSO Section */}
-                <div className="pt-6 border-t border-white/5 space-y-4 text-center">
-                  <div className="flex items-center justify-between text-[9px] font-bold text-outline/40 uppercase tracking-widest">
-                    <span className="h-px bg-white/5 flex-1 mr-3"></span>
-                    <span>Войти через</span>
-                    <span className="h-px bg-white/5 flex-1 ml-3"></span>
-                  </div>
-                  
-                  <div className="flex justify-center gap-4">
-                    {/* Google */}
-                    <button
-                      type="button"
-                      onClick={() => handleSsoLogin('Google', 'google_user@gmail.com')}
-                      className="w-11 h-11 bg-neutral-950 hover:bg-white/5 border border-white/10 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer"
-                      title="Войти через Google"
-                      disabled={loading}
-                    >
-                      <svg className="w-5 h-5 fill-white/60 group-hover:fill-[#4285F4] transition-colors" viewBox="0 0 24 24">
-                        <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.51 0-6.377-2.87-6.377-6.377 0-3.508 2.87-6.377 6.377-6.377 1.62 0 3.09.614 4.225 1.62l3.14-3.14A11.96 11.96 0 0 0 12.24 2c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.787 0 9.63-4.068 9.63-9.782 0-.668-.073-1.328-.193-1.933H12.24z"/>
-                      </svg>
-                    </button>
-
-                    {/* Apple */}
-                    <button
-                      type="button"
-                      onClick={() => handleSsoLogin('Apple', 'apple_user@icloud.com')}
-                      className="w-11 h-11 bg-neutral-950 hover:bg-white/5 border border-white/10 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer"
-                      title="Войти через Apple ID"
-                      disabled={loading}
-                    >
-                      <svg className="w-5 h-5 fill-white/60 group-hover:fill-white transition-colors" viewBox="0 0 24 24">
-                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.1.09 2.23-.58 2.95-1.39z"/>
-                      </svg>
-                    </button>
-
-                    {/* Telegram */}
-                    <button
-                      type="button"
-                      onClick={() => handleSsoLogin('Telegram', '@telegram_user')}
-                      className="w-11 h-11 bg-neutral-950 hover:bg-white/5 border border-white/10 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer"
-                      title="Войти через Telegram"
-                      disabled={loading}
-                    >
-                      <svg className="w-5 h-5 fill-white/60 group-hover:fill-[#0088cc] transition-colors" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.74 7.59-3.27 3.6-1.5 4.35-1.76 4.84-1.77.11 0 .35.03.5.15.13.1.17.24.19.34.02.13.03.39.01.59z"/>
-                      </svg>
-                    </button>
-
-                    {/* Yandex */}
-                    <button
-                      type="button"
-                      onClick={() => handleSsoLogin('Yandex', 'yandex_user@yandex.ru')}
-                      className="w-11 h-11 bg-neutral-950 hover:bg-white/5 border border-white/10 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer"
-                      title="Войти через Яндекс"
-                      disabled={loading}
-                    >
-                      <span className="font-serif font-black text-white/60 group-hover:text-[#FF0000] text-lg transition-colors leading-none select-none">Я</span>
-                    </button>
-                  </div>
-                  <p className="text-[9px] text-outline/50 mt-4 leading-normal text-center font-normal">
-                    Нажимая кнопку продолжения или SSO, вы соглашаетесь с условиями конфиденциальности. Доставка и биллинг полностью анонимны.
-                  </p>
                 </div>
-              </div>
-            ) : (
-              <form onSubmit={handleVerifySubmit} className="space-y-6 text-left">
-                {isRegistered ? (
-                  <div className="space-y-4">
-                    <div className="text-xs text-outline leading-relaxed mb-4">
-                      Вы зарегистрированы в системе. Пожалуйста, введите пароль от вашего аккаунта.
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black tracking-widest text-outline uppercase">Ваш Пароль</label>
-                      <input
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-neutral-950 border border-white/10 px-4 py-3 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px]"
-                        disabled={loading}
-                      />
+              ) : (
+                <div className="flex flex-col mb-4">
+                  <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 px-1">
+                    Мы отправили 4-значный код на контакт: <strong className="text-black font-mono">{identifier}</strong>.
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[14px] text-black font-normal text-center mb-3">Код подтверждения</label>
+                    <div className="flex justify-center gap-3">
+                      {[0, 1, 2, 3].map((idx) => (
+                        <input
+                          key={idx}
+                          id={`code-${idx}`}
+                          type="text"
+                          maxLength="1"
+                          value={code[idx]}
+                          onChange={(e) => handleCodeChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(idx, e)}
+                          className="w-12 h-12 bg-white border border-black text-center text-xl font-bold text-black focus:border-black/70 outline-none rounded-[12px]"
+                          disabled={loading}
+                        />
+                      ))}
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="text-xs text-outline leading-relaxed mb-4">
-                      Мы отправили 4-значный код подтверждения на указанный контакт: <strong className="text-white font-mono">{identifier}</strong>.
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black tracking-widest text-outline uppercase text-center mb-3">Код из СМС или Почты</label>
-                      <div className="flex justify-center gap-3">
-                        {[0, 1, 2, 3].map((idx) => (
-                          <input
-                            key={idx}
-                            id={`code-${idx}`}
-                            type="text"
-                            maxLength="1"
-                            value={code[idx]}
-                            onChange={(e) => handleCodeChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(idx, e)}
-                            className="w-12 h-12 bg-neutral-950 border border-white/10 text-center text-xl font-bold text-white focus:border-primary outline-none transition-colors rounded-[2px]"
-                            disabled={loading}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-[#ffe088] transition-colors rounded-[2px] flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      'ПОДТВЕРДИТЬ'
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { setStep(1); setError(''); }}
-                    className="w-full bg-transparent text-outline hover:text-white font-sans font-black text-[9px] tracking-[0.15em] py-2 uppercase transition-colors text-center"
-                    disabled={loading}
-                  >
-                    ← ИЗМЕНИТЬ ПОЧТУ / ТЕЛЕФОН
-                  </button>
                 </div>
-              </form>
-            )}
+              )}
 
-            {/* Privacy Trust Grid */}
-            <div className="mt-8 pt-6 border-t border-white/5 space-y-4 text-left">
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">visibility_off</span>
-                <div>
-                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">100% Анонимный биллинг</h4>
-                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">В банковской выписке отобразится нейтральное название («Retail Atyrau»), без упоминания деликатных товаров.</p>
-                </div>
+              <div className="flex flex-col gap-4 mt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  <span>Подтвердить</span>
+                  {loading && (
+                    <svg className="animate-spin h-[18px] w-[18px] text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setStep(1); setError(''); }}
+                  className="w-full text-center text-[11px] font-bold text-neutral-500 hover:text-black uppercase tracking-wider py-1 bg-transparent border-none cursor-pointer"
+                  disabled={loading}
+                >
+                  ← Назад к вводу
+                </button>
               </div>
-              
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">shield_lock</span>
-                <div>
-                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">Безопасная SSL-авторизация</h4>
-                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">Все персональные данные и сессии входа защищены современным 256-битным протоколом шифрования.</p>
-                </div>
-              </div>
+            </form>
+          )}
 
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">mail</span>
-                <div>
-                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">Конфиденциальность контактов</h4>
-                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">Используем телефон или почту только для передачи кодов входа и статусов доставки. Никакого спама.</p>
-                </div>
-              </div>
-            </div>
+          {/* Image-accurate Disclaimer */}
+          <p className="text-[9.5px] text-black/90 leading-[1.6] text-center font-normal px-2 mt-4 max-w-[325px]">
+            Нажимая продолжить, вы соглашаетесь с <span className="underline decoration-black underline-offset-2 cursor-pointer">условиями</span>. Ваши Ваши данные шифруются по протоколу SSL. Мы гарантируем 100% анонимность. Мы никогда не передаем их третьим лицам. Ваша почта используется только для отправки чеков и статуса заказа.
+          </p>
 
-            <div className="mt-8 text-[9px] text-outline/40 uppercase tracking-[0.25em] font-bold text-center">
-              Безопасный зашифрованный вход Hot Stuff
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
