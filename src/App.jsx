@@ -10,11 +10,7 @@ import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
 
 function App() {
-  /* ── Cart state (lifted to App so Header + pages share it) ── */
   const [cartItems, setCartItems] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('hs_user') !== null;
-  });
 
   const addToCart = useCallback((item) => {
     setCartItems(prev => {
@@ -51,7 +47,6 @@ function App() {
               onUpdateQty={updateQty}
               onRemove={removeItem}
               onAddToCart={addToCart}
-              isLoggedIn={isLoggedIn}
             />
             <main className="min-h-screen pb-20 md:pb-0">
               <AppRouter
@@ -59,11 +54,9 @@ function App() {
                 onAddToCart={addToCart}
                 onUpdateQty={updateQty}
                 onRemove={removeItem}
-                isLoggedIn={isLoggedIn}
-                setIsLoggedIn={setIsLoggedIn}
               />
             </main>
-            <Footer isLoggedIn={isLoggedIn} />
+            <Footer />
           </BrowserRouter>
         </SecureProvider>
       </HelmetProvider>

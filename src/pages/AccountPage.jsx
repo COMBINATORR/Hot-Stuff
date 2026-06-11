@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
 
-export default function AccountPage({ onAddToCart, isLoggedIn, setIsLoggedIn }) {
+export default function AccountPage({ onAddToCart }) {
   const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
@@ -10,6 +10,7 @@ export default function AccountPage({ onAddToCart, isLoggedIn, setIsLoggedIn }) 
   const [code, setCode] = useState(['', '', '', '']); // 4 digit code inputs
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   const navigate = useNavigate();

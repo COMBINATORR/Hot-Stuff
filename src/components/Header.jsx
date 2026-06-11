@@ -288,8 +288,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
   );
 }
 
-/** Main Header component with Promo Ticker */
-export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToCart, isLoggedIn }) {
+export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToCart }) {
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
