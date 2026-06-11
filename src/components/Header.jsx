@@ -298,6 +298,24 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const getHomePath = () => {
+    const parts = pathname.split('/');
+    if (parts.length > 1 && ['ru', 'kz', 'en'].includes(parts[1])) {
+      return `/${parts[1]}`;
+    }
+    return '/';
+  };
+
+  const handleAccountClick = (e) => {
+    const isAccountPath = pathname === '/account' || pathname.endsWith('/account') || pathname.endsWith('/account/');
+    const hsUserExists = localStorage.getItem('hs_user') !== null;
+    
+    if (isAccountPath && !hsUserExists) {
+      e.preventDefault();
+      navigate(getHomePath());
+    }
+  };
+
   const isLightPage = pathname.includes('/catalog');
 
   // Автоматическая смена сообщений каждые 12 секунд
@@ -409,7 +427,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
-            <NavLink to="/account" className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
+            <NavLink to="/account" onClick={handleAccountClick} className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
             </NavLink>
             <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
@@ -531,7 +549,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               </nav>
 
               <div className="px-10 pb-12 mt-auto">
-                <Link to="/profile" className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors" onClick={() => setNavOpen(false)}>
+                <Link to="/account" className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors" onClick={(e) => { setNavOpen(false); handleAccountClick(e); }}>
                   <span className="material-symbols-outlined text-[20px]">person</span>
                 </Link>
               </div>
@@ -649,6 +667,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
         <NavLink 
           to="/account" 
+          onClick={handleAccountClick}
           className={({ isActive }) => 
             `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
               isActive ? 'text-primary' : 'text-white/60 hover:text-white'
