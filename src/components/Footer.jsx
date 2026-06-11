@@ -55,7 +55,7 @@ export default function Footer() {
       <div className="container-hs py-20 md:py-28 px-6 md:px-12 lg:px-16">
         
         {/* Main Grid: 4 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
           
           {/* Column 1: Brand & Trust */}
           <div className="flex flex-col items-start space-y-6">
@@ -108,7 +108,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setBuyersOpen(!buyersOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {buyersOpen ? '–' : '+'}
@@ -142,7 +142,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setPaymentsOpen(!paymentsOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {paymentsOpen ? '–' : '+'}
@@ -196,7 +196,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setLegalOpen(!legalOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {legalOpen ? '–' : '+'}
