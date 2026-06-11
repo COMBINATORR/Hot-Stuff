@@ -584,5 +584,10 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
   body.preview-modal-open .mobile-premium-header {
     display: none !important;
   }
+
+  /* Raise Panic Button when mobile sticky Buy Box (CTA) is visible */
+  body.has-sticky-cta .panic-btn-mobile {
+    bottom: 168px !important;
+  }
 }
 
