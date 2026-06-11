@@ -190,6 +190,9 @@ export default function AccountPage() {
                       className="w-full bg-neutral-950 border border-white/10 px-4 py-3 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px]"
                       disabled={loading}
                     />
+                    <p className="text-[9px] text-outline/60 leading-relaxed mt-2 font-normal">
+                      * На указанный контакт будет отправлен одноразовый код для входа. Никаких паролей, рекламных рассылок и спама.
+                    </p>
                   </div>
 
                   <button
@@ -264,6 +267,9 @@ export default function AccountPage() {
                       <span className="font-serif font-black text-white/60 group-hover:text-[#FF0000] text-lg transition-colors leading-none select-none">Я</span>
                     </button>
                   </div>
+                  <p className="text-[9px] text-outline/50 mt-4 leading-normal text-center font-normal">
+                    Нажимая кнопку продолжения или SSO, вы соглашаетесь с условиями конфиденциальности. Доставка и биллинг полностью анонимны.
+                  </p>
                 </div>
               </div>
             ) : (
@@ -337,7 +343,34 @@ export default function AccountPage() {
               </form>
             )}
 
-            <div className="mt-8 text-[9px] text-outline/50 uppercase tracking-widest">
+            {/* Privacy Trust Grid */}
+            <div className="mt-8 pt-6 border-t border-white/5 space-y-4 text-left">
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">visibility_off</span>
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">100% Анонимный биллинг</h4>
+                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">В банковской выписке отобразится нейтральное название («Retail Atyrau»), без упоминания деликатных товаров.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">shield_lock</span>
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">Безопасная SSL-авторизация</h4>
+                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">Все персональные данные и сессии входа защищены современным 256-битным протоколом шифрования.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-primary text-[18px] mt-0.5 font-light">mail</span>
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">Конфиденциальность контактов</h4>
+                  <p className="text-[9px] text-outline/70 leading-normal mt-0.5 font-normal">Используем телефон или почту только для передачи кодов входа и статусов доставки. Никакого спама.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 text-[9px] text-outline/40 uppercase tracking-[0.25em] font-bold">
               Безопасный зашифрованный вход Hot Stuff
             </div>
           </div>
