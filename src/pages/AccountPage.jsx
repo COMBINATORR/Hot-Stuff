@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ALL_PRODUCTS } from '../data/products';
 
-export default function AccountPage() {
+export default function AccountPage({ onAddToCart }) {
   const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
@@ -14,7 +15,7 @@ export default function AccountPage() {
 
   const navigate = useNavigate();
 
-  // Simple mock database
+  // Simple mock database of registered logins
   const MOCK_REGISTERED_USERS = [
     'test@test.com',
     'admin@hotstuff.kz',
@@ -22,13 +23,31 @@ export default function AccountPage() {
     '87777777777'
   ];
 
+  // Check login state on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('hs_user');
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        setIsLoggedIn(true);
+        setLoggedInUser(parsed.emailOrPhone);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  // Filter products for the Wishlist (Sona, Soraya Wave)
+  const wishlistProducts = useMemo(() => {
+    return ALL_PRODUCTS.filter(p => p.id === 4 || p.id === 8);
+  }, []);
+
   // Validation
   const validateEmail = (val) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   };
 
   const validatePhone = (val) => {
-    // Matches digits with optional +, length between 10-12
     return /^\+?[0-9]{10,12}$/.test(val.replace(/[\s()-]/g, ''));
   };
 
@@ -60,7 +79,6 @@ export default function AccountPage() {
 
     setTimeout(() => {
       setLoading(false);
-      // Check if user is already registered in our mock database
       const registered = MOCK_REGISTERED_USERS.includes(cleanedVal);
       setIsRegistered(registered);
       setStep(2);
@@ -75,14 +93,12 @@ export default function AccountPage() {
     setTimeout(() => {
       setLoading(false);
       if (isRegistered) {
-        // Mock password check (allow "password" or "123456" for test)
         if (password === 'password' || password === '123456' || password === '1234') {
           loginSuccess(identifier);
         } else {
           setError('Неверный пароль. Попробуйте "1234" или "password"');
         }
       } else {
-        // Mock code check (allow "1234" for new registrations)
         const enteredCode = code.join('');
         if (enteredCode === '1234') {
           loginSuccess(identifier);
@@ -96,7 +112,6 @@ export default function AccountPage() {
   const loginSuccess = (userVal) => {
     setIsLoggedIn(true);
     setLoggedInUser(userVal);
-    // Save to localStorage for persistence
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: userVal }));
   };
 
@@ -117,54 +132,184 @@ export default function AccountPage() {
     newCode[index] = value.substring(value.length - 1);
     setCode(newCode);
 
-    // Auto-focus next input
     if (value && index < 3) {
       document.getElementById(`code-${index + 1}`).focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // Backspace to focus previous input
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       document.getElementById(`code-${index - 1}`).focus();
     }
   };
 
-  return (
-    <div className="bg-background text-on-surface min-h-screen font-sans flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-24 selection:bg-primary-container selection:text-on-primary-container relative overflow-hidden">
-      {/* Background radial highlight */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+  const handleAddWishlistItem = (product) => {
+    if (onAddToCart) {
+      onAddToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        emoji: product.emoji || '🌸',
+        variant: product.colors?.[0]?.name || 'Default',
+        qty: 1,
+        image: product.image
+      });
+      alert(`Товар ${product.name} добавлен в корзину!`);
+    }
+  };
 
-      <div className="w-full max-w-[450px] bg-surface-container-low border border-white/5 p-8 md:p-10 rounded-2xl shadow-2xl relative z-10 font-sans text-center">
+  return (
+    <div className="bg-background text-on-surface min-h-screen font-sans flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-28 selection:bg-primary-container selection:text-on-primary-container relative overflow-hidden">
+      {/* Background radial highlight */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
+
+      <div className={`w-full ${isLoggedIn ? 'max-w-5xl' : 'max-w-[450px]'} bg-surface-container-low border border-white/5 p-6 md:p-10 rounded-2xl shadow-2xl relative z-10 font-sans transition-all duration-500`}>
         
         {isLoggedIn ? (
-          <div className="space-y-6">
-            <span className="material-symbols-outlined text-5xl text-primary font-light">account_circle</span>
-            <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider">Личный Кабинет</h1>
-            <p className="text-xs text-outline font-bold uppercase tracking-widest">Вы вошли как</p>
-            <p className="text-sm text-white font-mono bg-neutral-950 px-4 py-2 border border-white/5 rounded-[4px] break-all">
-              {loggedInUser}
-            </p>
-            
-            <div className="pt-6 border-t border-white/10 space-y-4">
-              <button
-                onClick={() => navigate('/catalog')}
-                className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-[#ffe088] transition-colors rounded-[2px]"
-              >
-                ПЕРЕЙТИ В КАТАЛОГ
-              </button>
+          <div className="space-y-10 text-left">
+            {/* Dashboard Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/5">
+              <div className="flex items-center gap-4">
+                <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider">Кабинет Покупателя</h1>
+                  <p className="text-xs text-outline font-bold uppercase tracking-wider mt-1">{loggedInUser}</p>
+                </div>
+              </div>
               <button
                 onClick={handleLogout}
-                className="w-full bg-transparent border border-white/10 text-white hover:border-[#FF5C3F] hover:text-[#FF5C3F] font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase transition-colors rounded-[2px]"
+                className="self-start md:self-auto border border-white/10 hover:border-[#FF5C3F] hover:text-[#FF5C3F] text-white font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-[2px] cursor-pointer"
               >
                 ВЫЙТИ ИЗ АККАУНТА
               </button>
+            </div>
+
+            {/* Main Dashboard Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* Left Column: Loyalty & Active Shipping */}
+              <div className="lg:col-span-2 space-y-6">
+                
+                {/* 1. Loyalty Tier */}
+                <div className="p-6 bg-neutral-900/40 border border-white/5 rounded-xl space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xs font-black tracking-wider text-white uppercase">Клуб Привилегий</h3>
+                    <span className="bg-primary/10 text-primary text-[8px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase">
+                      HOT STUFF GOLD
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-black text-white leading-none">12%</span>
+                    <span className="text-[10px] text-outline uppercase font-bold tracking-wide">Ваша персональная скидка</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[9px] font-bold text-outline uppercase tracking-wider">
+                      <span>До скидки 15% (VIP уровень) осталось:</span>
+                      <span className="text-white">45 000 ₸</span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '60%' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Anonymous Active Delivery */}
+                <div className="p-6 bg-neutral-900/40 border border-white/5 rounded-xl space-y-5">
+                  <div className="flex items-center gap-3 text-green-400">
+                    <span className="material-symbols-outlined text-[20px] font-light">local_shipping</span>
+                    <h3 className="text-xs font-black tracking-wider text-white uppercase">Текущая Доставка</h3>
+                  </div>
+                  
+                  <div className="border-l-2 border-primary pl-4 py-1 space-y-2">
+                    <p className="text-xs font-black text-white">Заказ №10492 — Доставляется курьером сегодня</p>
+                    <p className="text-[10px] text-outline">Интервал: 18:00 – 22:00. Курьер свяжется за 30 минут.</p>
+                  </div>
+
+                  {/* Anti-Anxiety Privacy Banner */}
+                  <div className="bg-[#09090b]/80 border border-white/10 p-4 rounded-[4px] flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">visibility_off</span>
+                    <div>
+                      <h4 className="text-[9px] font-black text-white uppercase tracking-wider">Грантия 100% анонимности доставки:</h4>
+                      <p className="text-[9px] text-outline/80 leading-relaxed mt-1 font-normal">
+                        Заказ упакован в плотный непрозрачный сейф-пакет без каких-либо логотипов или названия магазина. В накладной курьера содержимое указано как «Аксессуары (косметика)». Курьер не знает, что внутри посылки.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Order History */}
+                <div className="p-6 bg-neutral-900/40 border border-white/5 rounded-xl space-y-4">
+                  <h3 className="text-xs font-black tracking-wider text-white uppercase mb-2">История Покупок</h3>
+                  
+                  <div className="divide-y divide-white/5 text-xs font-sans">
+                    <div className="py-4 flex justify-between items-center gap-4">
+                      <div>
+                        <p className="font-bold text-white uppercase">Заказ №9810 от 14.05.2026</p>
+                        <p className="text-[10px] text-outline mt-1">LELO Sona™ 3 Cruise x1 — Выполнен</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">38 900 ₸</p>
+                        <button 
+                          onClick={() => {
+                            const prod = ALL_PRODUCTS.find(p => p.id === 4);
+                            if (prod) handleAddWishlistItem(prod);
+                          }}
+                          className="text-[9px] font-black tracking-wider text-white hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer"
+                        >
+                          Повторить в 1 клик
+                        </button>
+                      </div>
+                    </div>
+                    <div className="py-4 flex justify-between items-center gap-4">
+                      <div>
+                        <p className="font-bold text-white uppercase">Заказ №8520 от 02.04.2026</p>
+                        <p className="text-[10px] text-outline mt-1">Personal Moisturizer x1 — Выполнен</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">12 500 ₸</p>
+                        <span className="text-[9px] font-bold text-outline/50 uppercase tracking-widest mt-1.5 block">Архив</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Wishlist (Избранное) */}
+              <div className="space-y-6">
+                <div className="p-6 bg-neutral-900/40 border border-white/5 rounded-xl space-y-6">
+                  <h3 className="text-xs font-black tracking-wider text-white uppercase">Избранные Товары</h3>
+                  
+                  <div className="space-y-5">
+                    {wishlistProducts.map(product => (
+                      <div key={product.id} className="flex gap-4 p-3 bg-neutral-950/40 border border-white/5 rounded-lg">
+                        <div className="w-16 h-16 bg-neutral-900 rounded-[4px] overflow-hidden flex items-center justify-center flex-none">
+                          <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-[10px] font-black text-white uppercase tracking-wider truncate max-w-[150px]">{product.name}</h4>
+                            <p className="text-[11px] text-primary font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
+                          </div>
+                          <button
+                            onClick={() => handleAddWishlistItem(product)}
+                            className="bg-primary hover:bg-[#ffe088] text-black font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
+                          >
+                            В КОРЗИНУ
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         ) : (
           <div>
             {/* Header logo/title */}
-            <div className="mb-8">
+            <div className="mb-8 text-center">
               <span className="material-symbols-outlined text-4xl text-primary font-light mb-4 block">lock_open</span>
               <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider">Вход в Кабинет</h1>
               <p className="text-[10px] text-outline font-bold uppercase tracking-widest mt-2">HOT STUFF ATYRAU</p>
@@ -209,7 +354,7 @@ export default function AccountPage() {
                 </form>
 
                 {/* SSO Section */}
-                <div className="pt-6 border-t border-white/5 space-y-4">
+                <div className="pt-6 border-t border-white/5 space-y-4 text-center">
                   <div className="flex items-center justify-between text-[9px] font-bold text-outline/40 uppercase tracking-widest">
                     <span className="h-px bg-white/5 flex-1 mr-3"></span>
                     <span>Войти через</span>
@@ -370,7 +515,7 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <div className="mt-8 text-[9px] text-outline/40 uppercase tracking-[0.25em] font-bold">
+            <div className="mt-8 text-[9px] text-outline/40 uppercase tracking-[0.25em] font-bold text-center">
               Безопасный зашифрованный вход Hot Stuff
             </div>
           </div>
