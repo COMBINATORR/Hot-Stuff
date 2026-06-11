@@ -12,11 +12,39 @@ export default function ProductPage({ onAddToCart }) {
     return found || ALL_PRODUCTS[0];
   }, [id]);
 
+  const deviceLength = useMemo(() => {
+    if (!product) return 15;
+    if (product.id === 8) return 21.8; // Soraya
+    if (product.id === 1) return 20.0; // Ina
+    if (product.id === 2) return 12.0; // Boomerang
+    if (product.id === 3) return 9.8;  // Surfer
+    if (product.id === 4) return 9.9;  // Sona
+    if (product.id === 7) return 10.4; // Hugo
+    if (product.id === 9) return 16.5; // Gigi
+    return 15;
+  }, [product]);
+
   const [selectedColor, setSelectedColor] = useState('');
   const [qty, setQty] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
+  const [displayMode, setDisplayMode] = useState('studio'); // 'studio' vs 'scale'
+  const [timeLeft, setTimeLeft] = useState(4500); // 1 hour 15 minutes default
+
+  // Reviews State
+  const [reviewsList, setReviewsList] = useState([]);
+  
+  // Form State
+  const [formName, setFormName] = useState('');
+  const [formAge, setFormAge] = useState('25-34');
+  const [formExp, setFormExp] = useState('Средний');
+  const [formSens, setFormSens] = useState('Нормальная');
+  const [formText, setFormText] = useState('');
+  const [formRating, setFormRating] = useState(5);
+  const [formNoise, setFormNoise] = useState(8);
+  const [formStrength, setFormStrength] = useState(8);
+  const [formErgo, setFormErgo] = useState(9);
 
   // Monitor scroll for sticky CTA
   useEffect(() => {
@@ -31,6 +59,21 @@ export default function ProductPage({ onAddToCart }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Ticking countdown timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 4500));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${String(h).padStart(2, '0')}ч ${String(m).padStart(2, '0')}м ${String(s).padStart(2, '0')}с`;
+  };
+
   // Reset states when active product changes
   useEffect(() => {
     if (product && product.colors && product.colors.length > 0) {
@@ -38,6 +81,37 @@ export default function ProductPage({ onAddToCart }) {
     }
     setQty(1);
     setActiveImageIndex(0);
+    setDisplayMode('studio');
+
+    // Populate dynamic reviews for the product
+    setReviewsList([
+      {
+        id: 1,
+        author: 'Аделина',
+        age: '25-34',
+        experience: 'Сексперт',
+        sensitivity: 'Высокая',
+        rating: 5,
+        date: '10.06.2026',
+        text: `Игрушка ${product.name} полностью оправдала ожидания. Очень мягкий силикон и тихая работа. Функция волновых движений ощущается совершенно иначе, чем обычная вибрация.`,
+        noise: 9,
+        strength: 9,
+        ergo: 10
+      },
+      {
+        id: 2,
+        author: 'Кирилл',
+        age: '35-44',
+        experience: 'Средний',
+        sensitivity: 'Нормальная',
+        rating: 4.8,
+        date: '05.06.2026',
+        text: 'Покупал в подарок партнерше. Мы оба в восторге. Качество сборки на высшем уровне, упаковано было абсолютно анонимно. Доставка в Атырау заняла всего день.',
+        noise: 8,
+        strength: 10,
+        ergo: 9
+      }
+    ]);
   }, [product]);
 
   const handleTouchStart = (e) => {
@@ -84,6 +158,35 @@ export default function ProductPage({ onAddToCart }) {
         qty: 1
       });
     }
+  };
+
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    if (!formName.trim() || !formText.trim()) {
+      alert('Пожалуйста, заполните имя и текст отзыва');
+      return;
+    }
+    const newRev = {
+      id: reviewsList.length + 1,
+      author: formName,
+      age: formAge,
+      experience: formExp,
+      sensitivity: formSens,
+      rating: formRating,
+      date: new Date().toLocaleDateString('ru-RU'),
+      text: formText,
+      noise: formNoise,
+      strength: formStrength,
+      ergo: formErgo
+    };
+    setReviewsList(prev => [newRev, ...prev]);
+    // Reset inputs
+    setFormName('');
+    setFormText('');
+    setFormRating(5);
+    setFormNoise(8);
+    setFormStrength(8);
+    setFormErgo(9);
   };
 
   if (!product) return null;
@@ -172,7 +275,7 @@ export default function ProductPage({ onAddToCart }) {
             )}
             
             {/* Quantity and Add to Cart */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-4 mb-4">
               <div className="flex items-center border border-white/10 h-[52px]">
                 <button
                   className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold"
@@ -191,6 +294,38 @@ export default function ProductPage({ onAddToCart }) {
               >
                 В КОРЗИНУ
               </button>
+            </div>
+
+            {/* Kaspi Red Installments */}
+            <div className="w-full flex items-center gap-3 bg-neutral-900/40 p-4 border border-white/5 rounded-[2px] mb-4">
+              <div className="flex-none bg-[#E11D48] text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase font-sans">Kaspi Red</div>
+              <div className="text-left font-sans text-xs text-white/90">
+                Рассрочка 0-0-3: <span className="font-bold text-primary">{Math.round(product.price / 3).toLocaleString('ru-KZ')} ₸</span> / мес без переплат
+              </div>
+            </div>
+
+            {/* Countdown Timer */}
+            <div className="w-full flex items-center gap-3 bg-[#FF5C3F]/10 p-4 border border-[#FF5C3F]/20 rounded-[2px] mb-6">
+              <span className="material-symbols-outlined text-[#FF5C3F] text-[18px]">alarm</span>
+              <div className="text-left font-sans text-xs text-white/95">
+                Закажите в течение <span className="font-black text-[#FF5C3F] font-mono">{formatTime(timeLeft)}</span>, и мы отправим сегодня!
+              </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="w-full grid grid-cols-3 gap-2.5 border-t border-white/10 pt-6 mt-2">
+              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+                <span className="material-symbols-outlined text-[18px] text-primary mb-1">visibility_off</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">Анонимно</span>
+              </div>
+              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+                <span className="material-symbols-outlined text-[18px] text-primary mb-1">verified_user</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">2 года гарантии</span>
+              </div>
+              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+                <span className="material-symbols-outlined text-[18px] text-primary mb-1">shield</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">Безопасно</span>
+              </div>
             </div>
           </div>
 
@@ -217,21 +352,61 @@ export default function ProductPage({ onAddToCart }) {
             
             {/* Main Hero Image */}
             <div className="w-full flex-1 max-h-[500px] md:max-h-[600px] flex flex-col items-center justify-center z-10 order-1 md:order-2">
-              <div 
-                className="w-full flex items-center justify-center"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                <ResponsiveImage 
-                  src={product.gallery && product.gallery[activeImageIndex] ? product.gallery[activeImageIndex] : product.image} 
-                  alt={`${product.name} product shot`} 
-                  className="w-full h-full max-h-[400px] md:max-h-[500px] object-contain transition-all duration-500 hover:scale-105 select-none" 
-                  loading="eager"
-                />
-              </div>
+              
+              {displayMode === 'scale' ? (
+                <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-neutral-950/40 rounded-[4px] border border-white/5 font-sans text-left min-h-[350px]">
+                  <p className="text-[10px] font-black tracking-widest text-primary uppercase mb-6 text-center">Сравнение размеров</p>
+                  
+                  <div className="flex items-end justify-center gap-8 md:gap-12 w-full h-56 pb-4">
+                    {/* Palm */}
+                    <div className="flex flex-col items-center gap-2 h-full justify-end">
+                      <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-2xl transition-all" style={{ height: `${18 * 8}px` }}>
+                        ✋
+                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">~18 см</span>
+                      </div>
+                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">Ладонь</span>
+                    </div>
+
+                    {/* Product Device */}
+                    <div className="flex flex-col items-center gap-2 h-full justify-end">
+                      <div className="relative w-16 bg-primary/20 border-2 border-primary flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(242,202,80,0.2)]" style={{ height: `${deviceLength * 8}px` }}>
+                        {product.emoji || '🌸'}
+                        <span className="absolute -top-6 text-[11px] font-black text-primary">{deviceLength} см</span>
+                      </div>
+                      <span className="text-[9px] font-black tracking-wider text-white uppercase text-center truncate max-w-[80px]">{product.name}</span>
+                    </div>
+
+                    {/* iPhone 15 */}
+                    <div className="flex flex-col items-center gap-2 h-full justify-end">
+                      <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-xl" style={{ height: `${14.6 * 8}px` }}>
+                        📱
+                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">14.6 см</span>
+                      </div>
+                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">iPhone 15</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[9px] text-outline text-center leading-relaxed mt-4 max-w-xs">
+                    * Сравнение габаритов с раскрытой ладонью взрослого человека и стандартным смартфоном iPhone 15.
+                  </p>
+                </div>
+              ) : (
+                <div 
+                  className="w-full flex items-center justify-center"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <ResponsiveImage 
+                    src={product.gallery && product.gallery[activeImageIndex] ? product.gallery[activeImageIndex] : product.image} 
+                    alt={`${product.name} product shot`} 
+                    className="w-full h-full max-h-[400px] md:max-h-[500px] object-contain transition-all duration-500 hover:scale-105 select-none" 
+                    loading="eager"
+                  />
+                </div>
+              )}
 
               {/* Mobile Swipe Indicator (Line progress bar) */}
-              {product.gallery && product.gallery.length > 1 && (
+              {displayMode === 'studio' && product.gallery && product.gallery.length > 1 && (
                 <div className="w-full max-w-[150px] mx-auto h-[2px] bg-white/10 mt-6 relative overflow-hidden md:hidden">
                   <div 
                     className="absolute top-0 left-0 h-full bg-primary transition-all duration-300"
@@ -241,6 +416,30 @@ export default function ProductPage({ onAddToCart }) {
                   />
                 </div>
               )}
+
+              {/* Toggle Display Mode */}
+              <div className="flex gap-4 mt-6 z-20">
+                <button
+                  onClick={() => setDisplayMode('studio')}
+                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-[2px] ${
+                    displayMode === 'studio'
+                      ? 'bg-white text-black border-white'
+                      : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
+                  }`}
+                >
+                  Студийный ракурс
+                </button>
+                <button
+                  onClick={() => setDisplayMode('scale')}
+                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-[2px] ${
+                    displayMode === 'scale'
+                      ? 'bg-white text-black border-white'
+                      : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
+                  }`}
+                >
+                  Сравнение размера
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -401,13 +600,219 @@ export default function ProductPage({ onAddToCart }) {
         </section>
 
         {/* Review Section */}
-        <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low flex items-center justify-center text-center">
-          <div className="max-w-4xl mx-auto">
-            <span className="material-symbols-outlined text-4xl text-primary mb-8 block opacity-40">format_quote</span>
-            <p className="font-sans font-black text-xl md:text-3xl text-white italic leading-snug">
-              "A masterpiece of engineering and pleasure."
-            </p>
-            <div className="w-12 h-px bg-primary mx-auto mt-8"></div>
+        <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low text-left font-sans">
+          <div className="max-w-5xl mx-auto flex flex-col gap-16">
+            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase text-center">ОТЗЫВЫ ПОКУПАТЕЛЕЙ</h2>
+            
+            {/* Reviews Summary and Add Form Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              
+              {/* Left Column: Ratings Summary & Sub-criteria */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-6">
+                  <div className="text-left">
+                    <p className="text-5xl font-black text-white leading-none">4.9</p>
+                    <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">из 5 звезд</p>
+                  </div>
+                  <div className="flex flex-col gap-1 text-primary">
+                    <div className="flex gap-1 text-lg">★★★★★</div>
+                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">На основе {reviewsList.length} отзывов</p>
+                  </div>
+                </div>
+
+                {/* Sub-criteria progress bars */}
+                <div className="space-y-4 pt-6 border-t border-white/10">
+                  <h3 className="text-[10px] font-black tracking-widest text-white uppercase">Оценка характеристик</h3>
+                  
+                  {/* Noise Level */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
+                      <span className="uppercase tracking-wider">Уровень шума (Тишина)</span>
+                      <span className="text-white">9.2 / 10</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '92%' }} />
+                    </div>
+                  </div>
+
+                  {/* Vibration Strength */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
+                      <span className="uppercase tracking-wider">Сила вибрации</span>
+                      <span className="text-white">9.5 / 10</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '95%' }} />
+                    </div>
+                  </div>
+
+                  {/* Ergonomics */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
+                      <span className="uppercase tracking-wider">Эргономика и дизайн</span>
+                      <span className="text-white">9.8 / 10</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '98%' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Write a Review Form */}
+              <div className="bg-neutral-900/40 p-6 md:p-8 border border-white/5 rounded-[4px]">
+                <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6">Написать отзыв</h3>
+                <form onSubmit={handleSubmitReview} className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">Ваше имя</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={formName}
+                      onChange={e => setFormName(e.target.value)}
+                      placeholder="Введите имя"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                    />
+                  </div>
+
+                  {/* Dropdowns Row */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Возраст</label>
+                      <select 
+                        value={formAge} 
+                        onChange={e => setFormAge(e.target.value)}
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                      >
+                        <option value="18-24">18-24</option>
+                        <option value="25-34">25-34</option>
+                        <option value="35-44">35-44</option>
+                        <option value="45+">45+</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Опыт</label>
+                      <select 
+                        value={formExp} 
+                        onChange={e => setFormExp(e.target.value)}
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                      >
+                        <option value="Новичок">Новичок</option>
+                        <option value="Средний">Средний</option>
+                        <option value="Сексперт">Сексперт</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Чувствительность</label>
+                      <select 
+                        value={formSens} 
+                        onChange={e => setFormSens(e.target.value)}
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                      >
+                        <option value="Низкая">Низкая</option>
+                        <option value="Нормальная">Нормальная</option>
+                        <option value="Высокая">Высокая</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Character Sliders */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
+                      <span>Шум: {formNoise}/10</span>
+                      <input 
+                        type="range" min="1" max="10" 
+                        value={formNoise} onChange={e => setFormNoise(parseInt(e.target.value))}
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
+                      <span>Вибрация: {formStrength}/10</span>
+                      <input 
+                        type="range" min="1" max="10" 
+                        value={formStrength} onChange={e => setFormStrength(parseInt(e.target.value))}
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
+                      <span>Эргономика: {formErgo}/10</span>
+                      <input 
+                        type="range" min="1" max="10" 
+                        value={formErgo} onChange={e => setFormErgo(parseInt(e.target.value))}
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Review Text */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">Ваш отзыв</label>
+                    <textarea 
+                      required
+                      value={formText}
+                      onChange={e => setFormText(e.target.value)}
+                      placeholder="Поделитесь вашим опытом..."
+                      rows={3}
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px] resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-3.5 uppercase hover:bg-[#ffe088] transition-colors rounded-[2px]"
+                  >
+                    ОТПРАВИТЬ ОТЗЫВ
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+            {/* Bottom Reviews List Stack */}
+            <div className="space-y-6 pt-12 border-t border-white/10">
+              <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6 text-left">Список отзывов ({reviewsList.length})</h3>
+              
+              <div className="space-y-6">
+                {reviewsList.map(rev => (
+                  <div key={rev.id} className="p-6 md:p-8 bg-neutral-900/20 border border-white/5 rounded-[4px] space-y-4">
+                    {/* Review Header Metadata */}
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="text-left">
+                        <p className="text-sm font-bold text-white uppercase">{rev.author}</p>
+                        <p className="text-[9px] text-outline mt-1 font-bold">{rev.date}</p>
+                      </div>
+                      
+                      {/* Profile Badges */}
+                      <div className="flex flex-wrap gap-2">
+                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
+                          Возраст: {rev.age}
+                        </span>
+                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
+                          Опыт: {rev.experience}
+                        </span>
+                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
+                          Чувствительность: {rev.sensitivity}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Review text */}
+                    <p className="text-xs text-white/80 leading-relaxed font-sans font-normal text-left">{rev.text}</p>
+
+                    {/* Review sub-ratings */}
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-[9px] text-outline font-bold tracking-wider uppercase pt-4 border-t border-white/5">
+                      <span>Шум: <span className="text-white font-mono">{rev.noise}/10</span></span>
+                      <span>Вибрация: <span className="text-white font-mono">{rev.strength}/10</span></span>
+                      <span>Эргономика: <span className="text-white font-mono">{rev.ergo}/10</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </section>
       </main>
