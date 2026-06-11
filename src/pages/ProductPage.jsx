@@ -819,7 +819,16 @@ export default function ProductPage({ onAddToCart }) {
 
       {/* Mobile Sticky CTA Bar */}
       {showStickyCta && (
-        <div className="fixed bottom-[92px] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[#09090b]/95 backdrop-blur-md border border-white/10 flex items-center justify-between px-4 z-40 md:hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-full">
+        <div 
+          className="fixed bottom-[92px] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 flex items-center justify-between px-4 z-40 md:hidden rounded-full"
+          style={{
+            background: 'rgba(9, 9, 11, 0.55)',
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.15)'
+          }}
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-neutral-900 flex items-center justify-center text-xl rounded-full overflow-hidden">
               {product.emoji || '🌸'}
