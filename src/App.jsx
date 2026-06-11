@@ -49,7 +49,7 @@ function App() {
               onRemove={removeItem}
               onAddToCart={addToCart}
             />
-            <main className="min-h-screen">
+            <main className="min-h-screen pb-20 md:pb-0">
               <AppRouter
                 cartItems={cartItems}
                 onAddToCart={addToCart}

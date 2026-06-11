@@ -64,6 +64,7 @@ const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 function ProductCard({ product, setSelectedPreviewProduct }) {
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(0);
 
   const colors = product.colors || [];
   const gallery = product.gallery || [];
@@ -74,6 +75,27 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
   const activeImage = isHovered 
     ? (gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : product.image)
     : (gallery.length > 0 ? gallery[selectedColorIndex] : product.image);
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+    const totalImages = gallery.length || 1;
+    if (totalImages <= 1) return;
+
+    if (Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        // Swipe left, show next
+        setSelectedColorIndex((prev) => (prev + 1) % totalImages);
+      } else {
+        // Swipe right, show prev
+        setSelectedColorIndex((prev) => (prev - 1 + totalImages) % totalImages);
+      }
+    }
+  };
 
   return (
     <div 
@@ -105,13 +127,26 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
 
         {/* Center Image */}
         <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
-          <Link to={`/product/${product.id}`} className="w-full h-full flex items-center justify-center">
+          <Link 
+            to={`/product/${product.id}`} 
+            className="w-full h-full flex flex-col items-center justify-center select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <ResponsiveImage 
               src={activeImage} 
               alt={product.name} 
               className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500" 
               loading="lazy" 
             />
+            {gallery.length > 1 && (
+              <div className="w-full max-w-[80px] h-[2px] bg-gray-200 mt-4 relative overflow-hidden md:hidden">
+                <div 
+                  className="absolute top-0 left-0 h-full bg-black transition-all duration-300"
+                  style={{ width: `${((selectedColorIndex + 1) / gallery.length) * 100}%` }}
+                />
+              </div>
+            )}
           </Link>
         </div>
 
@@ -217,8 +252,11 @@ export default function CatalogPage({ onAddToCart }) {
   // React to search query params dynamically (e.g. when header navigation or homepage link is clicked)
   useEffect(() => {
     const cat = params.get('cat');
+    const search = params.get('search');
     if (cat) {
       setActiveCat(cat);
+    } else if (search) {
+      setActiveCat('all');
     } else {
       setActiveCat('vibrators');
     }
@@ -240,7 +278,17 @@ export default function CatalogPage({ onAddToCart }) {
   const filtered = useMemo(() => {
     let result = ALL_PRODUCTS;
 
-    // 1. Sidebar Category
+    // 1. Search Query
+    const searchVal = params.get('search') || '';
+    if (searchVal) {
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(searchVal.toLowerCase()) || 
+        p.categoryLabel.toLowerCase().includes(searchVal.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchVal.toLowerCase())
+      );
+    }
+
+    // 1.5 Sidebar Category (Only if not searching, or if cat matches)
     if (activeCat !== 'all' && activeCat !== 'popular') {
       if (activeCat === 'new') {
         result = result.filter(p => p.isNew);
@@ -332,13 +380,16 @@ export default function CatalogPage({ onAddToCart }) {
 
   // Dynamically map page titles
   const pageTitle = useMemo(() => {
+    const searchVal = params.get('search');
+    if (searchVal) return `Результаты поиска: "${searchVal}"`;
+
     if (activeCat === 'all' || activeCat === 'popular') return 'Популярные секс-игрушки';
     if (activeCat === 'vibrators') return 'Секс-игрушки для женщин';
     if (activeCat === 'massagers') return 'Секс-игрушки для мужчин';
     if (activeCat === 'couples') return 'Секс-игрушки для пар';
     if (activeCat === 'new') return 'Новинки секс-игрушек';
     return activeCat;
-  }, [activeCat]);
+  }, [activeCat, params]);
 
   return (
     <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
@@ -508,14 +559,14 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white text-black z-[151] shadow-2xl flex flex-col font-sans"
+              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[151] shadow-2xl flex flex-col font-sans"
             >
               {/* Header */}
               <div className="p-8 border-b border-gray-100 flex justify-between items-center">
                 <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">ФИЛЬТРЫ</h2>
                 <button 
                   onClick={() => setIsFilterOpen(false)}
-                  className="text-black hover:text-gray-600 transition-colors flex items-center justify-center"
+                  className="text-black hover:text-gray-600 transition-colors flex items-center justify-center border-none bg-transparent focus:outline-none"
                 >
                   <span className="material-symbols-outlined text-[24px]">close</span>
                 </button>
@@ -526,7 +577,7 @@ export default function CatalogPage({ onAddToCart }) {
                 {/* 1. Stimulation Area */}
                 <div>
                   <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Зона стимуляции</h3>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     {[
                       { val: 'clitoris', label: 'Клитор' },
                       { val: 'g-spot', label: 'Точка G' },
@@ -534,17 +585,20 @@ export default function CatalogPage({ onAddToCart }) {
                       { val: 'prostate', label: 'Простата' },
                       { val: 'couples', label: 'Для пар' }
                     ].map(opt => {
-                      const checked = selectedStimulations.includes(opt.val);
+                      const selected = selectedStimulations.includes(opt.val);
                       return (
-                        <label key={opt.val} className="flex items-center gap-3 text-xs font-sans text-gray-800 cursor-pointer select-none">
-                          <input 
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => handleStimulationToggle(opt.val)}
-                            className="accent-black w-4 h-4 rounded border-gray-300 focus:ring-0 cursor-pointer"
-                          />
-                          <span className={checked ? 'font-bold text-black' : ''}>{opt.label}</span>
-                        </label>
+                        <button
+                          type="button"
+                          key={opt.val}
+                          onClick={() => handleStimulationToggle(opt.val)}
+                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
+                            selected 
+                              ? 'bg-black text-white border-black shadow-sm' 
+                              : 'bg-white text-black border-gray-200 hover:border-black'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
                       );
                     })}
                   </div>
@@ -553,23 +607,26 @@ export default function CatalogPage({ onAddToCart }) {
                 {/* 2. Price Range */}
                 <div>
                   <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Цена</h3>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     {[
                       { val: 'low', label: 'До 80 000 ₸' },
                       { val: 'mid', label: '80 000 ₸ – 120 000 ₸' },
                       { val: 'high', label: 'Более 120 000 ₸' }
                     ].map(opt => {
-                      const checked = selectedPriceRanges.includes(opt.val);
+                      const selected = selectedPriceRanges.includes(opt.val);
                       return (
-                        <label key={opt.val} className="flex items-center gap-3 text-xs font-sans text-gray-800 cursor-pointer select-none">
-                          <input 
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => handlePriceRangeToggle(opt.val)}
-                            className="accent-black w-4 h-4 rounded border-gray-300 focus:ring-0 cursor-pointer"
-                          />
-                          <span className={checked ? 'font-bold text-black' : ''}>{opt.label}</span>
-                        </label>
+                        <button
+                          type="button"
+                          key={opt.val}
+                          onClick={() => handlePriceRangeToggle(opt.val)}
+                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
+                            selected 
+                              ? 'bg-black text-white border-black shadow-sm' 
+                              : 'bg-white text-black border-gray-200 hover:border-black'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
                       );
                     })}
                   </div>
@@ -578,38 +635,43 @@ export default function CatalogPage({ onAddToCart }) {
                 {/* 3. Special Offers */}
                 <div>
                   <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Спецпредложения</h3>
-                  <label className="flex items-center gap-3 text-xs font-sans text-gray-800 cursor-pointer select-none">
-                    <input 
-                      type="checkbox"
-                      checked={onlyDiscounted}
-                      onChange={() => setOnlyDiscounted(!onlyDiscounted)}
-                      className="accent-black w-4 h-4 rounded border-gray-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className={onlyDiscounted ? 'font-bold text-black' : ''}>Только со скидкой</span>
-                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setOnlyDiscounted(!onlyDiscounted)}
+                    className={`w-full py-4 px-4 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
+                      onlyDiscounted 
+                        ? 'bg-black text-white border-black shadow-sm' 
+                        : 'bg-white text-black border-gray-200 hover:border-black'
+                    }`}
+                  >
+                    Только со скидкой
+                  </button>
                 </div>
 
                 {/* 4. Technologies & Features */}
                 <div>
                   <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Технологии и фичи</h3>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     {[
                       { val: 'cruise_control', label: 'Cruise Control™' },
                       { val: 'wave_motion', label: 'WaveMotion™' },
                       { val: 'sense_motion', label: 'SenseMotion™' },
                       { val: 'dual_stimulation', label: 'Двойная стимуляция' }
                     ].map(opt => {
-                      const checked = selectedFeatures.includes(opt.val);
+                      const selected = selectedFeatures.includes(opt.val);
                       return (
-                        <label key={opt.val} className="flex items-center gap-3 text-xs font-sans text-gray-800 cursor-pointer select-none">
-                          <input 
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => handleFeatureToggle(opt.val)}
-                            className="accent-black w-4 h-4 rounded border-gray-300 focus:ring-0 cursor-pointer"
-                          />
-                          <span className={checked ? 'font-bold text-black' : ''}>{opt.label}</span>
-                        </label>
+                        <button
+                          type="button"
+                          key={opt.val}
+                          onClick={() => handleFeatureToggle(opt.val)}
+                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
+                            selected 
+                              ? 'bg-black text-white border-black shadow-sm' 
+                              : 'bg-white text-black border-gray-200 hover:border-black'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
                       );
                     })}
                   </div>

@@ -15,6 +15,21 @@ export default function ProductPage({ onAddToCart }) {
   const [selectedColor, setSelectedColor] = useState('');
   const [qty, setQty] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(0);
+
+  // Monitor scroll for sticky CTA
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 350) {
+        setShowStickyCta(true);
+      } else {
+        setShowStickyCta(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Reset states when active product changes
   useEffect(() => {
@@ -24,6 +39,25 @@ export default function ProductPage({ onAddToCart }) {
     setQty(1);
     setActiveImageIndex(0);
   }, [product]);
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+    const totalImages = product.gallery?.length || 1;
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0) {
+        // Swipe left, show next image
+        setActiveImageIndex((prev) => (prev + 1) % totalImages);
+      } else {
+        // Swipe right, show prev image
+        setActiveImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
+      }
+    }
+  };
 
   const handleAdd = () => {
     if (onAddToCart && product) {
@@ -166,7 +200,7 @@ export default function ProductPage({ onAddToCart }) {
             
             {/* Gallery Thumbnails */}
             {product.gallery && product.gallery.length > 1 && (
-              <div className="flex md:flex-col gap-3 z-20 order-2 md:order-1">
+              <div className="hidden md:flex md:flex-col gap-3 z-20 order-2 md:order-1">
                 {product.gallery.map((img, idx) => (
                   <button
                     key={idx}
@@ -182,13 +216,31 @@ export default function ProductPage({ onAddToCart }) {
             )}
             
             {/* Main Hero Image */}
-            <div className="w-full flex-1 max-h-[500px] md:max-h-[600px] flex items-center justify-center z-10 order-1 md:order-2">
-              <ResponsiveImage 
-                src={product.gallery && product.gallery[activeImageIndex] ? product.gallery[activeImageIndex] : product.image} 
-                alt={`${product.name} product shot`} 
-                className="w-full h-full max-h-[400px] md:max-h-[500px] object-contain transition-all duration-500 hover:scale-105" 
-                loading="eager"
-              />
+            <div className="w-full flex-1 max-h-[500px] md:max-h-[600px] flex flex-col items-center justify-center z-10 order-1 md:order-2">
+              <div 
+                className="w-full flex items-center justify-center"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                <ResponsiveImage 
+                  src={product.gallery && product.gallery[activeImageIndex] ? product.gallery[activeImageIndex] : product.image} 
+                  alt={`${product.name} product shot`} 
+                  className="w-full h-full max-h-[400px] md:max-h-[500px] object-contain transition-all duration-500 hover:scale-105 select-none" 
+                  loading="eager"
+                />
+              </div>
+
+              {/* Mobile Swipe Indicator (Line progress bar) */}
+              {product.gallery && product.gallery.length > 1 && (
+                <div className="w-full max-w-[150px] mx-auto h-[2px] bg-white/10 mt-6 relative overflow-hidden md:hidden">
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-primary transition-all duration-300"
+                    style={{ 
+                      width: `${((activeImageIndex + 1) / product.gallery.length) * 100}%` 
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -359,6 +411,28 @@ export default function ProductPage({ onAddToCart }) {
           </div>
         </section>
       </main>
+
+      {/* Mobile Sticky CTA Bar */}
+      {showStickyCta && (
+        <div className="fixed bottom-16 left-0 right-0 h-16 bg-[#09090b]/95 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-6 z-40 md:hidden shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-neutral-900 flex items-center justify-center text-xl rounded-[2px] overflow-hidden">
+              {product.emoji || '🌸'}
+            </div>
+            <div className="text-left">
+              <p className="font-sans font-bold text-[10px] tracking-wider text-white uppercase truncate max-w-[150px]">{product.name}</p>
+              <p className="font-sans text-[11px] text-primary font-bold">{product.price.toLocaleString('ru-KZ')} ₸</p>
+            </div>
+          </div>
+          
+          <button 
+            onClick={handleAdd}
+            className="bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.15em] uppercase py-3 px-6 hover:bg-[#ffe088] transition-colors rounded-[2px]"
+          >
+            В КОРЗИНУ
+          </button>
+        </div>
+      )}
     </div>
   );
 }

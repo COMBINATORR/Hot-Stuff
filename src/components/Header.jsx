@@ -294,6 +294,9 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [navOpen,  setNavOpen]  = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [tickerIndex, setTickerIndex] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   // Автоматическая смена сообщений каждые 12 секунд
   useEffect(() => {
@@ -304,6 +307,19 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   }, [tickerIndex]);
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      setSearchOpen(false);
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearchTermClick = (term) => {
+    setSearchOpen(false);
+    navigate(`/catalog?search=${encodeURIComponent(term)}`);
+  };
 
   const handleNextTicker = () => {
     setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
@@ -388,7 +404,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button className="flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
+            <button onClick={() => setSearchOpen(true)} className="flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
             <NavLink to="/account" className="hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary transition-colors">
@@ -531,6 +547,103 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         onRemove={onRemove}
         onAddToCart={onAddToCart}
       />
+
+      {/* Search Overlay */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-neutral-950/98 z-[999] flex flex-col justify-start p-6 pt-24 font-sans text-white"
+          >
+            <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
+              <div className="flex justify-between items-center border-b border-white/20 pb-4">
+                <input 
+                  autoFocus 
+                  placeholder="Поиск аксессуаров..." 
+                  className="bg-transparent text-2xl font-light text-white outline-none w-full placeholder-white/30"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchSubmit();
+                    }
+                  }}
+                />
+                <button onClick={() => setSearchOpen(false)} className="text-white hover:text-primary transition-colors focus:outline-none bg-transparent border-none">
+                  <span className="material-symbols-outlined text-3xl font-light">close</span>
+                </button>
+              </div>
+              
+              {/* Suggestions */}
+              <div>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/50 mb-4">Популярные запросы</p>
+                <div className="flex flex-wrap gap-3">
+                  {['Вибраторы', 'Для пар', 'Массажеры', 'Новинки', 'Soraya'].map(term => (
+                    <button
+                      key={term}
+                      onClick={() => handleSearchTermClick(term)}
+                      className="px-4 py-2 border border-white/10 rounded-full text-xs font-bold hover:border-primary hover:text-primary hover:bg-white/5 transition-all text-white bg-transparent"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Tab Bar (Thumb Zone) */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#09090b]/95 backdrop-blur-md border-t border-white/5 flex items-center justify-around px-2 z-50 md:hidden pb-safe-bottom">
+        <NavLink 
+          to="/catalog" 
+          className={({ isActive }) => 
+            `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              isActive ? 'text-primary' : 'text-white/60 hover:text-white'
+            }`
+          }
+        >
+          <span className="material-symbols-outlined text-[22px] font-light">grid_view</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Каталог</span>
+        </NavLink>
+
+        <button 
+          onClick={() => setSearchOpen(true)}
+          className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-white/60 hover:text-white transition-colors focus:outline-none"
+        >
+          <span className="material-symbols-outlined text-[22px] font-light">search</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Поиск</span>
+        </button>
+
+        <button 
+          onClick={() => setCartOpen(true)}
+          className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-white/60 hover:text-white transition-colors focus:outline-none relative"
+        >
+          <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
+          {cartCount > 0 && (
+            <span className="absolute top-1.5 right-1/2 translate-x-4 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+              {cartCount}
+            </span>
+          )}
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Корзина</span>
+        </button>
+
+        <NavLink 
+          to="/account" 
+          className={({ isActive }) => 
+            `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              isActive ? 'text-primary' : 'text-white/60 hover:text-white'
+            }`
+          }
+        >
+          <span className="material-symbols-outlined text-[22px] font-light">person</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Кабинет</span>
+        </NavLink>
+      </div>
     </>
   );
 }
