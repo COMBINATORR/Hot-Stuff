@@ -1,6 +1,11 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Footer() {
+  const [navOpen, setNavOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  const [infoOpen, setInfoOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  const [contactsOpen, setContactsOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   return (
     <footer className="site-footer bg-black border-t border-white/5">
       <div className="container-hs py-20">
@@ -57,64 +62,118 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Navigation */}
-          <div className="flex flex-col items-start">
-            <h4 className="font-sans font-black text-xs tracking-[0.2em] text-white uppercase mb-6">Навигация</h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { to: '/catalog', label: 'Каталог' },
-                { to: '/catalog?cat=wellness', label: 'Wellness' },
-                { to: '/catalog?cat=philosophy', label: 'Philosophy' },
-                { to: '/about', label: 'О нас' },
-              ].map(l => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className="font-sans font-bold text-xs tracking-wider text-outline hover:text-white transition-colors uppercase"
+          <div className="flex flex-col items-start w-full">
+            <button
+              onClick={() => setNavOpen(!navOpen)}
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+            >
+              <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary">
+                {navOpen ? '–' : '+'}
+              </span>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">Навигация</h4>
+            </button>
+            <AnimatePresence initial={false}>
+              {navOpen && (
+                <motion.nav 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0"
                 >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
+                  {[
+                    { to: '/catalog', label: 'Каталог' },
+                    { to: '/catalog?cat=wellness', label: 'Wellness' },
+                    { to: '/catalog?cat=philosophy', label: 'Philosophy' },
+                    { to: '/about', label: 'О нас' },
+                  ].map(l => (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      className="font-sans font-bold text-xs tracking-wider text-outline hover:text-white transition-colors uppercase block py-1.5 md:py-0"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </motion.nav>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Column 3: Information */}
-          <div className="flex flex-col items-start">
-            <h4 className="font-sans font-black text-xs tracking-[0.2em] text-white uppercase mb-6">Информация</h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { to: '/delivery', label: 'Доставка' },
-                { to: '/returns', label: 'Возврат' },
-                { to: '/privacy', label: 'Конфиденциальность' },
-                { to: '/contacts', label: 'Контакты' },
-              ].map(l => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className="font-sans font-bold text-xs tracking-wider text-outline hover:text-white transition-colors uppercase"
+          <div className="flex flex-col items-start w-full">
+            <button
+              onClick={() => setInfoOpen(!infoOpen)}
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+            >
+              <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary">
+                {infoOpen ? '–' : '+'}
+              </span>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">Информация</h4>
+            </button>
+            <AnimatePresence initial={false}>
+              {infoOpen && (
+                <motion.nav 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0"
                 >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
+                  {[
+                    { to: '/delivery', label: 'Доставка' },
+                    { to: '/returns', label: 'Возврат' },
+                    { to: '/privacy', label: 'Конфиденциальность' },
+                    { to: '/contacts', label: 'Контакты' },
+                  ].map(l => (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      className="font-sans font-bold text-xs tracking-wider text-outline hover:text-white transition-colors uppercase block py-1.5 md:py-0"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </motion.nav>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Column 4: Contacts & Address */}
-          <div className="flex flex-col items-start">
-            <h4 className="font-sans font-black text-xs tracking-[0.2em] text-white uppercase mb-6">Контакты</h4>
-            <div className="flex flex-col gap-3 font-sans text-xs text-outline">
-              <p className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px]">location_on</span>
-                <span>Атырау, Казахстан</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px]">mail</span>
-                <a href="mailto:info@hotstuff.kz" className="hover:text-white transition-colors">info@hotstuff.kz</a>
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px]">call</span>
-                <a href="tel:+77771234567" className="hover:text-white transition-colors">+7 (777) 123-45-67</a>
-              </p>
-            </div>
+          <div className="flex flex-col items-start w-full">
+            <button
+              onClick={() => setContactsOpen(!contactsOpen)}
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-2 md:py-0 md:mb-6 w-full cursor-pointer"
+            >
+              <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary">
+                {contactsOpen ? '–' : '+'}
+              </span>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">Контакты</h4>
+            </button>
+            <AnimatePresence initial={false}>
+              {contactsOpen && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0 font-sans text-xs text-outline"
+                >
+                  <p className="flex items-center gap-2 py-1 md:py-0">
+                    <span className="material-symbols-outlined text-[16px]">location_on</span>
+                    <span>Атырау, Казахстан</span>
+                  </p>
+                  <p className="flex items-center gap-2 py-1 md:py-0">
+                    <span className="material-symbols-outlined text-[16px]">mail</span>
+                    <a href="mailto:info@hotstuff.kz" className="hover:text-white transition-colors">info@hotstuff.kz</a>
+                  </p>
+                  <p className="flex items-center gap-2 py-1 md:py-0">
+                    <span className="material-symbols-outlined text-[16px]">call</span>
+                    <a href="tel:+77771234567" className="hover:text-white transition-colors">+7 (777) 123-45-67</a>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>
