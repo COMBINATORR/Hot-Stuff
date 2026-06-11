@@ -158,7 +158,7 @@ export default function AccountPage({ onAddToCart, isLoggedIn, setIsLoggedIn }) 
   };
 
   return (
-    <div className={`w-full min-h-screen flex flex-col justify-center items-center transition-all duration-300 ${isLoggedIn ? 'bg-background text-on-surface py-28 px-margin-mobile md:px-margin-desktop' : 'bg-white text-black py-16 px-6'}`}>
+    <div className={`w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface py-20 md:py-28 ${isLoggedIn ? 'px-margin-mobile md:px-margin-desktop' : 'px-4 md:px-8'}`}>
       
       {isLoggedIn ? (
         /* Authenticated Dashboard view */
@@ -308,8 +308,8 @@ export default function AccountPage({ onAddToCart, isLoggedIn, setIsLoggedIn }) 
           </div>
         </div>
       ) : (
-        /* Image-accurate Light Mobile login view */
-        <div className="w-full max-w-[343px] flex flex-col items-center font-sans text-black select-none py-10 px-4">
+        /* Image-accurate Light Mobile login view wrapped in a white card/plate */
+        <div className="w-full max-w-[360px] bg-white text-black rounded-[28px] shadow-2xl p-6 md:p-8 flex flex-col items-center select-none z-10 border border-black/5">
           
           {/* Header */}
           <h1 className="text-xl font-light tracking-[0.2em] text-black uppercase mb-12 mt-4 text-center">

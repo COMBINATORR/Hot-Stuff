@@ -1,14 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 
-export default function Footer({ isLoggedIn }) {
-  const { pathname } = useLocation();
-
-  // Hide footer on account route when logged out to match pure mobile mockup layout
-  const isAccountRoute = pathname === '/account' || pathname.endsWith('/account') || pathname.endsWith('/account/');
-  if (isAccountRoute && !isLoggedIn) {
-    return null;
-  }
-
+export default function Footer() {
   return (
     <footer className="site-footer bg-black border-t border-white/5">
       <div className="container-hs py-20">

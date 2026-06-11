@@ -299,12 +299,6 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Hide header on account route when logged out to match pure mobile mockup layout
-  const isAccountRoute = pathname === '/account' || pathname.endsWith('/account') || pathname.endsWith('/account/');
-  if (isAccountRoute && !isLoggedIn) {
-    return null;
-  }
-
   const isLightPage = pathname.includes('/catalog');
 
   // Автоматическая смена сообщений каждые 12 секунд
