@@ -59,18 +59,6 @@ export default function ProductPage({ onAddToCart }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Toggle body class for layout adjustments when sticky CTA is active
-  useEffect(() => {
-    if (showStickyCta) {
-      document.body.classList.add('has-sticky-cta');
-    } else {
-      document.body.classList.remove('has-sticky-cta');
-    }
-    return () => {
-      document.body.classList.remove('has-sticky-cta');
-    };
-  }, [showStickyCta]);
-
   // Ticking countdown timer
   useEffect(() => {
     const timer = setInterval(() => {

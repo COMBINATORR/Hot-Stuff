@@ -658,6 +658,14 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           <span className="material-symbols-outlined text-[22px] font-light">person</span>
           <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Кабинет</span>
         </NavLink>
+
+        <button 
+          onClick={() => window.location.replace('https://www.google.com')}
+          className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-[#FF5C3F] hover:text-[#ff785f] transition-colors focus:outline-none"
+        >
+          <span className="material-symbols-outlined text-[22px] font-light">visibility_off</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Паника</span>
+        </button>
       </div>
     </>
   );
