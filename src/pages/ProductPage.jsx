@@ -819,20 +819,20 @@ export default function ProductPage({ onAddToCart }) {
 
       {/* Mobile Sticky CTA Bar */}
       {showStickyCta && (
-        <div className="fixed bottom-16 left-0 right-0 h-16 bg-[#09090b]/95 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-6 z-40 md:hidden shadow-lg">
+        <div className="fixed bottom-[92px] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[#09090b]/95 backdrop-blur-md border border-white/10 flex items-center justify-between px-4 z-40 md:hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-full">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-neutral-900 flex items-center justify-center text-xl rounded-[2px] overflow-hidden">
+            <div className="w-10 h-10 bg-neutral-900 flex items-center justify-center text-xl rounded-full overflow-hidden">
               {product.emoji || '🌸'}
             </div>
             <div className="text-left">
-              <p className="font-sans font-bold text-[10px] tracking-wider text-white uppercase truncate max-w-[150px]">{product.name}</p>
+              <p className="font-sans font-bold text-[10px] tracking-wider text-white uppercase truncate max-w-[120px]">{product.name}</p>
               <p className="font-sans text-[11px] text-primary font-bold">{product.price.toLocaleString('ru-KZ')} ₸</p>
             </div>
           </div>
           
           <button 
             onClick={handleAdd}
-            className="bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.15em] uppercase py-3 px-6 hover:bg-[#ffe088] transition-colors rounded-[2px]"
+            className="bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.15em] uppercase py-2.5 px-5 hover:bg-[#ffe088] transition-colors rounded-full"
           >
             В КОРЗИНУ
           </button>

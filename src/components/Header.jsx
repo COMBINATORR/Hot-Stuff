@@ -603,8 +603,8 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         )}
       </AnimatePresence>
 
-      {/* Mobile Tab Bar (Thumb Zone) */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#09090b]/95 backdrop-blur-md border-t border-white/5 flex items-center justify-around px-2 z-50 md:hidden pb-safe-bottom">
+      {/* Mobile Tab Bar (Thumb Zone) - Cigar shaped floating bar */}
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[#09090b]/90 backdrop-blur-lg border border-white/10 flex items-center justify-around px-4 z-50 md:hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <NavLink 
           to="/catalog" 
           className={({ isActive }) => 
