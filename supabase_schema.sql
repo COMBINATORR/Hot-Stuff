@@ -137,3 +137,85 @@ ON CONFLICT (slug)
 DO UPDATE SET 
     name = EXCLUDED.name, 
     description = EXCLUDED.description;
+
+
+-- ════════════════════════════════════════════════
+-- SUPABASE AUTH SCHEMA: USER PROFILES & TRIGGERS
+-- ════════════════════════════════════════════════
+
+-- 1. CREATE USER PROFILES TABLE
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+    email TEXT,
+    full_name TEXT,
+    avatar_url TEXT,
+    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- 2. ENABLE ROW LEVEL SECURITY (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- 3. CREATE RLS POLICIES FOR PROFILES
+DROP POLICY IF EXISTS "Публичные профили видны всем" ON public.profiles;
+DROP POLICY IF EXISTS "Пользователи могут обновлять свой профиль" ON public.profiles;
+
+CREATE POLICY "Публичные профили видны всем" 
+ON public.profiles FOR SELECT 
+USING (true);
+
+CREATE POLICY "Пользователи могут обновлять свой профиль" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = id);
+
+-- 4. CREATE TRIGGER FUNCTION TO SYNC METADATA ON SIGNUP (GOOGLE / OTP)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+    INSERT INTO public.profiles (id, email, full_name, avatar_url)
+    VALUES (
+        new.id,
+        new.email,
+        COALESCE(
+            new.raw_user_meta_data->>'full_name', 
+            new.raw_user_meta_data->>'name', 
+            'Пользователь Hot Stuff'
+        ),
+        new.raw_user_meta_data->>'avatar_url'
+    );
+    RETURN new;
+END;
+$$;
+
+-- 5. REGISTER AFTER INSERT TRIGGER ON auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 6. CREATE ORDERS TABLE
+CREATE TABLE IF NOT EXISTS public.orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users ON DELETE SET NULL,
+    total NUMERIC NOT NULL,
+    status TEXT DEFAULT 'pending' NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- 7. ENABLE RLS ON ORDERS
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- 8. CREATE RLS POLICIES FOR ORDERS
+DROP POLICY IF EXISTS "Пользователи могут видеть свои заказы" ON public.orders;
+DROP POLICY IF EXISTS "Пользователи могут создавать свои заказы" ON public.orders;
+
+CREATE POLICY "Пользователи могут видеть свои заказы" 
+ON public.orders FOR SELECT 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Пользователи могут создавать свои заказы" 
+ON public.orders FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
