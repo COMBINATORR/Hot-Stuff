@@ -221,20 +221,34 @@ export default function CatalogPage({ onAddToCart }) {
   // Load categories and subcategories from Supabase
   useEffect(() => {
     async function loadCategories() {
+      // 1. Load instantly from localStorage if cached
+      const cached = localStorage.getItem('hs_categories');
+      if (cached) {
+        try {
+          setCategories(JSON.parse(cached));
+          setLoading(false); // Turn off loading skeleton immediately since we have data!
+        } catch (e) {
+          console.error('[CatalogPage] Error parsing cached categories:', e);
+        }
+      }
+
+      // 2. Fetch fresh data in the background (SWR)
       try {
         const { data, error } = await supabase
           .from('categories')
           .select('id, name, slug, description, subcategories(id, name, slug, description)')
           .order('id', { ascending: true });
         if (error) throw error;
-        // Sort subcategories by id to maintain deterministic order
+        
         const processed = (data || []).map(cat => {
           if (cat.subcategories) {
             cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
           }
           return cat;
         });
+        
         setCategories(processed);
+        localStorage.setItem('hs_categories', JSON.stringify(processed));
       } catch (err) {
         console.error('[CatalogPage] Error loading categories:', err);
       } finally {
