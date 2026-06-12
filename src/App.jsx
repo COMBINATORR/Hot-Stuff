@@ -8,6 +8,7 @@ import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
+import CookieBanner from './components/CookieBanner.jsx';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -57,6 +58,7 @@ function App() {
               />
             </main>
             <Footer />
+            <CookieBanner />
           </BrowserRouter>
         </SecureProvider>
       </HelmetProvider>
