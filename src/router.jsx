@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import HomePage from './pages/HomePage.jsx';
 import CatalogPage from './pages/CatalogPage.jsx';
@@ -8,6 +8,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import SorayaMockupPage from './pages/SorayaMockupPage.jsx';
 import CartPage from './pages/CartPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
+import { supabase } from './lib/supabase';
 
 // Языковые префиксы: ru (default), kz, en
 const LANGS = ['ru', 'kz', 'en'];
@@ -27,6 +28,55 @@ const PageWrapper = ({ children }) => (
 
 export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Helper to determine the /account path based on the current locale prefix
+  const getAccountPath = (pathname) => {
+    const parts = pathname.split('/');
+    if (parts.length > 1 && ['ru', 'kz', 'en'].includes(parts[1])) {
+      return `/${parts[1]}/account`;
+    }
+    return '/account';
+  };
+
+  // Global Auth Listener to detect Google OAuth login redirect on any page and forward the user immediately to the cabinet
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        const email = session.user.email.trim().toLowerCase();
+        // Save user state in localStorage to login immediately on all pages
+        localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
+        localStorage.setItem('hs_remembered_email', email);
+
+        // Update registered users list in localStorage
+        const saved = localStorage.getItem('hs_registered_users');
+        const parsed = saved ? JSON.parse(saved) : [];
+        const normalizedList = parsed.map(u => u.trim().toLowerCase());
+        if (!normalizedList.includes(email)) {
+          localStorage.setItem('hs_registered_users', JSON.stringify([...normalizedList, email]));
+        }
+
+        // Check if we captured an OAuth callback flag in sessionStorage
+        const isCallback = sessionStorage.getItem('hs_oauth_callback') === 'true';
+        if (isCallback) {
+          sessionStorage.removeItem('hs_oauth_callback');
+          const targetPath = getAccountPath(window.location.pathname);
+          setTimeout(() => {
+            navigate(targetPath, { replace: true });
+          }, 0);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('hs_user');
+      }
+    });
+
+    return () => {
+      if (subscription) {
+        if (subscription.unsubscribe) subscription.unsubscribe();
+        else if (subscription.subscription && subscription.subscription.unsubscribe) subscription.subscription.unsubscribe();
+      }
+    };
+  }, [navigate]);
 
   // Scroll to top on page navigation
   useEffect(() => {

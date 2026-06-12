@@ -13,6 +13,7 @@ import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
 import logoNewsletterBg from '../assets/images/newsletter_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
+import ProductGrid from '../components/ProductGrid';
 
 const HERO = {
   headline: 'в погоне за наслаждением',
@@ -580,6 +581,11 @@ export default function HomePage({ onAddToCart }) {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Product Skeletons Grid */}
+      <div className="container mx-auto px-4 py-8">
+        <ProductGrid />
+      </div>
       
       {/* ═══ TRUST GRID SECTION ═══ */}
       <section className="bg-black py-12 px-6">

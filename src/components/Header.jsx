@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import ResponsiveImage from './ResponsiveImage';
+import { supabase } from '../lib/supabase';
 
 // Promo Ticker Data
 const TICKER_ITEMS = [
@@ -10,59 +11,170 @@ const TICKER_ITEMS = [
   { text: "НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ", link: "/catalog?cat=wellness" }
 ];
 
-const MENU_ITEMS = [
-  { label: 'популярные секс-игрушки', link: '/catalog' },
-  { 
-    label: 'секс-игрушки для женщин', 
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=women' },
-      { label: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G', link: '/catalog?cat=g-spot' },
-      { label: 'ВИБРАТОРЫ ДЛЯ КЛИТОРА', link: '/catalog?cat=clitoral' },
-      { label: 'ВИБРАТОРЫ-КРОЛИКИ', link: '/catalog?cat=rabbit' },
-      { label: 'АНАЛЬНЫЕ ПРОБКИ', link: '/catalog?cat=anal-plugs' },
-      { label: 'ВИБРОПУЛЯ', link: '/catalog?cat=bullets' },
-      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', link: '/catalog?cat=remote' },
-      { label: 'СЕКС-ИГРУШКИ ДЛЯ ПОЕЗДОК', link: '/catalog?cat=travel' },
-      { label: 'ЖЕЗЛОВЫЕ МАССАЖЕРЫ', link: '/catalog?cat=wands' },
-      { label: 'ВАГИНАЛЬНЫЕ ШАРИКИ', link: '/catalog?cat=kegel' },
-      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', link: '/catalog?cat=anal-balls' }
-    ]
-  },
-  {
-    label: 'секс-игрушки для мужчин',
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=men' },
-      { label: 'МАССАЖЕРЫ ПРОСТАТЫ', link: '/catalog?cat=prostate' },
-      { label: 'АНАЛЬНЫЕ ПРОБКИ', link: '/catalog?cat=anal-plugs' },
-      { label: 'ЭРЕКЦИОННЫЕ КОЛЬЦА', link: '/catalog?cat=rings' },
-      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', link: '/catalog?cat=anal-balls' },
-      { label: 'МУЖСКОЙ МАСТУРБАТОР', link: '/catalog?cat=masturbators' }
-    ]
-  },
-  {
-    label: 'секс-игрушки для пар',
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', link: '/catalog?cat=couples' },
-      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', link: '/catalog?cat=remote' },
-      { label: 'НАДЕВАЕМЫЕ ВИБРОМАССАЖЕРЫ', link: '/catalog?cat=wearable' }
-    ]
-  },
-  {
-    label: 'секс-аксессуары',
-    subItems: [
-      { label: 'БДСМ-ИГРУШКИ', link: '/catalog?cat=bdsm' },
-      { label: 'ВЭЛНЕС', link: '/catalog?cat=wellness' },
-      { label: 'ЗАРЯДНЫЕ УСТРОЙСТВА И КАБЕЛИ USB', link: '/catalog?cat=chargers' },
-      { label: 'СЕКС-СВЕЧИ', link: '/catalog?cat=candles' },
-      { label: 'СМАЗКИ', link: '/catalog?cat=lubes' },
-      { label: 'СПРЕЙ ДЛЯ ОЧИСТКИ', link: '/catalog?cat=cleaners' }
-    ]
-  },
-  { label: 'эротическое белье', link: '/catalog?cat=lingerie' },
-  { label: 'подарочные наборы', link: '/catalog?cat=gifts' },
-  { label: 'блог', link: '/blog' },
-  { label: 'МАКЕТ SORAYA WAVE™', link: '/mockup/soraya-wave' },
-];
+function CategoryLink({ category, onClick }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const subcategories = category.subcategories || [];
+  const hasSub = subcategories.length > 0;
+
+  return (
+    <div className="relative flex flex-col w-full">
+      {/* Mobile-only layout */}
+      <div className="block md:hidden">
+        {hasSub ? (
+          <>
+            <div className="flex justify-between items-center w-full py-1.5">
+              <span
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors text-left flex-1"
+              >
+                {category.name}
+              </span>
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-white hover:text-primary transition-colors p-1"
+              >
+                <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                  expand_more
+                </span>
+              </button>
+            </div>
+            <AnimatePresence>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="overflow-hidden pl-4 flex flex-col gap-2 border-l border-white/10 my-1 pb-2"
+                >
+                  <Link
+                    to={`/catalog?cat=${category.slug}`}
+                    onClick={onClick}
+                    className="text-neutral-300 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left"
+                  >
+                    посмотреть все
+                  </Link>
+                  {subcategories.map((sub) => (
+                    <Link
+                      key={sub.slug}
+                      to={`/catalog?cat=${sub.slug}`}
+                      onClick={onClick}
+                      className="text-neutral-400 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left"
+                    >
+                      {sub.name}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        ) : (
+          <>
+            <Link
+              to={`/catalog?cat=${category.slug}`}
+              onClick={onClick}
+              className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-1.5 hover:text-primary transition-colors text-left"
+            >
+              {category.name}
+            </Link>
+            {category.description && (
+              <span className="text-[10px] text-neutral-400 leading-normal block -mt-1 pb-2 font-normal font-sans text-left">
+                {category.description}
+              </span>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Desktop-only layout */}
+      {hasSub ? (
+        <div
+          className="hidden md:block relative text-left"
+          onMouseLeave={() => setIsOpen(false)}
+        >
+          <div className="flex justify-between items-center w-full py-2">
+            <span
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors flex-1"
+            >
+              {category.name}
+            </span>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-white hover:text-primary transition-colors p-1"
+            >
+              <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                expand_more
+              </span>
+            </button>
+          </div>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute left-0 top-full mt-1 z-[9999] min-w-[220px] bg-[#0c0c0d] border border-neutral-800 p-4 shadow-2xl flex flex-col gap-2.5 rounded-[2px]"
+              >
+                <Link
+                  to={`/catalog?cat=${category.slug}`}
+                  onClick={() => { setIsOpen(false); onClick(); }}
+                  className="text-neutral-300 hover:text-primary transition-colors text-[10px] font-bold tracking-widest uppercase"
+                >
+                  посмотреть все
+                </Link>
+                {subcategories.map((sub) => (
+                  <Link
+                    key={sub.slug}
+                    to={`/catalog?cat=${sub.slug}`}
+                    onClick={() => { setIsOpen(false); onClick(); }}
+                    className="text-neutral-400 hover:text-primary transition-colors text-[10px] font-bold tracking-widest uppercase"
+                  >
+                    {sub.name}
+                  </Link>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
+        <div
+          className="hidden md:block relative text-left"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <Link
+            to={`/catalog?cat=${category.slug}`}
+            onClick={onClick}
+            className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-2 hover:text-primary transition-colors"
+          >
+            {category.name}
+          </Link>
+          {category.description && (
+            <AnimatePresence>
+              {showTooltip && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 5 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-0 top-full mt-2 z-[9999] max-w-[240px] bg-black text-white text-[9.5px] leading-relaxed font-sans font-normal p-3 rounded border border-neutral-800 shadow-xl pointer-events-none text-left"
+                >
+                  {category.description}
+                  {/* Arrow pointing up */}
+                  <div className="absolute bottom-full left-4 border-4 border-transparent border-b-black" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** CartDrawer — slide-in panel (Stitch design) */
 function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddToCart }) {
@@ -295,8 +407,32 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [tickerIndex, setTickerIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, slug, description, subcategories(id, name, slug, description)')
+          .order('id', { ascending: true });
+        if (error) throw error;
+        // Sort subcategories by id to maintain deterministic order
+        const processed = (data || []).map(cat => {
+          if (cat.subcategories) {
+            cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
+          }
+          return cat;
+        });
+        setCategories(processed);
+      } catch (err) {
+        console.error('[Header] Error loading categories:', err);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const getHomePath = () => {
     const parts = pathname.split('/');
@@ -486,66 +622,33 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               </div>
 
               {/* Navigation Links */}
-              <nav className="flex flex-col px-10 py-2 gap-5 overflow-y-auto flex-1">
-                {MENU_ITEMS.map((item, idx) => {
-                  const isExpanded = expandedCategory === item.label;
-                  return (
-                    <div key={idx} className="flex flex-col">
-                      {item.subItems ? (
-                        <button 
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setExpandedCategory(isExpanded ? null : item.label);
-                          }}
-                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase w-full group"
-                        >
-                          <span className="w-5 text-[14px] font-light leading-none text-white/50 flex-none text-center -ml-5 group-hover:text-primary transition-colors">
-                            {isExpanded ? '–' : '+'}
-                          </span>
-                          <span>{item.label}</span>
-                        </button>
-                      ) : (
-                        <Link 
-                          to={item.link} 
-                          className="flex items-center text-left text-white text-[11px] font-bold tracking-widest lowercase w-full"
-                          onClick={() => setNavOpen(false)}
-                        >
-                          <span>{item.label}</span>
-                        </Link>
-                      )}
-
-                      {/* Sub-items accordion */}
-                      {item.subItems && (
-                        <AnimatePresence initial={false}>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="flex flex-col gap-4 mt-5 pb-4">
-                                {item.subItems.map((sub, sIdx) => (
-                                  <Link 
-                                    key={sIdx} 
-                                    to={sub.link}
-                                    className="text-white text-[10px] font-bold tracking-widest uppercase hover:text-primary transition-colors"
-                                    onClick={() => setNavOpen(false)}
-                                  >
-                                    {sub.label}
-                                  </Link>
-                                ))}
-                              </div>
-                              <div className="w-full h-px bg-white/20 mt-2 mb-2"></div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      )}
-                    </div>
-                  );
-                })}
+              <nav className="flex flex-col px-10 py-2 gap-4 overflow-y-auto flex-1">
+                {categories.length === 0 ? (
+                  <span className="text-[10px] text-neutral-500 font-sans text-left">Загрузка категорий...</span>
+                ) : (
+                  categories.map((cat) => (
+                    <CategoryLink
+                      key={cat.id}
+                      category={cat}
+                      onClick={() => setNavOpen(false)}
+                    />
+                  ))
+                )}
+                <div className="w-full h-px bg-white/10 my-2"></div>
+                <Link 
+                  to="/blog" 
+                  className="text-white text-[11px] font-bold tracking-widest lowercase hover:text-primary transition-colors text-left" 
+                  onClick={() => setNavOpen(false)}
+                >
+                  блог
+                </Link>
+                <Link 
+                  to="/mockup/soraya-wave" 
+                  className="text-white text-[11px] font-bold tracking-widest lowercase hover:text-primary transition-colors text-left mt-1" 
+                  onClick={() => setNavOpen(false)}
+                >
+                  МАКЕТ SORAYA WAVE™
+                </Link>
               </nav>
 
               <div className="px-10 pb-12 mt-auto">

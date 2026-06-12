@@ -2,60 +2,35 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
-const SIDEBAR_CATEGORIES = [
-  {
-    key: 'popular',
-    label: 'ПОПУЛЯРНЫЕ СЕКС-ИГРУШКИ',
-    cat: 'all',
-  },
-  {
-    key: 'women',
-    label: 'СЕКС-ИГРУШКИ ДЛЯ ЖЕНЩИН',
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', cat: 'vibrators' },
-      { label: 'АНАЛЬНЫЕ ПРОБКИ', cat: 'АНАЛЬНЫЕ ПРОБКИ' },
-      { label: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G', cat: 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G' },
-      { label: 'ВИБРАТОРЫ ДЛЯ КЛИТОРА', cat: 'ВИБРАТОРЫ ДЛЯ КЛИТОРА' },
-      { label: 'ВИБРАТОРЫ-КРОЛИКИ', cat: 'ВИБРАТОРЫ-КРОЛИКИ' },
-      { label: 'ВИБРОПУЛЯ', cat: 'ВИБРОПУЛЯ' },
-      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', cat: 'ВИБРАТОРЫ С ПУЛЬТОМ' },
-      { label: 'СЕКС-ИГРУШКИ ДЛЯ ПОЕЗДОК', cat: 'СЕКС-ИГРУШКИ ДЛЯ ПОЕЗДОК' },
-      { label: 'ЖЕЗЛОВЫЕ МАССАЖЕРЫ', cat: 'ЖЕЗЛОВЫЕ МАССАЖЕРЫ' },
-      { label: 'ВАГИНАЛЬНЫЕ ШАРИКИ', cat: 'ВАГИНАЛЬНЫЕ ШАРИКИ' },
-      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', cat: 'АНАЛЬНЫЕ ВИБРОШАРИКИ' }
-    ]
-  },
-  {
-    key: 'men',
-    label: 'СЕКС-ИГРУШКИ ДЛЯ МУЖЧИН',
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', cat: 'massagers' },
-      { label: 'МАССАЖЕРЫ ПРОСТАТЫ', cat: 'МАССАЖЕРЫ ПРОСТАТЫ' },
-      { label: 'АНАЛЬНЫЕ ПРОБКИ', cat: 'АНАЛЬНЫЕ ПРОБКИ' },
-      { label: 'ЭРЕКЦИОННЫЕ КОЛЬЦА', cat: 'ЭРЕКЦИОННЫЕ КОЛЬЦА' },
-      { label: 'АНАЛЬНЫЕ ВИБРОШАРИКИ', cat: 'АНАЛЬНЫЕ ВИБРОШАРИКИ' },
-      { label: 'МУЖСКОЙ МАСТУРБАТОР', cat: 'МУЖСКОЙ МАСТУРБАТОР' }
-    ]
-  },
-  {
-    key: 'couples',
-    label: 'СЕКС-ИГРУШКИ ДЛЯ ПАР',
-    subItems: [
-      { label: 'ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ', cat: 'couples' },
-      { label: 'ВИБРАТОРЫ С ПУЛЬТОМ', cat: 'ВИБРАТОРЫ С ПУЛЬТОМ' },
-      { label: 'НАДЕВАЕМЫЕ ВИБРОМАССАЖЕРЫ', cat: 'НАДЕВАЕМЫЕ ВИБРОМАССАЖЕРЫ' }
-    ]
-  },
-  {
-    key: 'news',
-    label: 'НОВИНКИ СЕКС-ИГРУШЕК',
-    cat: 'new',
-  }
-];
+const categorySlugMap = {
+  'toys-women': (p) => p.category === 'vibrators' && p.categoryLabel !== 'АНАЛЬНЫЕ ПРОБКИ',
+  'toys-men': (p) => p.category === 'massagers',
+  'toys-couples': (p) => p.category === 'couples',
+  'toys-anal': (p) => p.categoryLabel === 'АНАЛЬНЫЕ ПРОБКИ' || p.categoryLabel === 'АНАЛЬНЫЕ ВИБРОШАРИКИ' || (p.stimulation && p.stimulation.includes('anal')),
+  'clitoral-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ ДЛЯ КЛИТОРА',
+  'gspot-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ ДЛЯ ТОЧКИ G',
+  'rabbit-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ-КРОЛИКИ',
+  'bullet-vibrators': (p) => p.categoryLabel === 'ВИБРОПУЛЯ',
+  'remote-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ С ПУЛЬТОМ',
+  'vibrating-panties': (p) => p.categoryLabel === 'ВИБРАЦИОННЫЕ ТРУСИКИ',
+  'kegel-exercisers': (p) => p.categoryLabel === 'ВАГИНАЛЬНЫЕ ШАРИКИ' || p.categoryLabel === 'ВАГИНАЛЬНЫЕ ТРЕНАЖЕРЫ',
+  'male-masturbators': (p) => p.categoryLabel === 'МУЖСКОЙ МАСТУРБАТОР',
+  'prostate-massagers': (p) => p.categoryLabel === 'МАССАЖЕРЫ ПРОСТАТЫ',
+  'cock-rings': (p) => p.categoryLabel === 'ЭРЕКЦИОННЫЕ КОЛЬЦА',
+  'wearable-couples-vibrators': (p) => p.categoryLabel === 'НАДЕВАЕМЫЕ ВИБРОМАССАЖЕРЫ',
+  'remote-couples-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ С ПУЛЬТОМ' && p.category === 'couples',
+  'anal-plugs': (p) => p.categoryLabel === 'АНАЛЬНЫЕ ПРОБКИ',
+  'anal-beads': (p) => p.categoryLabel === 'АНАЛЬНЫЕ ВИБРОШАРИКИ',
+  'lingerie-classic': (p) => false,
+  'lingerie-erotic': (p) => false,
+  'bdsm-fetish': (p) => false,
+  'lubricants-cosmetics': (p) => false
+};
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
@@ -236,10 +211,81 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
 
 export default function CatalogPage({ onAddToCart }) {
   const [params, setParams] = useSearchParams();
-  const initialCat = params.get('cat') || 'vibrators'; // Women toys / vibrators by default as in screenshot
+  const initialCat = params.get('cat') || 'toys-women';
   const [activeCat, setActiveCat] = useState(initialCat);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
-  const [expandedSidebarCats, setExpandedSidebarCats] = useState({ women: true }); // Expanded by default for women
+  const [expandedSidebarCats, setExpandedSidebarCats] = useState({ 'toys-women': true });
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load categories and subcategories from Supabase
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, slug, description, subcategories(id, name, slug, description)')
+          .order('id', { ascending: true });
+        if (error) throw error;
+        // Sort subcategories by id to maintain deterministic order
+        const processed = (data || []).map(cat => {
+          if (cat.subcategories) {
+            cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
+          }
+          return cat;
+        });
+        setCategories(processed);
+      } catch (err) {
+        console.error('[CatalogPage] Error loading categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  // Gift hint states
+  const [showGiftBanner, setShowGiftBanner] = useState(false);
+  const [giftProducts, setGiftProducts] = useState([]);
+
+  // Process incoming gift parameters from partner's link
+  useEffect(() => {
+    const giftParam = params.get('gift');
+    const refParam = params.get('ref');
+
+    if (giftParam && refParam === 'anonymous') {
+      const productIds = giftParam.split(',').map(id => parseInt(id, 10));
+      const addedList = [];
+
+      productIds.forEach(id => {
+        const product = ALL_PRODUCTS.find(p => p.id === id);
+        if (product) {
+          addedList.push(product);
+          if (onAddToCart) {
+            onAddToCart({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              emoji: product.emoji || '🌸',
+              variant: product.colors?.[0]?.name || 'Default',
+              qty: 1,
+              image: product.image
+            });
+          }
+        }
+      });
+
+      if (addedList.length > 0) {
+        setGiftProducts(addedList);
+        setShowGiftBanner(true);
+        // Clear params to prevent re-execution on refresh or route change
+        const newParams = new URLSearchParams(params);
+        newParams.delete('gift');
+        newParams.delete('ref');
+        setParams(newParams, { replace: true });
+      }
+    }
+  }, [params, onAddToCart, setParams]);
 
   // Filters State
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -258,7 +304,7 @@ export default function CatalogPage({ onAddToCart }) {
     } else if (search) {
       setActiveCat('all');
     } else {
-      setActiveCat('vibrators');
+      setActiveCat('toys-women');
     }
   }, [params]);
 
@@ -293,10 +339,16 @@ export default function CatalogPage({ onAddToCart }) {
       if (activeCat === 'new') {
         result = result.filter(p => p.isNew);
       } else {
-        result = result.filter(p => 
-          p.category === activeCat || 
-          p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
-        );
+        const filterFn = categorySlugMap[activeCat];
+        if (filterFn) {
+          result = result.filter(filterFn);
+        } else {
+          // Fallback to match by category property or categoryLabel
+          result = result.filter(p => 
+            p.category === activeCat || 
+            p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
+          );
+        }
       }
     }
 
@@ -384,15 +436,64 @@ export default function CatalogPage({ onAddToCart }) {
     if (searchVal) return `Результаты поиска: "${searchVal}"`;
 
     if (activeCat === 'all' || activeCat === 'popular') return 'Популярные секс-игрушки';
+    if (activeCat === 'new') return 'Новинки секс-игрушек';
+
+    // Find category or subcategory name from the loaded list
+    for (const cat of categories) {
+      if (cat.slug === activeCat) return cat.name;
+      if (cat.subcategories) {
+        for (const sub of cat.subcategories) {
+          if (sub.slug === activeCat) return sub.name;
+        }
+      }
+    }
+
+    // Fallbacks for compatibility
     if (activeCat === 'vibrators') return 'Секс-игрушки для женщин';
     if (activeCat === 'massagers') return 'Секс-игрушки для мужчин';
     if (activeCat === 'couples') return 'Секс-игрушки для пар';
-    if (activeCat === 'new') return 'Новинки секс-игрушек';
+
     return activeCat;
-  }, [activeCat, params]);
+  }, [activeCat, params, categories]);
 
   return (
     <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
+      
+      {/* Floating Gift Hint Banner */}
+      <AnimatePresence>
+        {showGiftBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full bg-white border-b border-[#D4AF37]/30 shadow-md py-4 px-4 md:px-8 relative z-30"
+            style={{ borderLeft: '4px solid #D4AF37' }}
+          >
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3 text-left">
+                <span className="text-2xl flex-shrink-0">🎁</span>
+                <div>
+                  <h4 className="text-xs font-black tracking-wider uppercase text-black">
+                    Ваш партнер намекает на подарок!
+                  </h4>
+                  <p className="text-[11px] text-neutral-600 leading-relaxed mt-0.5 font-normal">
+                    Выбранные товары ({giftProducts.map(p => p.name).join(', ')}) добавлены в вашу корзину. Доставка будет осуществлена на защищенный анонимный адрес партнера.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <button
+                  onClick={() => setShowGiftBanner(false)}
+                  className="text-[9px] font-black tracking-widest text-neutral-400 hover:text-black uppercase px-4 py-2 border border-black/10 hover:border-black rounded-[2px] transition-colors cursor-pointer animate-none bg-transparent"
+                >
+                  ЗАКРЫТЬ
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="container-hs py-8">
         
         {/* Main Columns Container */}
@@ -408,55 +509,101 @@ export default function CatalogPage({ onAddToCart }) {
             </div>
             
             <nav className="space-y-4">
-              {SIDEBAR_CATEGORIES.map((catObj) => {
-                const hasSub = !!catObj.subItems;
-                const isExpanded = !!expandedSidebarCats[catObj.key];
-                
-                return (
-                  <div key={catObj.key} className="border-b border-gray-100 pb-2">
-                    {hasSub ? (
-                      <div>
+              {/* Popular item */}
+              <div className="border-b border-gray-100 pb-2">
+                <button
+                  onClick={() => handleCategoryClick('all')}
+                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
+                    activeCat === 'all' || activeCat === 'popular' ? 'text-[#FF5C3F]' : 'text-black'
+                  }`}
+                >
+                  <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
+                  <span>ПОПУЛЯРНЫЕ СЕКС-ИГРУШКИ</span>
+                </button>
+              </div>
+
+              {/* Dynamic categories from DB */}
+              {loading ? (
+                <div className="text-[10px] text-gray-400 font-sans py-2">Загрузка категорий...</div>
+              ) : (
+                categories.map((cat) => {
+                  const subcategories = cat.subcategories || [];
+                  const hasSub = subcategories.length > 0;
+                  const isExpanded = !!expandedSidebarCats[cat.slug];
+                  
+                  return (
+                    <div key={cat.slug} className="border-b border-gray-100 pb-2">
+                      {hasSub ? (
+                        <div>
+                          <button
+                            onClick={() => toggleSidebarCat(cat.slug)}
+                            className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
+                              activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-black'
+                            }`}
+                          >
+                            <span className="text-[13px] font-light w-4 flex-none text-center">
+                              {isExpanded ? '–' : '+'}
+                            </span>
+                            <span>{cat.name.toUpperCase()}</span>
+                          </button>
+                          
+                          {isExpanded && (
+                            <div className="pl-6 space-y-3 mt-2 pb-2">
+                              {/* Option to view all in this category */}
+                              <button
+                                onClick={() => handleCategoryClick(cat.slug)}
+                                className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
+                                  activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-gray-500 hover:text-black'
+                                }`}
+                              >
+                                ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ
+                              </button>
+
+                              {subcategories.map((sub) => {
+                                const isActive = activeCat === sub.slug;
+                                return (
+                                  <button
+                                    key={sub.slug}
+                                    onClick={() => handleCategoryClick(sub.slug)}
+                                    className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
+                                      isActive ? 'text-[#FF5C3F]' : 'text-gray-500 hover:text-black'
+                                    }`}
+                                  >
+                                    {sub.name.toUpperCase()}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
                         <button
-                          onClick={() => toggleSidebarCat(catObj.key)}
-                          className="w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider text-black py-2 hover:text-[#FF5C3F] transition-colors"
+                          onClick={() => handleCategoryClick(cat.slug)}
+                          className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
+                            activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-black'
+                          }`}
                         >
-                          <span className="text-[13px] font-light w-4 flex-none text-center">
-                            {isExpanded ? '–' : '+'}
-                          </span>
-                          <span>{catObj.label}</span>
+                          <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
+                          <span>{cat.name.toUpperCase()}</span>
                         </button>
-                        
-                        {isExpanded && (
-                          <div className="pl-6 space-y-3 mt-2 pb-2">
-                            {catObj.subItems.map((sub, sIdx) => {
-                              const isActive = activeCat.toLowerCase() === sub.cat.toLowerCase() || activeCat.toLowerCase() === sub.label.toLowerCase();
-                              return (
-                                <button
-                                  key={sIdx}
-                                  onClick={() => handleCategoryClick(sub.cat || sub.label)}
-                                  className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
-                                    isActive ? 'text-[#FF5C3F]' : 'text-gray-500 hover:text-black'
-                                  }`}
-                                >
-                                  {sub.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleCategoryClick(catObj.cat || 'all')}
-                        className="w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider text-black py-2 hover:text-[#FF5C3F] transition-colors"
-                      >
-                        <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                        <span>{catObj.label}</span>
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                    </div>
+                  );
+                })
+              )}
+
+              {/* News item */}
+              <div className="border-b border-gray-100 pb-2">
+                <button
+                  onClick={() => handleCategoryClick('new')}
+                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
+                    activeCat === 'new' ? 'text-[#FF5C3F]' : 'text-black'
+                  }`}
+                >
+                  <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
+                  <span>НОВИНКИ СЕКС-ИГРУШЕК</span>
+                </button>
+              </div>
             </nav>
           </aside>
 
