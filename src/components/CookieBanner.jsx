@@ -8,10 +8,10 @@ export default function CookieBanner() {
   useEffect(() => {
     const consent = localStorage.getItem('cookie_consent');
     if (!consent) {
-      // Premium delayed fade-in after 1.2 seconds
+      // Premium delayed fade-in after 1 second
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, 1200);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -25,11 +25,11 @@ export default function CookieBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={{ opacity: 0, y: 80 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 80 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-[96px] md:bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-4xl bg-neutral-950/90 border border-white/10 backdrop-blur-md text-white px-6 py-4.5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 z-[999] shadow-2xl select-none"
+          className="fixed bottom-0 left-0 w-full md:bottom-8 md:left-1/2 md:-translate-x-1/2 md:w-[92%] md:max-w-4xl bg-neutral-950/95 border-t border-white/10 md:border md:border-white/10 text-white pt-5 pb-[100px] px-6 md:py-4 md:px-6 rounded-t-2xl md:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 z-[49] shadow-2xl"
         >
           {/* Left Description Text */}
           <p className="text-xs sm:text-[13px] text-white/80 leading-relaxed font-sans font-normal text-center md:text-left flex-1">
