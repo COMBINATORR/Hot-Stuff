@@ -52,13 +52,13 @@ export default function Footer() {
 
   return (
     <footer className="site-footer bg-black border-t border-white/5">
-      <div className="container-hs pt-8 pb-12 md:py-28 px-6 md:px-12 lg:px-16">
+      <div className="container-hs pt-6 pb-6 md:pt-12 md:pb-8 px-6 md:px-12 lg:px-16">
         
         {/* Main Grid: 4 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-8">
           
           {/* Column 1: Brand & Trust */}
-          <div className="flex flex-col items-start space-y-6">
+          <div className="flex flex-col items-start space-y-4 md:space-y-6">
             <div className="flex flex-col select-none">
               <Link to="/" className="font-sans font-black text-2xl tracking-[0.2em] text-white uppercase hover:text-primary transition-colors">
                 {FOOTER_CONFIG.brand.logo}
@@ -108,7 +108,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setBuyersOpen(!buyersOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {buyersOpen ? '–' : '+'}
@@ -122,13 +122,13 @@ export default function Footer() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0"
+                  className="overflow-hidden flex flex-col gap-1.5 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
                   {FOOTER_CONFIG.buyers.links.map(l => (
                     <Link
                       key={l.to}
                       to={l.to}
-                      className="font-sans font-bold text-xs tracking-wider text-[#a1a1aa] hover:text-white transition-colors uppercase block py-1.5 md:py-0"
+                      className="font-sans font-bold text-xs tracking-wider text-[#a1a1aa] hover:text-white transition-colors uppercase block py-1 md:py-0"
                     >
                       {l.label}
                     </Link>
@@ -142,7 +142,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setPaymentsOpen(!paymentsOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {paymentsOpen ? '–' : '+'}
@@ -156,12 +156,12 @@ export default function Footer() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden flex flex-col gap-4 w-full pl-5 md:pl-0"
+                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
                   <p className="text-[13px] text-[#a1a1aa] leading-relaxed font-sans font-normal">
                     {FOOTER_CONFIG.paymentsLogistics.description}
                   </p>
-                  <div className="flex flex-wrap gap-2 pt-2">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     {FOOTER_CONFIG.paymentsLogistics.payments.map(pay => {
                       if (pay.type === 'highlight') {
                         return (
@@ -196,7 +196,7 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <button
               onClick={() => setLegalOpen(!legalOpen)}
-              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1.5 md:py-0 md:mb-6 w-full cursor-pointer"
+              className="flex items-center text-left bg-transparent border-none text-white focus:outline-none group py-1 md:py-0 md:mb-6 w-full cursor-pointer"
             >
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {legalOpen ? '–' : '+'}
@@ -210,14 +210,14 @@ export default function Footer() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden flex flex-col gap-4 w-full pl-5 md:pl-0"
+                  className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
-                  <nav className="flex flex-col gap-3">
+                  <nav className="flex flex-col gap-1.5">
                     {FOOTER_CONFIG.legal.links.map(l => (
                       <Link
                         key={l.to}
                         to={l.to}
-                        className="font-sans font-bold text-xs tracking-wider text-[#a1a1aa] hover:text-white transition-colors uppercase block py-1.5 md:py-0"
+                        className="font-sans font-bold text-xs tracking-wider text-[#a1a1aa] hover:text-white transition-colors uppercase block py-1 md:py-0"
                       >
                         {l.label}
                       </Link>
@@ -225,7 +225,7 @@ export default function Footer() {
                   </nav>
                   
                   {/* Strict 18+ Warning Marker */}
-                  <div className="flex items-start gap-3 border-t border-white/5 pt-4 mt-1">
+                  <div className="flex items-start gap-3 border-t border-white/5 pt-3 mt-1">
                     <span className="w-8 h-8 bg-[#FF5C3F] text-white rounded-[4px] flex items-center justify-center font-sans font-black text-[11px] flex-none select-none shadow-sm">
                       {FOOTER_CONFIG.legal.ageRestriction}
                     </span>
@@ -241,7 +241,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="w-full h-px bg-white/5 mt-8 mb-6 md:mt-16 md:mb-8" />
+        <div className="w-full h-px bg-white/5 mt-6 mb-4 md:mt-12 md:mb-6" />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[#71717a] font-sans text-xs">
