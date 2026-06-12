@@ -52,7 +52,7 @@ export default function Footer() {
 
   return (
     <footer className="site-footer bg-black border-t border-white/5">
-      <div className="container-hs py-20 md:py-28 px-6 md:px-12 lg:px-16">
+      <div className="container-hs pt-8 pb-12 md:py-28 px-6 md:px-12 lg:px-16">
         
         {/* Main Grid: 4 columns */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
@@ -241,7 +241,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="w-full h-px bg-white/5 mt-16 mb-8" />
+        <div className="w-full h-px bg-white/5 mt-8 mb-6 md:mt-16 md:mb-8" />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[#71717a] font-sans text-xs">
