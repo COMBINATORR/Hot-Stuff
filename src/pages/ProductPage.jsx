@@ -239,7 +239,7 @@ export default function ProductPage({ onAddToCart }) {
                 <>
                   <span className="font-sans font-bold text-2xl text-primary">{product.price.toLocaleString('ru-KZ')} ₸</span>
                   <span className="font-sans text-sm text-outline line-through">{product.oldPrice.toLocaleString('ru-KZ')} ₸</span>
-                  <span className="bg-[#FF5C3F] text-black text-[9px] font-black px-2 py-1 uppercase tracking-wider leading-none">
+                  <span className="bg-primary text-on-primary text-[9px] font-black px-2 py-1 uppercase tracking-wider leading-none">
                     Сэкономить {(product.oldPrice - product.price).toLocaleString('ru-KZ')} ₸
                   </span>
                 </>
@@ -297,32 +297,32 @@ export default function ProductPage({ onAddToCart }) {
             </div>
 
             {/* Kaspi Red Installments */}
-            <div className="w-full flex items-center gap-3 bg-neutral-900/40 p-4 border border-white/5 rounded-[2px] mb-4">
-              <div className="flex-none bg-[#E11D48] text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase font-sans">Kaspi Red</div>
+            <div className="w-full flex items-center gap-3 bg-neutral-900/40 p-4 border border-white/5 rounded-none mb-4">
+              <div className="flex-none bg-[#E11D48] text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-none uppercase font-sans">Kaspi Red</div>
               <div className="text-left font-sans text-xs text-white/90">
                 Рассрочка 0-0-3: <span className="font-bold text-primary">{Math.round(product.price / 3).toLocaleString('ru-KZ')} ₸</span> / мес без переплат
               </div>
             </div>
 
             {/* Countdown Timer */}
-            <div className="w-full flex items-center gap-3 bg-[#FF5C3F]/10 p-4 border border-[#FF5C3F]/20 rounded-[2px] mb-6">
-              <span className="material-symbols-outlined text-[#FF5C3F] text-[18px]">alarm</span>
+            <div className="w-full flex items-center gap-3 bg-primary/10 p-4 border border-primary/20 rounded-none mb-6">
+              <span className="material-symbols-outlined text-primary text-[18px]">alarm</span>
               <div className="text-left font-sans text-xs text-white/95">
-                Закажите в течение <span className="font-black text-[#FF5C3F] font-mono">{formatTime(timeLeft)}</span>, и мы отправим сегодня!
+                Закажите в течение <span className="font-black text-primary font-mono">{formatTime(timeLeft)}</span>, и мы отправим сегодня!
               </div>
             </div>
 
             {/* Trust Badges */}
             <div className="w-full grid grid-cols-3 gap-2.5 border-t border-white/10 pt-6 mt-2">
-              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">visibility_off</span>
                 <span className="text-[8px] font-black tracking-wider text-white uppercase">Анонимно</span>
               </div>
-              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">verified_user</span>
                 <span className="text-[8px] font-black tracking-wider text-white uppercase">2 года гарантии</span>
               </div>
-              <div className="flex flex-col items-center text-center p-2.5 rounded-[2px] bg-neutral-900/20 border border-white/5">
+              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">shield</span>
                 <span className="text-[8px] font-black tracking-wider text-white uppercase">Безопасно</span>
               </div>
@@ -354,7 +354,7 @@ export default function ProductPage({ onAddToCart }) {
             <div className="w-full flex-1 max-h-[500px] md:max-h-[600px] flex flex-col items-center justify-center z-10 order-1 md:order-2">
               
               {displayMode === 'scale' ? (
-                <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-neutral-950/40 rounded-[4px] border border-white/5 font-sans text-left min-h-[350px]">
+                <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-neutral-950/40 rounded-none border border-white/5 font-sans text-left min-h-[350px]">
                   <p className="text-[10px] font-black tracking-widest text-primary uppercase mb-6 text-center">Сравнение размеров</p>
                   
                   <div className="flex items-end justify-center gap-8 md:gap-12 w-full h-56 pb-4">
@@ -421,7 +421,7 @@ export default function ProductPage({ onAddToCart }) {
               <div className="flex gap-4 mt-6 z-20">
                 <button
                   onClick={() => setDisplayMode('studio')}
-                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-[2px] ${
+                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 ${
                     displayMode === 'studio'
                       ? 'bg-white text-black border-white'
                       : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
@@ -431,7 +431,7 @@ export default function ProductPage({ onAddToCart }) {
                 </button>
                 <button
                   onClick={() => setDisplayMode('scale')}
-                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-[2px] ${
+                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 ${
                     displayMode === 'scale'
                       ? 'bg-white text-black border-white'
                       : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
@@ -660,7 +660,7 @@ export default function ProductPage({ onAddToCart }) {
               </div>
 
               {/* Right Column: Write a Review Form */}
-              <div className="bg-neutral-900/40 p-6 md:p-8 border border-white/5 rounded-[4px]">
+              <div className="bg-neutral-900/40 p-6 md:p-8 border border-white/5 rounded-none">
                 <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6">Написать отзыв</h3>
                 <form onSubmit={handleSubmitReview} className="space-y-6">
                   {/* Name */}
@@ -672,7 +672,7 @@ export default function ProductPage({ onAddToCart }) {
                       value={formName}
                       onChange={e => setFormName(e.target.value)}
                       placeholder="Введите имя"
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                     />
                   </div>
 
@@ -683,7 +683,7 @@ export default function ProductPage({ onAddToCart }) {
                       <select 
                         value={formAge} 
                         onChange={e => setFormAge(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                       >
                         <option value="18-24">18-24</option>
                         <option value="25-34">25-34</option>
@@ -697,7 +697,7 @@ export default function ProductPage({ onAddToCart }) {
                       <select 
                         value={formExp} 
                         onChange={e => setFormExp(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                       >
                         <option value="Новичок">Новичок</option>
                         <option value="Средний">Средний</option>
@@ -710,7 +710,7 @@ export default function ProductPage({ onAddToCart }) {
                       <select 
                         value={formSens} 
                         onChange={e => setFormSens(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary outline-none transition-colors rounded-[2px]"
+                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                       >
                         <option value="Низкая">Низкая</option>
                         <option value="Нормальная">Нормальная</option>
@@ -726,7 +726,7 @@ export default function ProductPage({ onAddToCart }) {
                       <input 
                         type="range" min="1" max="10" 
                         value={formNoise} onChange={e => setFormNoise(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
                       />
                     </div>
                     <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
@@ -734,7 +734,7 @@ export default function ProductPage({ onAddToCart }) {
                       <input 
                         type="range" min="1" max="10" 
                         value={formStrength} onChange={e => setFormStrength(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
                       />
                     </div>
                     <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
@@ -742,7 +742,7 @@ export default function ProductPage({ onAddToCart }) {
                       <input 
                         type="range" min="1" max="10" 
                         value={formErgo} onChange={e => setFormErgo(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-lg cursor-pointer"
+                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
                       />
                     </div>
                   </div>
@@ -756,13 +756,13 @@ export default function ProductPage({ onAddToCart }) {
                       onChange={e => setFormText(e.target.value)}
                       placeholder="Поделитесь вашим опытом..."
                       rows={3}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary outline-none transition-colors rounded-[2px] resize-none"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
                     />
                   </div>
 
                   <button 
                     type="submit" 
-                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-3.5 uppercase hover:bg-[#ffe088] transition-colors rounded-[2px]"
+                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-3.5 uppercase hover:bg-[#ffe088] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] transition-all rounded-none"
                   >
                     ОТПРАВИТЬ ОТЗЫВ
                   </button>
@@ -777,7 +777,7 @@ export default function ProductPage({ onAddToCart }) {
               
               <div className="space-y-6">
                 {reviewsList.map(rev => (
-                  <div key={rev.id} className="p-6 md:p-8 bg-neutral-900/20 border border-white/5 rounded-[4px] space-y-4">
+                  <div key={rev.id} className="p-6 md:p-8 bg-neutral-900/20 border border-white/5 rounded-none space-y-4">
                     {/* Review Header Metadata */}
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="text-left">

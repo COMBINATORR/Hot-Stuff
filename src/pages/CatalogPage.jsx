@@ -90,11 +90,11 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
         <div className="flex justify-between items-start w-full">
           <span>
             {product.isNew && (
-              <span className="text-[9px] font-bold tracking-widest text-[#FF5C3F] uppercase">NEW</span>
+              <span className="text-[9px] font-bold tracking-widest text-primary uppercase">NEW</span>
             )}
           </span>
           {product.discount ? (
-            <span className="bg-[#FF5C3F] text-white text-[9px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
+            <span className="bg-primary text-on-primary text-[9px] font-bold px-2 py-0.5 rounded-none leading-none">
               -{product.discount}%
             </span>
           ) : <div />}
@@ -128,7 +128,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
         {/* Info & Meta */}
         <div className="mt-2">
           {/* Heart Favorite */}
-          <button className="text-black hover:text-[#FF5C3F] transition-colors mb-2 block">
+          <button className="text-black hover:text-primary transition-colors mb-2 block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-none">
             <span className="material-symbols-outlined font-light text-[20px]">favorite_border</span>
           </button>
           
@@ -172,7 +172,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
                   {product.oldPrice.toLocaleString('ru-KZ')} ₸
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-[#FF5C3F] font-bold text-[12px]">
+                  <span className="text-primary font-bold text-[12px]">
                     {product.price.toLocaleString('ru-KZ')} ₸
                   </span>
                   <span className="text-gray-500 text-[8px]">
@@ -527,8 +527,8 @@ export default function CatalogPage({ onAddToCart }) {
               <div className="border-b border-gray-100 pb-2">
                 <button
                   onClick={() => handleCategoryClick('all')}
-                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
-                    activeCat === 'all' || activeCat === 'popular' ? 'text-[#FF5C3F]' : 'text-black'
+                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
+                    activeCat === 'all' || activeCat === 'popular' ? 'text-primary' : 'text-black'
                   }`}
                 >
                   <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
@@ -551,8 +551,8 @@ export default function CatalogPage({ onAddToCart }) {
                         <div>
                           <button
                             onClick={() => toggleSidebarCat(cat.slug)}
-                            className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
-                              activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-black'
+                            className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
+                              activeCat === cat.slug ? 'text-primary' : 'text-black'
                             }`}
                           >
                             <span className="text-[13px] font-light w-4 flex-none text-center">
@@ -567,7 +567,7 @@ export default function CatalogPage({ onAddToCart }) {
                               <button
                                 onClick={() => handleCategoryClick(cat.slug)}
                                 className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
-                                  activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-gray-500 hover:text-black'
+                                  activeCat === cat.slug ? 'text-primary' : 'text-gray-500 hover:text-black'
                                 }`}
                               >
                                 ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ
@@ -580,7 +580,7 @@ export default function CatalogPage({ onAddToCart }) {
                                     key={sub.slug}
                                     onClick={() => handleCategoryClick(sub.slug)}
                                     className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
-                                      isActive ? 'text-[#FF5C3F]' : 'text-gray-500 hover:text-black'
+                                      isActive ? 'text-primary' : 'text-gray-500 hover:text-black'
                                     }`}
                                   >
                                     {sub.name.toUpperCase()}
@@ -593,8 +593,8 @@ export default function CatalogPage({ onAddToCart }) {
                       ) : (
                         <button
                           onClick={() => handleCategoryClick(cat.slug)}
-                          className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
-                            activeCat === cat.slug ? 'text-[#FF5C3F]' : 'text-black'
+                          className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
+                            activeCat === cat.slug ? 'text-primary' : 'text-black'
                           }`}
                         >
                           <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
@@ -610,8 +610,8 @@ export default function CatalogPage({ onAddToCart }) {
               <div className="border-b border-gray-100 pb-2">
                 <button
                   onClick={() => handleCategoryClick('new')}
-                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-[#FF5C3F] transition-colors ${
-                    activeCat === 'new' ? 'text-[#FF5C3F]' : 'text-black'
+                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
+                    activeCat === 'new' ? 'text-primary' : 'text-black'
                   }`}
                 >
                   <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
@@ -644,12 +644,12 @@ export default function CatalogPage({ onAddToCart }) {
             <div className="flex justify-between items-center py-3 border-b border-gray-100 mb-8 font-sans">
               <button 
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-[#FF5C3F] transition-colors"
+                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-[16px]">tune</span>
                 Фильтры
                 {(selectedStimulations.length + selectedPriceRanges.length + selectedFeatures.length + (onlyDiscounted ? 1 : 0)) > 0 && (
-                  <span className="bg-[#FF5C3F] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  <span className="bg-primary text-on-primary text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {selectedStimulations.length + selectedPriceRanges.length + selectedFeatures.length + (onlyDiscounted ? 1 : 0)}
                   </span>
                 )}

@@ -27,14 +27,14 @@ function App() {
     });
   }, []);
 
-  const updateQty = useCallback((id, qty) => {
+  const updateQty = useCallback((id, variant, qty) => {
     setCartItems(prev =>
-      prev.map(i => i.id === id ? { ...i, qty: Math.max(1, qty) } : i)
+      prev.map(i => i.id === id && i.variant === variant ? { ...i, qty: Math.max(1, qty) } : i)
     );
   }, []);
 
-  const removeItem = useCallback((id) => {
-    setCartItems(prev => prev.filter(i => i.id !== id));
+  const removeItem = useCallback((id, variant) => {
+    setCartItems(prev => prev.filter(i => !(i.id === id && i.variant === variant)));
   }, []);
 
   return (

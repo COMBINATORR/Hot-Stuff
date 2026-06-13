@@ -59,6 +59,7 @@ module.exports = {
         xl:      '0',
         '2xl':   '0',
         full:    '9999px', // Only for color swatches
+        card:    '12px',   // Rounded corners specifically for product cards
       },
       spacing: {
         'margin-mobile':  '24px',

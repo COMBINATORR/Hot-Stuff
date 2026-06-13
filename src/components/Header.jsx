@@ -12,7 +12,6 @@ const TICKER_ITEMS = [
 ];
 
 function CategoryLink({ category, onClick }) {
-  const [showTooltip, setShowTooltip] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const subcategories = category.subcategories || [];
@@ -20,90 +19,18 @@ function CategoryLink({ category, onClick }) {
 
   return (
     <div className="relative flex flex-col w-full">
-      {/* Mobile-only layout */}
-      <div className="block md:hidden">
-        {hasSub ? (
-          <>
-            <div className="flex justify-between items-center w-full py-1.5">
-              <span
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors text-left flex-1"
-              >
-                {category.name}
-              </span>
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-white hover:text-primary transition-colors p-1"
-              >
-                <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                  expand_more
-                </span>
-              </button>
-            </div>
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className="overflow-hidden pl-4 flex flex-col gap-2 border-l border-white/10 my-1 pb-2"
-                >
-                  <Link
-                    to={`/catalog?cat=${category.slug}`}
-                    onClick={onClick}
-                    className="text-neutral-300 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left"
-                  >
-                    посмотреть все
-                  </Link>
-                  {subcategories.map((sub) => (
-                    <Link
-                      key={sub.slug}
-                      to={`/catalog?cat=${sub.slug}`}
-                      onClick={onClick}
-                      className="text-neutral-400 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left"
-                    >
-                      {sub.name}
-                    </Link>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
-        ) : (
-          <>
-            <Link
-              to={`/catalog?cat=${category.slug}`}
-              onClick={onClick}
-              className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-1.5 hover:text-primary transition-colors text-left"
-            >
-              {category.name}
-            </Link>
-            {category.description && (
-              <span className="text-[10px] text-neutral-400 leading-normal block -mt-1 pb-2 font-normal font-sans text-left">
-                {category.description}
-              </span>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Desktop-only layout */}
       {hasSub ? (
-        <div
-          className="hidden md:block relative text-left"
-          onMouseLeave={() => setIsOpen(false)}
-        >
-          <div className="flex justify-between items-center w-full py-2">
+        <>
+          <div className="flex justify-between items-center w-full py-1.5">
             <span
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors flex-1"
+              className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors text-left flex-1"
             >
               {category.name}
             </span>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white hover:text-primary transition-colors p-1"
+              className="text-white hover:text-primary transition-colors p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 rounded-[2px]"
             >
               <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
                 expand_more
@@ -113,16 +40,16 @@ function CategoryLink({ category, onClick }) {
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className="absolute left-0 top-full mt-1 z-[9999] min-w-[220px] bg-[#0c0c0d] border border-neutral-800 p-4 shadow-2xl flex flex-col gap-2.5 rounded-[2px]"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="overflow-hidden pl-4 flex flex-col gap-2 border-l border-white/10 my-1 pb-2"
               >
                 <Link
                   to={`/catalog?cat=${category.slug}`}
-                  onClick={() => { setIsOpen(false); onClick(); }}
-                  className="text-neutral-300 hover:text-primary transition-colors text-[10px] font-bold tracking-widest uppercase"
+                  onClick={onClick}
+                  className="text-neutral-300 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
                 >
                   посмотреть все
                 </Link>
@@ -130,8 +57,8 @@ function CategoryLink({ category, onClick }) {
                   <Link
                     key={sub.slug}
                     to={`/catalog?cat=${sub.slug}`}
-                    onClick={() => { setIsOpen(false); onClick(); }}
-                    className="text-neutral-400 hover:text-primary transition-colors text-[10px] font-bold tracking-widest uppercase"
+                    onClick={onClick}
+                    className="text-neutral-400 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
                   >
                     {sub.name}
                   </Link>
@@ -139,38 +66,22 @@ function CategoryLink({ category, onClick }) {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </>
       ) : (
-        <div
-          className="hidden md:block relative text-left"
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-        >
+        <>
           <Link
             to={`/catalog?cat=${category.slug}`}
             onClick={onClick}
-            className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-2 hover:text-primary transition-colors"
+            className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-1.5 hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
           >
             {category.name}
           </Link>
           {category.description && (
-            <AnimatePresence>
-              {showTooltip && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-0 top-full mt-2 z-[9999] max-w-[240px] bg-black text-white text-[9.5px] leading-relaxed font-sans font-normal p-3 rounded border border-neutral-800 shadow-xl pointer-events-none text-left"
-                >
-                  {category.description}
-                  {/* Arrow pointing up */}
-                  <div className="absolute bottom-full left-4 border-4 border-transparent border-b-black" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <span className="text-[10px] text-neutral-400 leading-normal block -mt-1 pb-2 font-normal font-sans text-left">
+              {category.description}
+            </span>
           )}
-        </div>
+        </>
       )}
     </div>
   );
@@ -279,17 +190,17 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                         <div className="flex items-center border border-white/10">
                           <button 
                             className="px-3 py-1 text-on-surface-variant hover:text-primary"
-                            onClick={() => onUpdateQty(item.id, Math.max(1, item.qty - 1))}
+                            onClick={() => onUpdateQty(item.id, item.variant, Math.max(1, item.qty - 1))}
                           >-</button>
                           <span className="px-3 py-1 font-body-md">{item.qty}</span>
                           <button 
                             className="px-3 py-1 text-on-surface-variant hover:text-primary"
-                            onClick={() => onUpdateQty(item.id, item.qty + 1)}
+                            onClick={() => onUpdateQty(item.id, item.variant, item.qty + 1)}
                           >+</button>
                         </div>
                         <button 
                           className="text-xs text-on-surface-variant hover:text-error uppercase tracking-widest"
-                          onClick={() => onRemove(item.id)}
+                          onClick={() => onRemove(item.id, item.variant)}
                         >Удалить</button>
                       </div>
                     </div>
@@ -521,7 +432,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               </span>
               <Link 
                 to={TICKER_ITEMS[tickerIndex].link} 
-                className="bg-[#FF5C3F] text-black text-[8px] md:text-[9px] font-black tracking-widest uppercase py-1 px-2.5 md:py-1.5 md:px-4 transition-transform hover:scale-105 inline-block flex-none"
+                className="bg-primary hover:bg-[#ffe088] active:scale-95 transition-all text-on-primary text-[8px] md:text-[9px] font-black tracking-widest uppercase py-1 px-2.5 md:py-1.5 md:px-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary inline-block flex-none"
               >
                 КУПИТЬ
               </Link>
@@ -540,7 +451,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
             {/* Sandwich for Desktop */}
-            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none group h-[24px]`}>
+            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 transition-all group h-[24px]`}>
               <div className="flex flex-col justify-between items-start w-6 h-[10px]">
                 <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
                 <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
@@ -573,13 +484,13 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
+            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
-            <NavLink to="/account" onClick={handleAccountClick} className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
+            <NavLink to="/account" onClick={handleAccountClick} className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
             </NavLink>
-            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary transition-colors`}>
+            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
@@ -589,7 +500,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             </button>
 
             {/* Sandwich for Mobile */}
-            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none group`}>
+            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all group`}>
               <div className="flex flex-col justify-between items-end w-6 h-[10px]">
                 <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
                 <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
@@ -796,7 +707,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
         <button 
           onClick={() => window.location.replace('https://www.google.com')}
-          className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-[#FF5C3F] hover:text-[#ff785f] transition-colors focus:outline-none"
+          className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-primary hover:text-[#ffe088] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-90"
         >
           <span className="material-symbols-outlined text-[22px] font-light">visibility_off</span>
           <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Паника</span>

@@ -7,21 +7,27 @@ import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import ResponsiveImage from '../components/ResponsiveImage';
 
-/* Mock cart state — later replace with Context/Zustand */
-const MOCK_ITEMS = [
-  { id: 1, name: 'Товар №1', price: 12500, qty: 1, image_url: null },
-  { id: 2, name: 'Товар №2', price: 8900,  qty: 2, image_url: null },
-];
-
 /* ── Qty stepper ──────────────────────────── */
 function QtyControl({ qty, onMinus, onPlus }) {
   return (
-    <div className="cart-item-qty">
-      <button onClick={onMinus} aria-label="Уменьшить">−</button>
-      <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.9rem', minWidth: '1.5ch', textAlign: 'center' }}>
+    <div className="inline-flex items-center border border-white/10 bg-neutral-900 rounded-none h-8">
+      <button 
+        onClick={onMinus} 
+        className="w-8 h-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 active:scale-90 transition-all focus:outline-none focus-visible:bg-white/10" 
+        aria-label="Уменьшить"
+      >
+        −
+      </button>
+      <span className="px-2 text-xs font-bold text-white font-sans min-w-[2rem] text-center">
         {qty}
       </span>
-      <button onClick={onPlus} aria-label="Увеличить">+</button>
+      <button 
+        onClick={onPlus} 
+        className="w-8 h-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 active:scale-90 transition-all focus:outline-none focus-visible:bg-white/10" 
+        aria-label="Увеличить"
+      >
+        +
+      </button>
     </div>
   );
 }
@@ -30,64 +36,60 @@ function QtyControl({ qty, onMinus, onPlus }) {
 function CartItemRow({ item, onQtyChange, onRemove }) {
   return (
     <motion.div
-      className="cart-item"
+      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 bg-neutral-900/40 border border-white/5 hover:border-white/10 transition-all duration-300 relative rounded-none"
       layout
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 16, height: 0, padding: 0 }}
       transition={{ duration: 0.28 }}
     >
-      {/* Image */}
-      <div className="cart-item-image">
-        {(item.image_url || item.image)
-          ? <ResponsiveImage src={item.image_url || item.image} alt={item.name} loading="lazy" />
-          : (
-            <div style={{
-              width: '100%', height: '100%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem', background: 'var(--bg-secondary)',
-            }}>📦</div>
-          )
-        }
-      </div>
+      <div className="flex gap-4 items-center w-full sm:w-auto">
+        {/* Image - Rounded Card Corner brand rule applies here */}
+        <div className="w-20 h-20 bg-neutral-950 border border-white/10 flex-shrink-0 flex items-center justify-center rounded-card overflow-hidden">
+          {(item.image_url || item.image) ? (
+            <ResponsiveImage 
+              src={item.image_url || item.image} 
+              alt={item.name} 
+              className="w-full h-full object-cover" 
+              loading="lazy" 
+            />
+          ) : (
+            <div className="text-3xl">📦</div>
+          )}
+        </div>
 
-      {/* Info */}
-      <div>
-        <p style={{
-          fontFamily: 'var(--font-heading)', fontWeight: 700,
-          fontSize: '0.92rem', color: 'var(--text-primary)', marginBottom: '0.3rem',
-        }}>
-          {item.name}
-        </p>
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-          арт. HS-{String(item.id).padStart(4, '0')}
-        </p>
-        <QtyControl
-          qty={item.qty}
-          onMinus={() => onQtyChange(item.id, item.qty - 1)}
-          onPlus={() => onQtyChange(item.id, item.qty + 1)}
-        />
+        {/* Info */}
+        <div className="space-y-1 text-left">
+          <h3 className="font-sans font-bold text-xs text-white uppercase tracking-wider">
+            {item.name}
+          </h3>
+          {item.variant && (
+            <p className="text-[10px] text-primary font-bold uppercase tracking-wider">
+              Цвет: {item.variant}
+            </p>
+          )}
+          <p className="text-[9px] text-white/40 font-mono tracking-wider">
+            АРТ. HS-{String(item.id).padStart(4, '0')}
+          </p>
+          <div className="pt-2">
+            <QtyControl
+              qty={item.qty}
+              onMinus={() => onQtyChange(item.id, item.variant, item.qty - 1)}
+              onPlus={() => onQtyChange(item.id, item.variant, item.qty + 1)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Price + remove */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-        <span style={{
-          fontFamily: 'var(--font-heading)', fontWeight: 800,
-          fontSize: '1rem', color: 'var(--text-primary)',
-        }}>
+      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto gap-4 self-stretch text-right mt-4 sm:mt-0">
+        <span className="font-sans font-extrabold text-sm text-white tracking-tight">
           {(item.price * item.qty).toLocaleString('ru-KZ')} ₸
         </span>
         <button
-          onClick={() => onRemove(item.id)}
+          onClick={() => onRemove(item.id, item.variant)}
           aria-label={`Удалить ${item.name}`}
-          style={{
-            fontSize: '0.72rem', color: 'var(--text-muted)',
-            fontFamily: 'var(--font-body)',
-            transition: 'color 0.2s',
-            background: 'none', border: 'none', cursor: 'pointer',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = '#e53e3e'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+          className="text-[10px] font-bold text-white/40 hover:text-error uppercase tracking-wider transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-error focus-visible:ring-offset-1 focus-visible:ring-offset-black rounded-none"
         >
           Удалить
         </button>
@@ -100,16 +102,16 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   const { t } = useTranslation();
   const items = cartItems;
 
-  const handleQty = (id, newQty) => {
+  const handleQty = (id, variant, newQty) => {
     if (newQty < 1) {
-      if (onRemove) onRemove(id);
+      if (onRemove) onRemove(id, variant);
     } else {
-      if (onUpdateQty) onUpdateQty(id, newQty);
+      if (onUpdateQty) onUpdateQty(id, variant, newQty);
     }
   };
 
-  const handleRemove = (id) => {
-    if (onRemove) onRemove(id);
+  const handleRemove = (id, variant) => {
+    if (onRemove) onRemove(id, variant);
   };
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -117,7 +119,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   const total = subtotal + delivery;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <Helmet>
         <title>Hot Stuff — Корзина</title>
         <meta name="description" content="Ваша корзина в Hot Stuff. Оформите заказ с доставкой по Казахстану." />
@@ -125,21 +127,16 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
 
       <Header />
 
-      <main className="flex-1 page-enter" id="main-content">
-        <div className="container-hs section-gap">
+      <main className="flex-1 pt-32 pb-20" id="main-content">
+        <div className="container-hs">
           <motion.h1
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '2.5rem' }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-sans text-2xl md:text-3xl font-black text-white uppercase tracking-widest mb-10 flex items-baseline gap-3 text-left"
           >
             {t('cart.title')}
             {items.length > 0 && (
-              <span style={{
-                marginLeft: '0.75rem',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.9rem',
-                fontWeight: 400,
-                color: 'var(--text-muted)',
-              }}>
+              <span className="font-sans font-normal text-xs text-white/40 uppercase tracking-widest">
                 ({items.length} {items.length === 1 ? 'товар' : 'товара'})
               </span>
             )}
@@ -147,32 +144,37 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
 
           {items.length === 0 ? (
             /* ─ Empty State ─────────────────── */
-            <div className="empty-state">
-              <div className="empty-state-icon">🛒</div>
-              <p style={{
-                fontFamily: 'var(--font-heading)', fontWeight: 700,
-                fontSize: '1.25rem', color: 'var(--text-primary)',
-              }}>
-                {t('cart.empty')}
-              </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                Добавьте товары, чтобы оформить заказ
-              </p>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Link to="/catalog" className="btn btn-primary btn-lg" id="cart-cta-catalog">
+            <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-neutral-950 border border-white/5 space-y-6 rounded-none">
+              <div className="w-16 h-16 flex items-center justify-center bg-neutral-900 border border-white/10 text-2xl text-primary rounded-none">
+                🛒
+              </div>
+              <div>
+                <p className="font-sans font-bold text-sm text-white uppercase tracking-wider">
+                  {t('cart.empty')}
+                </p>
+                <p className="text-[11px] text-white/50 tracking-wide mt-1">
+                  Добавьте товары, чтобы оформить заказ
+                </p>
+              </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link 
+                  to="/catalog" 
+                  className="inline-flex items-center justify-center bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] px-8 py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
+                  id="cart-cta-catalog"
+                >
                   Перейти в каталог →
                 </Link>
               </motion.div>
             </div>
           ) : (
             /* ─ Cart layout ─────────────────── */
-            <div className="cart-layout">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start mt-10">
               {/* Left: items list */}
-              <div>
+              <div className="lg:col-span-2 space-y-6">
                 <AnimatePresence>
                   {items.map(item => (
                     <CartItemRow
-                      key={item.id}
+                      key={item.id + (item.variant || '')}
                       item={item}
                       onQtyChange={handleQty}
                       onRemove={handleRemove}
@@ -181,18 +183,10 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                 </AnimatePresence>
 
                 {/* Continue shopping */}
-                <div style={{ marginTop: '1.5rem' }}>
+                <div className="pt-4 text-left">
                   <Link
                     to="/catalog"
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                      fontFamily: 'var(--font-heading)', fontSize: '0.78rem', fontWeight: 600,
-                      letterSpacing: '0.06em', textTransform: 'uppercase',
-                      color: 'var(--text-muted)',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--brand-gold)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                    className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 hover:text-primary uppercase tracking-widest transition-colors duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-none"
                   >
                     ← Продолжить покупки
                   </Link>
@@ -200,65 +194,68 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
               </div>
 
               {/* Right: order summary */}
-              <aside>
-                <div className="cart-summary">
-                  <p style={{
-                    fontFamily: 'var(--font-heading)', fontSize: '0.72rem', fontWeight: 700,
-                    letterSpacing: '0.12em', textTransform: 'uppercase',
-                    color: 'var(--text-muted)', marginBottom: '1rem',
-                  }}>
-                    Итого заказа
-                  </p>
+              <aside className="lg:col-span-1 bg-neutral-950 border border-white/5 p-6 sm:p-8 space-y-6 sticky top-28 rounded-none">
+                <p className="font-sans text-[10px] font-bold tracking-widest text-white/40 uppercase text-left">
+                  Итого заказа
+                </p>
 
-                  <div className="cart-summary-row">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs tracking-wide text-white/60">
                     <span>Товары ({items.reduce((s, i) => s + i.qty, 0)} шт.)</span>
-                    <span>{subtotal.toLocaleString('ru-KZ')} ₸</span>
+                    <span className="font-semibold text-white">{subtotal.toLocaleString('ru-KZ')} ₸</span>
                   </div>
 
-                  <div className="cart-summary-row">
+                  <div className="flex justify-between text-xs tracking-wide text-white/60">
                     <span>Доставка</span>
-                    <span style={{ color: delivery === 0 ? '#38a169' : 'inherit' }}>
+                    <span className={`font-semibold ${delivery === 0 ? 'text-green-400' : 'text-white'}`}>
                       {delivery === 0 ? 'Бесплатно' : `${delivery.toLocaleString('ru-KZ')} ₸`}
                     </span>
                   </div>
 
                   {delivery > 0 && (
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                    <p className="text-[10px] text-white/40 text-left mt-1 leading-normal">
                       Бесплатно при заказе от 15 000 ₸ (осталось {(15000 - subtotal).toLocaleString('ru-KZ')} ₸)
                     </p>
                   )}
+                </div>
 
-                  <div className="cart-summary-total cart-summary-row">
-                    <span>К оплате</span>
-                    <span>{total.toLocaleString('ru-KZ')} ₸</span>
-                  </div>
+                <div className="flex justify-between items-baseline border-t border-white/10 pt-4 text-white">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">К оплате</span>
+                  <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
+                </div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    style={{ marginTop: '1.5rem' }}
+                <motion.div
+                  whileHover={{ scale: 1.01 }} 
+                  whileTap={{ scale: 0.99 }}
+                  className="pt-2"
+                >
+                  <Link 
+                    to="/checkout" 
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
+                    id="cart-cta-checkout"
                   >
-                    <Link to="/checkout" className="btn btn-primary btn-lg" id="cart-cta-checkout"
-                      style={{ width: '100%', justifyContent: 'center' }}>
-                      Оформить заказ
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    </Link>
-                  </motion.div>
+                    Оформить заказ
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </Link>
+                </motion.div>
 
-                  {/* Trust micro-copy */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1.2rem' }}>
-                    {[
-                      '🔒 Безопасная оплата SSL',
-                      '💳 Оплата Kaspi Pay / рассрочка',
-                      '↩️ Возврат в течение 30 дней',
-                    ].map(text => (
-                      <p key={text} style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        {text}
-                      </p>
-                    ))}
-                  </div>
+                {/* Trust micro-copy */}
+                <div className="border-t border-white/5 pt-6 space-y-3">
+                  {[
+                    { text: '🔒 Безопасная оплата SSL' },
+                    { text: '💳 Оплата Kaspi Pay / рассрочка' },
+                    { text: '↩️ Возврат в течение 30 дней' }
+                  ].map(item => (
+                    <p 
+                      key={item.text} 
+                      className="text-[9px] font-bold text-white/40 flex items-center gap-2.5 uppercase tracking-wider text-left"
+                    >
+                      {item.text}
+                    </p>
+                  ))}
                 </div>
               </aside>
             </div>

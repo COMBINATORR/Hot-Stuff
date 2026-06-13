@@ -542,7 +542,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="border border-black/10 hover:border-[#FF5C3F] hover:text-[#FF5C3F] text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-[2px] cursor-pointer"
+                  className="border border-black/10 hover:border-red-500 hover:text-red-500 text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 active:scale-95"
                 >
                   ВЫЙТИ ИЗ АККАУНТА
                 </button>
@@ -621,7 +621,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                           const prod = ALL_PRODUCTS.find(p => p.id === 4);
                           if (prod) handleAddWishlistItem(prod);
                         }}
-                        className="text-[9px] font-black tracking-wider text-black hover:text-[#FF5C3F] uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0"
+                        className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
                       >
                         Повторить в 1 клик
                       </button>
@@ -707,7 +707,7 @@ export default function AccountPage({ onAddToCart, lang }) {
           </h2>
 
           {error && (
-            <div className="w-full text-center text-xs text-[#FF5C3F] font-bold pb-4">
+            <div className="w-full text-center text-xs text-red-500 font-bold pb-4">
               ⚠️ {error}
             </div>
           )}
@@ -871,7 +871,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                         <button
                           type="button"
                           onClick={() => triggerOtpSend(identifier)}
-                          className="text-[11px] font-bold text-black hover:text-[#FF5C3F] uppercase tracking-wider bg-transparent border-none cursor-pointer transition-colors font-sans"
+                          className="text-[11px] font-bold text-black hover:text-primary uppercase tracking-wider bg-transparent border-none cursor-pointer transition-colors font-sans focus-visible:outline-none focus-visible:underline"
                           disabled={loading}
                         >
                           Отправить код повторно

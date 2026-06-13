@@ -202,16 +202,16 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
               <div className="absolute top-4 right-4 flex gap-2.5 z-40">
                 <button 
                   onClick={() => setIsFavorited(!isFavorited)}
-                  className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm"
+                  className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all"
                   aria-label="В избранное"
                 >
-                  <span className={`material-symbols-outlined text-[18px] ${isFavorited ? 'fill-current text-[#FF5C3F]' : ''}`}>
+                  <span className={`material-symbols-outlined text-[18px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                     {isFavorited ? 'favorite' : 'favorite_border'}
                   </span>
                 </button>
                 <button 
                   onClick={onClose}
-                  className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm"
+                  className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all"
                   aria-label="Закрыть"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
@@ -260,7 +260,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
 
                 {/* Discount Badge */}
                 <div className="mt-3.5 flex">
-                  <span className="bg-[#FF5C3F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
+                  <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-none leading-none">
                     -{discountPercent}%
                   </span>
                 </div>
@@ -271,7 +271,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     {oldPriceValue.toLocaleString('ru-KZ')} ₸
                   </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-[#FF5C3F] font-bold text-[18px] font-sans">
+                    <span className="text-primary font-bold text-[18px] font-sans">
                       {product.price.toLocaleString('ru-KZ')} ₸
                     </span>
                     <span className="text-gray-500 text-[10px] font-sans">
@@ -314,13 +314,13 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 <div className="mt-8 flex gap-3">
                   <button
                     onClick={handleNavigateToProduct}
-                    className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase text-center"
+                    className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
                   >
                     ПОСМОТРЕТЬ
                   </button>
                   <button
                     onClick={handleAdd}
-                    className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase"
+                    className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
                   >
                     ADD TO CART
                   </button>
@@ -492,15 +492,17 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     <div className="flex justify-end flex-none border-b border-gray-100">
                       <button 
                         onClick={() => setIsFavorited(!isFavorited)}
-                        className="flex items-center justify-center w-12 h-12 bg-white text-black hover:text-[#FF5C3F] transition-colors border-l border-gray-100"
+                        className="flex items-center justify-center w-12 h-12 bg-white text-black hover:text-primary transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:text-primary active:scale-90"
+                        aria-label="В избранное"
                       >
-                        <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-[#FF5C3F]' : ''}`}>
+                        <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                           {isFavorited ? 'favorite' : 'favorite_border'}
                         </span>
                       </button>
                       <button 
                         onClick={onClose}
-                        className="flex items-center justify-center w-12 h-12 bg-white text-black hover:bg-black hover:text-white transition-colors border-l border-gray-100"
+                        className="flex items-center justify-center w-12 h-12 bg-white text-black hover:bg-black hover:text-white transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:bg-black focus-visible:text-white active:scale-90"
+                        aria-label="Закрыть"
                       >
                         <span className="material-symbols-outlined text-[20px]">close</span>
                       </button>
@@ -520,7 +522,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
 
                       {/* Discount Badge */}
                       <div className="mt-4 flex">
-                        <span className="bg-[#FF5C3F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
+                        <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-none leading-none">
                           -{discountPercent}%
                         </span>
                       </div>
@@ -531,7 +533,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                           {oldPriceValue.toLocaleString('ru-KZ')} ₸
                         </span>
                         <div className="flex items-baseline gap-2 mt-0.5">
-                          <span className="text-[#FF5C3F] font-bold text-[18px] font-sans">
+                          <span className="text-primary font-bold text-[18px] font-sans">
                             {product.price.toLocaleString('ru-KZ')} ₸
                           </span>
                           <span className="text-gray-500 text-[10px] font-sans">
@@ -572,7 +574,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       <div className="mt-6 flex gap-2.5">
                         <button
                           onClick={handleNavigateToProduct}
-                          className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-black hover:text-white transition-all text-center"
+                          className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-black hover:text-white transition-all text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98]"
                         >
                           ПОСМОТРЕТЬ
                         </button>

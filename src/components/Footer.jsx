@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -46,9 +46,28 @@ const FOOTER_CONFIG = {
 };
 
 export default function Footer() {
-  const [buyersOpen, setBuyersOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
-  const [paymentsOpen, setPaymentsOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
-  const [legalOpen, setLegalOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  const [buyersOpen, setBuyersOpen] = useState(false);
+  const [paymentsOpen, setPaymentsOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 768;
+      if (isDesktop) {
+        setBuyersOpen(true);
+        setPaymentsOpen(true);
+        setLegalOpen(true);
+      } else {
+        setBuyersOpen(false);
+        setPaymentsOpen(false);
+        setLegalOpen(false);
+      }
+    };
+
+    handleResize(); // Initialize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <footer className="site-footer bg-black border-t border-white/5">
@@ -167,7 +186,7 @@ export default function Footer() {
                         return (
                           <div 
                             key={pay.id} 
-                            className="bg-[#F14635] text-white font-black text-[9px] tracking-widest px-3 py-1.5 rounded-[4px] flex items-center gap-1 select-none shadow-md"
+                            className="bg-primary text-on-primary font-black text-[9px] tracking-widest px-3 py-1.5 rounded-none flex items-center gap-1 select-none shadow-md"
                             title={pay.name}
                           >
                             <span className="material-symbols-outlined text-[12px] leading-none">qr_code_2</span>
@@ -178,7 +197,7 @@ export default function Footer() {
                       return (
                         <div 
                           key={pay.id}
-                          className="border border-white/10 text-[#a1a1aa] font-bold text-[9px] tracking-widest px-3 py-1.5 rounded-[4px] flex items-center select-none"
+                          className="border border-white/10 text-[#a1a1aa] font-bold text-[9px] tracking-widest px-3 py-1.5 rounded-none flex items-center select-none"
                           title={pay.name}
                         >
                           {pay.id === 'cash' && <span className="material-symbols-outlined text-[12px] leading-none mr-1">payments</span>}
@@ -226,7 +245,7 @@ export default function Footer() {
                   
                   {/* Strict 18+ Warning Marker */}
                   <div className="flex items-start gap-3 border-t border-white/5 pt-3 mt-1">
-                    <span className="w-8 h-8 bg-[#FF5C3F] text-white rounded-[4px] flex items-center justify-center font-sans font-black text-[11px] flex-none select-none shadow-sm">
+                    <span className="w-8 h-8 bg-primary text-on-primary rounded-none flex items-center justify-center font-sans font-black text-[11px] flex-none select-none shadow-sm">
                       {FOOTER_CONFIG.legal.ageRestriction}
                     </span>
                     <p className="text-[10px] text-[#71717a] leading-normal font-sans font-medium tracking-wide">

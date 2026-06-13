@@ -455,8 +455,8 @@ export default function HomePage({ onAddToCart }) {
           <h3 className="text-white text-xl font-bold mb-2 font-sans">Ваша идеальная пара найдена!</h3>
           <p className="text-white/60 text-xs sm:text-sm mb-6">На основе ваших ответов мы подобрали лучшее решение:</p>
           
-          <div className="w-full bg-surface-container-low border border-white/5 p-6 rounded-lg mb-6 flex flex-col items-center">
-            <div className="w-32 h-32 mb-4 overflow-hidden rounded bg-black/20">
+          <div className="w-full bg-surface-container-low border border-white/5 p-6 rounded-card mb-6 flex flex-col items-center">
+            <div className="w-32 h-32 mb-4 overflow-hidden rounded-card bg-black/20">
               <ResponsiveImage src={rec.image} alt={rec.name} className="w-full h-full object-cover" />
             </div>
             <h4 className="text-white font-bold text-base mb-1 tracking-wider uppercase font-sans">{rec.name}</h4>
@@ -582,10 +582,7 @@ export default function HomePage({ onAddToCart }) {
         </motion.div>
       </section>
 
-      {/* Product Skeletons Grid */}
-      <div className="container mx-auto px-4 py-8">
-        <ProductGrid />
-      </div>
+      {/* Removed redundant/pulsing Product Skeletons Grid */}
       
       {/* ═══ TRUST GRID SECTION ═══ */}
       <section className="bg-black py-12 px-6">
@@ -710,12 +707,12 @@ export default function HomePage({ onAddToCart }) {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {ALL_PRODUCTS.map((p) => (
-              <div key={p.id} className="relative group">
+              <div key={p.id} className="relative group rounded-card">
                 {/* Background and border that expands on hover */}
-                <div className="absolute inset-0 bg-surface-container-low border border-white/5 transition-all duration-300 md:group-hover:-bottom-[68px] z-0 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-surface-container-low border border-white/5 transition-all duration-300 md:group-hover:-bottom-[68px] z-0 pointer-events-none rounded-card"></div>
                 
-                <div className="relative z-10 flex flex-col h-full">
-                  <Link to={`/product/${p.id}`} className="block relative overflow-hidden aspect-[3/4]">
+                <div className="relative z-10 flex flex-col h-full rounded-card overflow-hidden">
+                  <Link to={`/product/${p.id}`} className="block relative overflow-hidden aspect-[3/4] rounded-t-card">
                     <ResponsiveImage src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   </Link>
                   
@@ -778,8 +775,8 @@ export default function HomePage({ onAddToCart }) {
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
       <section className="bg-black py-16 md:py-24">
         <div className="container-hs grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-          {/* Left Column: Image with rounded corners */}
-          <div className="w-full aspect-[4/3] md:aspect-square overflow-hidden rounded-lg border border-white/10">
+          {/* Left Column: Image with sharp corners (brand rule) */}
+          <div className="w-full aspect-[4/3] md:aspect-square overflow-hidden rounded-none border border-white/10">
             <ResponsiveImage 
               src={logoQuizBg} 
               alt="Опрос по секс-игрушкам" 
@@ -900,7 +897,7 @@ export default function HomePage({ onAddToCart }) {
       {/* Quiz Modal Portal */}
       {quizOpen && createPortal(
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4 transition-opacity duration-300">
-          <div className="bg-[#121212] border border-white/10 w-full max-w-xl p-8 rounded-lg relative flex flex-col">
+          <div className="bg-[#121212] border border-white/10 w-full max-w-xl p-8 rounded-none relative flex flex-col">
             <button 
               onClick={() => setQuizOpen(false)} 
               className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"

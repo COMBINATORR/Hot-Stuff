@@ -23,7 +23,7 @@ export default function PanicButton() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1, duration: 0.5 }}
-      className="hidden md:flex md:fixed md:bottom-6 md:left-6 z-[9999] bg-black/95 hover:bg-[#FF5C3F] text-white border border-white/10 hover:border-[#FF5C3F] shadow-2xl transition-all duration-300 font-sans font-bold text-[10px] tracking-[0.15em] cursor-pointer items-center justify-start gap-2 h-10 px-4 py-2.5 rounded-full focus:outline-none"
+      className="hidden md:flex md:fixed md:bottom-6 md:left-6 z-[9999] bg-black/95 hover:bg-primary text-white hover:text-on-primary border border-white/10 hover:border-primary shadow-2xl transition-all duration-300 font-sans font-bold text-[10px] tracking-[0.15em] cursor-pointer items-center justify-start gap-2 h-10 px-4 py-2.5 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95"
       title="Быстрый выход (Клавиша ESC)"
     >
       <span className="material-symbols-outlined text-[16px] flex-none">visibility_off</span>

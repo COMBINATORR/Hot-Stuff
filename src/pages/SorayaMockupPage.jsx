@@ -100,16 +100,16 @@ export default function SorayaMockupPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsFavorited(!isFavorited)}
-              className="text-black hover:text-[#FF5C3F] transition-colors"
+              className="text-black hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-none"
               aria-label="В избранное"
             >
-              <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-[#FF5C3F]' : ''}`}>
+              <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                 {isFavorited ? 'favorite' : 'favorite_border'}
               </span>
             </button>
             <button 
               onClick={() => navigate('/catalog')}
-              className="text-black hover:text-gray-600 transition-colors"
+              className="text-black hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-none"
               aria-label="Закрыть"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -170,10 +170,10 @@ export default function SorayaMockupPage() {
               <span className="text-gray-400 line-through text-[11px]">
                 259 EUR
               </span>
-              <span className="text-[#FF5C3F] font-bold text-[18px] mt-0.5 leading-none">
+              <span className="text-primary font-bold text-[18px] mt-0.5 leading-none">
                 202,02 EUR
               </span>
-              <span className="text-[#FF5C3F] font-bold text-[10px] mt-1.5">
+              <span className="text-primary font-bold text-[10px] mt-1.5">
                 сохранить 56,98 EUR
               </span>
             </div>
@@ -208,17 +208,17 @@ export default function SorayaMockupPage() {
 
           {/* Discount Tag */}
           <div className="mt-4 flex">
-            <span className="bg-[#FF5C3F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[2px] leading-none">
+            <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-none leading-none">
               -22%
             </span>
           </div>
 
           {/* Actions Button Grid */}
           <div className="mt-6 flex gap-2.5">
-            <button className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-black hover:text-white transition-all">
+            <button className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
               ПОСМОТРЕТЬ
             </button>
-            <button className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-gray-800 transition-all">
+            <button className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
               ADD TO CART
             </button>
           </div>
@@ -342,7 +342,7 @@ export default function SorayaMockupPage() {
           </h3>
 
           {/* Bundle 1 */}
-          <div className="bg-white border border-gray-100 p-4 mb-6 relative shadow-sm">
+          <div className="bg-white border border-gray-100 p-4 mb-6 relative shadow-sm rounded-card overflow-hidden">
             <div className="flex gap-4">
               <div className="w-20 h-20 bg-[#784B3E] flex-none overflow-hidden relative">
                 <OperationAllgasmSvg />
@@ -355,22 +355,22 @@ export default function SorayaMockupPage() {
                   SORAYA Wave™, SONA™ 2 Cruise, Flickering Touch Massage Candle, Personal Moisturizer, Mouthwatering Spray
                 </p>
                 <div className="mt-2 flex flex-col font-sans">
-                  <span className="text-[#FF5C3F] font-bold text-[12px] leading-none">
+                  <span className="text-primary font-bold text-[12px] leading-none">
                     319 EUR
                   </span>
-                  <span className="text-[#FF5C3F] font-bold text-[9px] mt-0.5">
+                  <span className="text-primary font-bold text-[9px] mt-0.5">
                     сохранить 159,80 EUR
-                </span>
+                  </span>
                 </div>
               </div>
             </div>
-            <button className="w-full mt-4 bg-white text-black border border-black font-sans font-bold text-[9px] tracking-widest py-2.5 uppercase hover:bg-black hover:text-white transition-all">
+            <button className="w-full mt-4 bg-white text-black border border-black font-sans font-bold text-[9px] tracking-widest py-2.5 uppercase hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
               ПРЕДПРОСМОТР
             </button>
           </div>
 
           {/* Bundle 2 */}
-          <div className="bg-white border border-gray-100 p-4 relative shadow-sm">
+          <div className="bg-white border border-gray-100 p-4 relative shadow-sm rounded-card overflow-hidden">
             <div className="flex gap-4">
               <div className="w-20 h-20 bg-[#2A4B7C] flex-none overflow-hidden relative">
                 <SorayaExperienceSvg />
@@ -383,10 +383,10 @@ export default function SorayaMockupPage() {
                   SORAYA Wave™, SORAYA Beads™, Personal Moisturizer, Bad Day Killer - Clitherapy Balm
                 </p>
                 <div className="mt-2 flex flex-col font-sans">
-                  <span className="text-[#FF5C3F] font-bold text-[12px] leading-none">
+                  <span className="text-primary font-bold text-[12px] leading-none">
                     359 EUR
                   </span>
-                  <span className="text-[#FF5C3F] font-bold text-[9px] mt-0.5">
+                  <span className="text-primary font-bold text-[9px] mt-0.5">
                     сохранить 159,90 EUR
                   </span>
                 </div>

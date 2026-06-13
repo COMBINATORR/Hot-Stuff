@@ -25,255 +25,307 @@ export default function CheckoutPage({ cartItems = [] }) {
   const total = subtotal + deliveryCost;
 
   return (
-    <div className="page-enter pt-[80px]">
-      <div className="container-hs py-16 md:py-24">
-        {/* Breadcrumb */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-          className="flex items-center gap-2 mb-12"
-        >
-          <Link to="/catalog" className="label-caps text-outline hover:text-primary transition-colors">Каталог</Link>
-          <span className="text-outline">/</span>
-          <span className="label-caps text-on-surface-variant">Оформление заказа</span>
-        </motion.div>
+    <div className="w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface py-20 md:py-28 px-4 md:px-8">
+      {/* White Card Wrapper */}
+      <div className="w-full max-w-5xl bg-white text-black border border-black/5 p-6 md:p-10 rounded-[28px] shadow-2xl font-sans relative z-10 overflow-hidden">
+        {/* Background radial highlight for light dashboard */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-headline-lg mb-16"
-        >
-          Оформление заказа
-        </motion.h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-16 lg:gap-gutter items-start">
-          {/* ═══ LEFT — Form ═══════════════════════ */}
-          <motion.div initial="hidden" animate="visible" variants={stagger} className="flex flex-col gap-16">
-            {/* ── SECTION 1: Контакты ─────────────── */}
-            <motion.div variants={fadeUp}>
-              <div className="flex items-center mb-8">
-                <div className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary label-caps text-[11px]">1</div>
-                <h2 className="label-caps text-on-surface ml-4">КОНТАКТНАЯ ИНФОРМАЦИЯ</h2>
-                <div className="section-rule" />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                <div>
-                  <label className="field-label">ИМЯ</label>
-                  <input className="field-underline" placeholder="Ваше имя" />
-                </div>
-                <div>
-                  <label className="field-label">ФАМИЛИЯ</label>
-                  <input className="field-underline" placeholder="Ваша фамилия" />
-                </div>
-                <div>
-                  <label className="field-label">ТЕЛЕФОН</label>
-                  <input className="field-underline" type="tel" placeholder="+7 (___) ___-__-__" />
-                </div>
-                <div>
-                  <label className="field-label">EMAIL</label>
-                  <input className="field-underline" type="email" placeholder="email@example.com" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── SECTION 2: Доставка ─────────────── */}
-            <motion.div variants={fadeUp}>
-              <div className="flex items-center mb-8">
-                <div className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary label-caps text-[11px]">2</div>
-                <h2 className="label-caps text-on-surface ml-4">ДОСТАВКА</h2>
-                <div className="section-rule" />
-              </div>
-
-              <div className="flex flex-col gap-3 mb-8">
-                {DELIVERY_OPTIONS.map(d => (
-                  <button
-                    key={d.id}
-                    className={`radio-option ${delivery === d.id ? 'selected' : ''}`}
-                    onClick={() => setDelivery(d.id)}
-                  >
-                    {/* radio circle */}
-                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-none"
-                      style={{ borderColor: delivery === d.id ? '#f2ca50' : 'rgba(255,255,255,0.2)' }}
-                    >
-                      {delivery === d.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="label-caps text-on-surface text-[11px]">{d.label}</p>
-                      <p className="text-xs text-on-surface-variant mt-0.5">{d.time}</p>
-                    </div>
-                    <span className="text-body-md text-on-surface-variant">
-                      {d.price === 0 ? 'Бесплатно' : `${d.price.toLocaleString('ru-KZ')} ₸`}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Address */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="sm:col-span-2">
-                  <label className="field-label">АДРЕС</label>
-                  <input className="field-underline" placeholder="ул. Примерная, д. 1, кв. 1" />
-                </div>
-                <div>
-                  <label className="field-label">ГОРОД</label>
-                  <input className="field-underline" placeholder="Атырау" />
-                </div>
-                <div>
-                  <label className="field-label">ПОЧТОВЫЙ ИНДЕКС</label>
-                  <input className="field-underline" placeholder="060000" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── SECTION 3: Оплата ───────────────── */}
-            <motion.div variants={fadeUp}>
-              <div className="flex items-center mb-8">
-                <div className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary label-caps text-[11px]">3</div>
-                <h2 className="label-caps text-on-surface ml-4">ОПЛАТА</h2>
-                <div className="section-rule" />
-              </div>
-
-              <div className="flex flex-col gap-3">
-                {PAYMENT_OPTIONS.map(p => (
-                  <button
-                    key={p.id}
-                    className={`radio-option ${payment === p.id ? 'selected' : ''}`}
-                    onClick={() => setPayment(p.id)}
-                  >
-                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-none"
-                      style={{ borderColor: payment === p.id ? '#f2ca50' : 'rgba(255,255,255,0.2)' }}
-                    >
-                      {payment === p.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                    </div>
-                    <span className="text-2xl">{p.icon}</span>
-                    <div className="flex-1 text-left">
-                      <p className="label-caps text-on-surface text-[11px]">{p.label}</p>
-                      <p className="text-xs text-on-surface-variant mt-0.5">{p.desc}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* ── Submit ──────────────────────────── */}
-            <motion.div variants={fadeUp}>
-              <button className="btn-primary w-full py-5 text-sm">
-                ПОДТВЕРДИТЬ ЗАКАЗ — {total.toLocaleString('ru-KZ')} ₸
-              </button>
-              <p className="text-xs text-outline text-center mt-4 tracking-wider">
-                Нажимая кнопку, вы принимаете условия{' '}
-                <Link to="/privacy" className="underline hover:text-primary transition-colors">политики конфиденциальности</Link>
-              </p>
-            </motion.div>
+        <div className="relative z-10 space-y-8 text-left">
+          {/* Breadcrumb */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-400"
+          >
+            <Link to="/catalog" className="hover:text-primary transition-colors">Каталог</Link>
+            <span>/</span>
+            <span className="text-neutral-600">Оформление заказа</span>
           </motion.div>
 
-          {/* ═══ RIGHT — Order Summary (sticky) ════ */}
+          {/* Page Header */}
           <motion.div
-            className="lg:sticky lg:top-[112px]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="pb-6 border-b border-black/5"
           >
-            <div className="bg-surface-container-low p-8">
-              <h3 className="label-caps text-on-surface-variant mb-8">ВАШ ЗАКАЗ</h3>
+            <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
+              Оформление заказа
+            </h1>
+          </motion.div>
 
-              {/* Items */}
-              {cartItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-4xl text-outline mb-3 block">shopping_bag</span>
-                  <p className="text-body-md text-on-surface-variant">Корзина пуста</p>
-                  <Link to="/catalog" className="btn-outline mt-6 inline-flex">В КАТАЛОГ</Link>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column (Forms) */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={stagger}
+              className="lg:col-span-7 space-y-10"
+            >
+              {/* SECTION 1: Контакты */}
+              <motion.div variants={fadeUp} className="space-y-6">
+                <div className="flex items-center mb-2">
+                  <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">1</div>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Контактная информация</h2>
+                  <div className="flex-1 h-px bg-black/5 ml-4" />
                 </div>
-              ) : (
-                <div className="flex flex-col gap-6 mb-8">
-                  {cartItems.map(item => (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="w-16 h-16 bg-surface-container flex-none flex items-center justify-center text-2xl">
-                        {item.emoji || '🛍️'}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Имя</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder="Ваше имя"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Фамилия</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder="Ваша фамилия"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Телефон</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      type="tel"
+                      placeholder="+7 (777) 777-77-77"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Email</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      type="email"
+                      placeholder="email@example.com"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* SECTION 2: Доставка */}
+              <motion.div variants={fadeUp} className="space-y-6">
+                <div className="flex items-center mb-2">
+                  <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">2</div>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Способ доставки</h2>
+                  <div className="flex-1 h-px bg-black/5 ml-4" />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {DELIVERY_OPTIONS.map(d => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      className={`w-full flex items-center gap-4 p-4 border rounded-[20px] transition-all cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] ${
+                        delivery === d.id
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-black/5 bg-neutral-50 hover:border-black/10'
+                      }`}
+                      onClick={() => setDelivery(d.id)}
+                    >
+                      <div className="w-5 h-5 rounded-full border flex items-center justify-center flex-none"
+                        style={{ borderColor: delivery === d.id ? '#f2ca50' : '#d1d1d6' }}
+                      >
+                        {delivery === d.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                       </div>
-                      <div className="flex-1">
-                        <p className="label-caps text-on-surface text-[10px]">{item.name}</p>
-                        {item.variant && <p className="text-xs text-outline mt-0.5">{item.variant}</p>}
-                        <p className="text-body-md text-on-surface-variant mt-1">
-                          {item.qty} × {item.price.toLocaleString('ru-KZ')} ₸
-                        </p>
+                      <div className="flex-1 text-left">
+                        <p className="text-xs font-black text-black uppercase tracking-wider">{d.label}</p>
+                        <p className="text-[11px] text-neutral-500 font-medium mt-0.5">{d.time}</p>
                       </div>
-                      <p className="text-body-md text-on-surface">
-                        {(item.price * item.qty).toLocaleString('ru-KZ')} ₸
-                      </p>
-                    </div>
+                      <span className="text-xs font-bold text-black">
+                        {d.price === 0 ? 'Бесплатно' : `${d.price.toLocaleString('ru-KZ')} ₸`}
+                      </span>
+                    </button>
                   ))}
                 </div>
-              )}
 
-              {/* Totals */}
-              <div className="border-t border-white/10 pt-6 flex flex-col gap-3">
-                <div className="flex justify-between text-body-md text-on-surface-variant">
-                  <span>Товары</span>
-                  <span>{subtotal.toLocaleString('ru-KZ')} ₸</span>
-                </div>
-                <div className="flex justify-between text-body-md text-on-surface-variant">
-                  <span>Доставка</span>
-                  <span>{deliveryCost === 0 ? 'Бесплатно' : `${deliveryCost.toLocaleString('ru-KZ')} ₸`}</span>
-                </div>
-                <div className="h-px bg-white/10 my-2" />
-                <div className="flex justify-between items-end">
-                  <span className="label-caps text-on-surface-variant">ИТОГО</span>
-                  <span className="text-xl text-primary font-medium tracking-wide">
-                    {total.toLocaleString('ru-KZ')} ₸
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Privacy & Discretion Assurances */}
-            <div className="mt-6 border border-white/10 bg-[#0F0E11] p-6 text-left font-sans">
-              <div className="flex items-center gap-4 mb-4">
-                {/* SVG of discreet box */}
-                <div className="w-12 h-12 flex-none flex items-center justify-center bg-white/5 border border-white/10">
-                  <svg className="w-8 h-8 text-[#f2ca50]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                    {/* Isometric box representation */}
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M2 7v10" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M12 12v10" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M22 7v10" strokeLinecap="round" strokeLinejoin="round" />
-                    {/* Tape accent */}
-                    <path d="M12 7l5-2.5M12 12l5-2.5" stroke="#f2ca50" strokeWidth="1" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="label-caps text-[10px] text-white tracking-[0.2em] font-bold">100% КОНФИДЕНЦИАЛЬНОСТЬ</h4>
-                  <p className="text-[9px] text-[#f2ca50] label-caps tracking-[0.1em] mt-0.5">ГАРАНТИЯ АНОНИМНОСТИ</p>
-                </div>
-              </div>
-
-              <div className="space-y-4 text-[11px] leading-relaxed text-on-surface-variant border-t border-white/5 pt-4">
-                <div className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">inventory_2</span>
+                {/* Address details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-2">
+                  <div className="sm:col-span-2">
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Адрес доставки</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder="ул. Примерная, д. 1, кв. 1"
+                    />
+                  </div>
                   <div>
-                    <span className="text-white font-bold block mb-0.5">НЕЙТРАЛЬНАЯ УПАКОВКА</span>
-                    Все заказы отправляются в плотных непрозрачных сейф-пакетах или стандартных картонных коробках без каких-либо логотипов, надписей бренда или указания интимного характера содержимого.
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Город</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder="Атырау"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Почтовый индекс</label>
+                    <input
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder="060000"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* SECTION 3: Оплата */}
+              <motion.div variants={fadeUp} className="space-y-6">
+                <div className="flex items-center mb-2">
+                  <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">3</div>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Способ оплаты</h2>
+                  <div className="flex-1 h-px bg-black/5 ml-4" />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {PAYMENT_OPTIONS.map(p => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`w-full flex items-center gap-4 p-4 border rounded-[20px] transition-all cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] ${
+                        payment === p.id
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-black/5 bg-neutral-50 hover:border-black/10'
+                      }`}
+                      onClick={() => setPayment(p.id)}
+                    >
+                      <div className="w-5 h-5 rounded-full border flex items-center justify-center flex-none"
+                        style={{ borderColor: payment === p.id ? '#f2ca50' : '#d1d1d6' }}
+                      >
+                        {payment === p.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <span className="text-2xl select-none">{p.icon}</span>
+                      <div className="flex-1 text-left">
+                        <p className="text-xs font-black text-black uppercase tracking-wider">{p.label}</p>
+                        <p className="text-[11px] text-neutral-500 font-medium mt-0.5">{p.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Column (Summary Panel) */}
+            <motion.div
+              className="lg:col-span-5 lg:sticky lg:top-[112px] space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+            >
+              {/* Order Bento Card */}
+              <div className="bg-neutral-50 border border-black/5 p-6 md:p-8 rounded-[28px] space-y-6">
+                <h3 className="text-xs font-black tracking-wider text-black uppercase">Ваш заказ</h3>
+
+                {/* Items */}
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <span className="material-symbols-outlined text-4xl text-neutral-300 mb-3 block">shopping_bag</span>
+                    <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">Корзина пуста</p>
+                    <Link to="/catalog" className="w-full h-[46px] bg-black hover:bg-neutral-900 text-white font-bold text-xs uppercase tracking-widest rounded-[20px] transition-colors flex items-center justify-center mt-6 cursor-pointer">
+                      В каталог
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4 max-h-[320px] overflow-y-auto pr-1">
+                    {cartItems.map(item => (
+                      <div key={item.id + (item.variant || '')} className="flex gap-4 p-3 bg-white border border-black/5 rounded-[16px] shadow-sm">
+                        {/* Item image/emoji placeholder */}
+                        <div className="w-14 h-14 bg-neutral-50 rounded-[12px] flex-none flex items-center justify-center text-2xl border border-black/5">
+                          {item.emoji || '🛍️'}
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between min-w-0 text-left">
+                          <div>
+                            <h4 className="text-[11px] font-black text-black uppercase tracking-wider truncate">
+                              {item.name}
+                            </h4>
+                            {item.variant && <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mt-0.5">{item.variant}</p>}
+                          </div>
+                          <div className="flex justify-between items-baseline mt-1">
+                            <span className="text-[10px] text-neutral-400 font-bold">
+                              {item.qty} шт × {item.price.toLocaleString('ru-KZ')} ₸
+                            </span>
+                            <span className="text-[11px] font-black text-black">
+                              {(item.price * item.qty).toLocaleString('ru-KZ')} ₸
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Totals */}
+                <div className="border-t border-black/5 pt-6 space-y-3 font-sans text-xs">
+                  <div className="flex justify-between text-neutral-500 font-medium">
+                    <span>Товары</span>
+                    <span className="font-bold text-black">{subtotal.toLocaleString('ru-KZ')} ₸</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-500 font-medium">
+                    <span>Доставка</span>
+                    <span className="font-bold text-black">{deliveryCost === 0 ? 'Бесплатно' : `${deliveryCost.toLocaleString('ru-KZ')} ₸`}</span>
+                  </div>
+                  <div className="h-px bg-black/5 my-2" />
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[11px] font-black text-black uppercase tracking-wider">Итого к оплате</span>
+                    <span className="text-xl font-black text-primary tracking-wide">
+                      {total.toLocaleString('ru-KZ')} ₸
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button & Disclaimer */}
+              <div className="space-y-4">
+                <button className="w-full h-[58px] bg-black hover:bg-neutral-900 text-white font-bold text-[14px] tracking-widest uppercase rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]">
+                  Подтвердить заказ — {total.toLocaleString('ru-KZ')} ₸
+                </button>
+                <p className="text-[10px] text-neutral-400 text-center tracking-wider font-medium">
+                  Нажимая кнопку, вы принимаете условия{' '}
+                  <Link to="/privacy" className="underline hover:text-black transition-colors">политики конфиденциальности</Link>
+                </p>
+              </div>
+
+              {/* Privacy & Discretion Assurances */}
+              <div className="bg-neutral-100 border border-black/5 p-6 rounded-[28px] text-left font-sans space-y-6">
+                <div className="flex items-center gap-3 pb-4 border-b border-black/5">
+                  {/* SVG of discreet box */}
+                  <div className="w-10 h-10 flex-none flex items-center justify-center bg-white border border-black/5 rounded-full shadow-sm text-primary">
+                    <span className="material-symbols-outlined text-[20px]">visibility_off</span>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-black uppercase tracking-widest">100% Конфиденциальность</h4>
+                    <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mt-0.5">Гарантия анонимности</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">account_balance_wallet</span>
-                  <div>
-                    <span className="text-white font-bold block mb-0.5">НЕЙТРАЛЬНЫЙ БИЛЛИНГ</span>
-                    В выписке по вашей карте или Kaspi при списании отобразится нейтральное наименование продавца (например, <span className="text-white">«Retail Atyrau»</span> или <span className="text-white">«HS-Atyrau»</span>), без упоминания интимных товаров или бренда.
+                <div className="space-y-4 text-[11px] leading-relaxed text-neutral-600 font-medium">
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">inventory_2</span>
+                    <div>
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Нейтральная упаковка</span>
+                      Все заказы отправляются в плотных непрозрачных сейф-пакетах или стандартных картонных коробках без каких-либо логотипов, надписей бренда или указания интимного характера содержимого.
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[#f2ca50] mt-0.5 flex-none">shield</span>
-                  <div>
-                    <span className="text-white font-bold block mb-0.5">ЗАЩИТА SSL И ДАННЫХ</span>
-                    Ваши персональные данные защищены 256-битным SSL-шифрованием и используются исключительно для конфиденциальной доставки заказа курьером.
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">account_balance_wallet</span>
+                    <div>
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Нейтральный биллинг</span>
+                      В выписке по вашей карте или Kaspi при списании отобразится нейтральное наименование продавца (например, <span className="text-black font-bold">«Retail Atyrau»</span> или <span className="text-black font-bold">«HS-Atyrau»</span>), без упоминания интимных товаров или бренда.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">shield</span>
+                    <div>
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Защита SSL и данных</span>
+                      Ваши персональные данные защищены 256-битным SSL-шифрованием и используются исключительно для конфиденциальной доставки заказа курьером.
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>
