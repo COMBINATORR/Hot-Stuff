@@ -14,6 +14,7 @@ import logoNewsletterBg from '../assets/images/newsletter_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductGrid from '../components/ProductGrid';
+import { supabase } from '../lib/supabase';
 
 const HERO = {
   headline: 'в погоне за наслаждением',
@@ -108,6 +109,77 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 export default function HomePage({ onAddToCart }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
+
+  // Supabase states
+  const [categories, setCategories] = useState(() => {
+    return [
+      { id: 1, name: 'Классическое нижнее белье', slug: 'lingerie-classic' },
+      { id: 2, name: 'Эротическое белье и одежда', slug: 'lingerie-erotic' },
+      { id: 3, name: 'Игрушки для женщин', slug: 'toys-women' },
+      { id: 4, name: 'Игрушки для мужчин', slug: 'toys-men' }
+    ];
+  });
+  const [dbProducts, setDbProducts] = useState([]);
+
+  // Helper to map DB category slug to local image
+  const getCategoryImage = (slug) => {
+    switch (slug) {
+      case 'lingerie-classic': return logoNoirDress;
+      case 'lingerie-erotic': return logoEtherealWrap;
+      case 'toys-women': return logoNoirDress;
+      case 'toys-men': return logoGoldBoots;
+      case 'toys-couples': return logoNoirDress;
+      default: return logoNoirDress;
+    }
+  };
+
+  // Helper to map DB category slug to catalog route
+  const getCategoryLink = (slug) => {
+    return `/catalog?cat=${slug}`;
+  };
+
+  // Load 4 priority categories from Supabase categories table
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, slug')
+          .order('id', { ascending: true })
+          .limit(4);
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      } catch (err) {
+        console.warn('[HomePage] Error loading categories from Supabase, using defaults:', err);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  // Load bestsellers from Supabase products table
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .limit(8);
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setDbProducts(data);
+        }
+      } catch (err) {
+        console.warn('[HomePage] Error loading products from Supabase, using local fallback:', err);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const displayedProducts = dbProducts.length > 0 ? dbProducts : ALL_PRODUCTS;
 
   // Quiz State
   const [quizOpen, setQuizOpen] = useState(false);
@@ -660,25 +732,25 @@ export default function HomePage({ onAddToCart }) {
           onScroll={handleScroll}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {POPULAR_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <div 
               key={cat.id} 
               className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[35vw] lg:min-w-[32vw] snap-start relative aspect-[4/3] group overflow-hidden border border-white/5"
             >
               {/* Product Background Image */}
               <ResponsiveImage 
-                src={cat.image} 
-                alt={cat.title} 
+                src={getCategoryImage(cat.slug)} 
+                alt={cat.name} 
                 className="w-full h-full object-cover brightness-[0.8] group-hover:scale-105 transition-transform duration-700"
                 loading="lazy"
               />
               {/* Overlay with title & CTA button */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end items-start">
                 <h3 className="text-white font-bold text-lg md:text-xl mb-4">
-                  {cat.title}
+                  {cat.name}
                 </h3>
                 <Link 
-                  to={cat.link} 
+                  to={getCategoryLink(cat.slug)} 
                   className="bg-white text-black font-label-caps text-[10px] font-black tracking-widest py-3 px-8 transition-transform hover:scale-105"
                 >
                   СМОТРЕТЬ
@@ -706,7 +778,7 @@ export default function HomePage({ onAddToCart }) {
             БЕСТСЕЛЛЕРЫ
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {ALL_PRODUCTS.map((p) => (
+            {displayedProducts.map((p) => (
               <div key={p.id} className="relative group rounded-card">
                 {/* Background and border that expands on hover */}
                 <div className="absolute inset-0 bg-surface-container-low border border-white/5 transition-all duration-300 md:group-hover:-bottom-[68px] z-0 pointer-events-none rounded-card"></div>
