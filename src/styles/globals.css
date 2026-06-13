@@ -585,3 +585,33 @@ h1,h2,h3,h4,h5,h6 { margin: 0; font-family: 'Montserrat', sans-serif; }
   }
 }
 
+/* ════════════════════════════════════════════════
+   FLUID PAINT MIX GRADIENT BUTTON EFFECT
+   ════════════════════════════════════════════════ */
+.btn-fluid-paint {
+  background: radial-gradient(circle at 10% 20%, rgba(30, 132, 73, 0.9) 0%, transparent 60%),
+              radial-gradient(circle at 90% 10%, rgba(230, 57, 70, 0.8) 0%, transparent 60%),
+              radial-gradient(circle at 50% 90%, rgba(255, 209, 102, 0.8) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(15, 82, 186, 0.4) 0%, transparent 50%),
+              #0d4a36; /* Deep money green base */
+  background-size: 200% 200%;
+  animation: fluid-paint-flow 10s ease infinite;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(13, 74, 54, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+.btn-fluid-paint:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(13, 74, 54, 0.4);
+}
+.btn-fluid-paint:active {
+  transform: scale(0.98);
+}
+
+@keyframes fluid-paint-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+

@@ -276,7 +276,7 @@ export default function CheckoutPage({ cartItems = [] }) {
 
               {/* Submit Button & Disclaimer */}
               <div className="space-y-4">
-                <button className="w-full h-[58px] bg-black hover:bg-neutral-900 text-white font-bold text-[14px] tracking-widest uppercase rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]">
+                <button className="w-full h-[58px] btn-fluid-paint text-white font-bold text-[14px] tracking-widest uppercase rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]">
                   Подтвердить заказ — {total.toLocaleString('ru-KZ')} ₸
                 </button>
                 <p className="text-[10px] text-neutral-400 text-center tracking-wider font-medium">
