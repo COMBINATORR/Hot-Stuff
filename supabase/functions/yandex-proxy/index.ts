@@ -6,6 +6,33 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
 };
 
+// Global in-memory logs buffer
+const logs: any[] = [];
+
+async function addLog(message: string, detail?: any) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    message,
+    detail
+  };
+  console.log(`${message}:`, JSON.stringify(detail || ""));
+  logs.unshift(logEntry);
+  if (logs.length > 50) {
+    logs.pop();
+  }
+
+  // Also send to RequestCatcher for robust retrieval
+  try {
+    await fetch("https://hotstuff-yandex.requestcatcher.com/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(logEntry),
+    });
+  } catch (e) {
+    // Fail silently for webhook logger
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
@@ -13,20 +40,41 @@ Deno.serve(async (req) => {
   }
 
   const url = new URL(req.url);
+
   // Serve mock JWKS keys to satisfy Supabase's Custom Provider validation
   if (url.pathname.endsWith("/jwks")) {
-    console.log("Serving mock JWKS keys...");
+    await addLog("JWKS Endpoint Called", { url: req.url, method: req.method });
     return new Response(JSON.stringify({ keys: [] }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
+  // Endpoint to retrieve logs for debugging
+  if (url.pathname.endsWith("/logs")) {
+    return new Response(JSON.stringify(logs), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
+    const headersObj = Object.fromEntries(req.headers.entries());
+    const maskedHeaders = { ...headersObj };
+    if (maskedHeaders.authorization) {
+      maskedHeaders.authorization = maskedHeaders.authorization.substring(0, 15) + "...";
+    }
+
+    await addLog("Incoming request to Userinfo", {
+      method: req.method,
+      url: req.url,
+      headers: maskedHeaders,
+    });
+
     // Extract token from Authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      console.warn("Authorization header is missing");
+      await addLog("Error: Missing Authorization header");
       return new Response(
         JSON.stringify({ error: "Missing Authorization header" }),
         {
@@ -42,7 +90,10 @@ Deno.serve(async (req) => {
     const yandexAuthHeader = `OAuth ${token}`;
 
     // Call Yandex API to retrieve user profile info
-    console.log("Fetching profile from Yandex login info API...");
+    await addLog("Fetching profile from Yandex login info API...", {
+      yandexAuthHeaderMasked: yandexAuthHeader.substring(0, 15) + "...",
+    });
+
     const yandexResponse = await fetch("https://login.yandex.ru/info?format=json", {
       headers: {
         Authorization: yandexAuthHeader,
@@ -52,7 +103,10 @@ Deno.serve(async (req) => {
 
     if (!yandexResponse.ok) {
       const errorText = await yandexResponse.text();
-      console.error("Yandex API responded with error:", errorText);
+      await addLog("Yandex API responded with error", {
+        status: yandexResponse.status,
+        details: errorText,
+      });
       return new Response(
         JSON.stringify({ error: "Failed to fetch user info from Yandex", details: errorText }),
         {
@@ -63,7 +117,7 @@ Deno.serve(async (req) => {
     }
 
     const yandexData = await yandexResponse.json();
-    console.log("Original Yandex profile data received:", JSON.stringify(yandexData));
+    await addLog("Original Yandex profile data received", yandexData);
 
     // Normalize keys for GoTrue (Supabase Auth) compatibility
     const normalizedData = { ...yandexData };
@@ -96,14 +150,14 @@ Deno.serve(async (req) => {
       normalizedData.picture = `https://avatars.yandex.net/get-yapic/${normalizedData.default_avatar_id}/islands-200`;
     }
 
-    console.log("Normalized profile response data:", JSON.stringify(normalizedData));
+    await addLog("Normalized profile response data", normalizedData);
 
     return new Response(JSON.stringify(normalizedData), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Exception in yandex-proxy edge function:", error);
+    await addLog("Exception in yandex-proxy edge function", { error: error.message });
     return new Response(
       JSON.stringify({ error: error.message }),
       {
