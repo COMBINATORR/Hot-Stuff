@@ -26,11 +26,16 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Supabase passes "Bearer <token>" in the Authorization header.
+    // Yandex API strictly requires "OAuth <token>" instead of "Bearer".
+    const token = authHeader.replace(/^bearer\s+/i, "");
+    const yandexAuthHeader = `OAuth ${token}`;
+
     // Call Yandex API to retrieve user profile info
     console.log("Fetching profile from Yandex login info API...");
     const yandexResponse = await fetch("https://login.yandex.ru/info?format=json", {
       headers: {
-        Authorization: authHeader,
+        Authorization: yandexAuthHeader,
       },
     });
 
