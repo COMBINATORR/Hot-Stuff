@@ -12,6 +12,16 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const url = new URL(req.url);
+  // Serve mock JWKS keys to satisfy Supabase's Custom Provider validation
+  if (url.pathname.endsWith("/jwks")) {
+    console.log("Serving mock JWKS keys...");
+    return new Response(JSON.stringify({ keys: [] }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     // Extract token from Authorization header
     const authHeader = req.headers.get("Authorization");
