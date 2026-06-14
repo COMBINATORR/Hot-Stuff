@@ -52,6 +52,12 @@ Deno.serve(async (req) => {
     // Normalize keys for GoTrue (Supabase Auth) compatibility
     const normalizedData = { ...yandexData };
 
+    // GoTrue (Supabase Auth) requires a 'sub' field (subject claim / unique user ID) for custom OAuth providers.
+    // Yandex returns the unique user ID in the 'id' field, so we map it to 'sub'.
+    if (normalizedData.id) {
+      normalizedData.sub = normalizedData.id;
+    }
+
     // 1. Map email (GoTrue requires 'email')
     if (!normalizedData.email && normalizedData.default_email) {
       normalizedData.email = normalizedData.default_email;
