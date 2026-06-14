@@ -234,8 +234,26 @@ export default function AccountPage({ onAddToCart, lang }) {
     }
   };
 
-  const handleYandexClick = () => {
-    console.log('[Auth] Clicked Yandex SSO - Edge Function integration planned');
+  const handleYandexClick = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'custom:yandex',
+        options: {
+          redirectTo: window.location.origin + window.location.pathname
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error('[Yandex OAuth Error]', err);
+      let errMsg = err.message || 'Ошибка авторизации через Яндекс';
+      if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
+        errMsg = 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте кастомный провайдер (custom:yandex) в Supabase Dashboard.';
+      }
+      setError(errMsg);
+      setLoading(false);
+    }
   };
 
   const triggerOtpSend = async (emailVal) => {
