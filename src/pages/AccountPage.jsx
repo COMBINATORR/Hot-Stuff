@@ -290,15 +290,15 @@ export default function AccountPage({ onAddToCart, lang }) {
       return;
     }
 
-    // Check if user is already in our registered list
-    const isReg = registeredUsers.includes(cleanedVal);
-    if (isReg) {
-      // Fast path: immediately log in without OTP!
+    // Allow fast-path bypass ONLY for mock/testing accounts when typed manually.
+    // Real user accounts must always go through OTP verification when typed manually for safety.
+    const isMock = MOCK_REGISTERED_USERS.includes(cleanedVal);
+    if (isMock) {
       loginSuccess(cleanedVal);
       return;
     }
 
-    // Otherwise, first-time login: send OTP via Supabase
+    // Otherwise, standard secure login: send OTP via Supabase
     setIsRegistered(false);
     await triggerOtpSend(cleanedVal);
   };
@@ -711,6 +711,54 @@ export default function AccountPage({ onAddToCart, lang }) {
                   </button>
                 )}
               </div>
+
+              {/* 5. Session Security & Devices (Bento: 3 cols) */}
+              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <h3 className="text-xs font-black tracking-wider text-black uppercase mb-1 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-black">security</span>
+                      <span>Безопасность и управление сессиями</span>
+                    </h3>
+                    <p className="text-[11px] text-neutral-500 font-sans">
+                      Вы можете завершить сессии на других устройствах или стереть историю входов на этом компьютере.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase.auth.signOut({ scope: 'others' });
+                          if (error) throw error;
+                          alert('Все сессии на других устройствах успешно завершены!');
+                        } catch (err) {
+                          console.error(err);
+                          alert('Не удалось завершить сессии: ' + err.message);
+                        }
+                      }}
+                      className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
+                    >
+                      Выйти на других устройствах
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm('Вы уверены, что хотите очистить историю входов на этом устройстве? При следующем входе вам потребуется подтверждение по коду.')) {
+                          localStorage.removeItem('hs_registered_users');
+                          setSavedAccounts([]);
+                          setRegisteredUsers(MOCK_REGISTERED_USERS);
+                          alert('История входов на этом устройстве очищена!');
+                        }
+                      }}
+                      className="border border-black/10 hover:border-black text-black font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
+                    >
+                      Стереть историю входов здесь
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
