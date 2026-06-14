@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
@@ -19,10 +20,43 @@ const PAYMENT_OPTIONS = [
 export default function CheckoutPage({ cartItems = [] }) {
   const [delivery, setDelivery] = useState('atyrau');
   const [payment, setPayment]   = useState('kaspi');
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const navigate = useNavigate();
 
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const deliveryCost = DELIVERY_OPTIONS.find(d => d.id === delivery)?.price || 0;
   const total = subtotal + deliveryCost;
+
+  const handleConfirmOrder = async () => {
+    if (payment === 'kaspi') {
+      setIsCheckingOut(true);
+      try {
+        const orderId = `HS-${Date.now()}`;
+        const amount = total;
+        
+        console.log(`[Kaspi Checkout] Requesting invoice for ${amount} ₸ (Order ID: ${orderId})`);
+        
+        const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
+          body: { amount, orderId }
+        });
+
+        if (error) throw error;
+        
+        if (data && data.paymentUrl) {
+          console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
+          window.location.href = data.paymentUrl;
+        } else {
+          throw new Error('Не удалось получить ссылку на оплату от сервера');
+        }
+      } catch (err) {
+        console.error('[Kaspi Checkout Error]', err);
+        alert(`Ошибка оплаты: ${err.message || 'Неизвестная ошибка'}`);
+        setIsCheckingOut(false);
+      }
+    } else {
+      alert('Заказ успешно оформлен!');
+    }
+  };
 
   return (
     <div className="w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface py-20 md:py-28 px-4 md:px-8">
@@ -276,8 +310,21 @@ export default function CheckoutPage({ cartItems = [] }) {
 
               {/* Submit Button & Disclaimer */}
               <div className="space-y-4">
-                <button className="w-full h-[58px] btn-fluid-paint text-white font-bold text-[14px] tracking-widest uppercase rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]">
-                  Подтвердить заказ — {total.toLocaleString('ru-KZ')} ₸
+                <button 
+                  onClick={handleConfirmOrder}
+                  disabled={isCheckingOut}
+                  className="w-full h-[58px] btn-fluid-paint text-white font-bold text-[14px] tracking-widest uppercase rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border-none"
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                        <circle cx="12" cy="12" r="9" />
+                      </svg>
+                      <span>Обработка...</span>
+                    </>
+                  ) : (
+                    <span>Подтвердить заказ — {total.toLocaleString('ru-KZ')} ₸</span>
+                  )}
                 </button>
                 <p className="text-[10px] text-neutral-400 text-center tracking-wider font-medium">
                   Нажимая кнопку, вы принимаете условия{' '}
