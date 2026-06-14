@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import ResponsiveImage from '../components/ResponsiveImage';
+import { supabase } from '../lib/supabase';
 
 /* ── Qty stepper ──────────────────────────── */
 function QtyControl({ qty, onMinus, onPlus }) {
@@ -118,6 +119,39 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   const delivery = subtotal >= 15000 ? 0 : 1490;
   const total = subtotal + delivery;
 
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
+  const handleKaspiCheckout = async () => {
+    setIsCheckingOut(true);
+    setCheckoutError('');
+    try {
+      const orderId = `HS-${Date.now()}`;
+      const amount = total;
+      
+      console.log(`[Kaspi Checkout] Requesting invoice for ${amount} ₸ (Order ID: ${orderId})`);
+      
+      const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
+        body: { amount, orderId }
+      });
+
+      if (error) throw error;
+      
+      if (data && data.paymentUrl) {
+        console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
+        window.location.href = data.paymentUrl;
+      } else {
+        throw new Error('Не удалось получить ссылку на оплату от сервера');
+      }
+    } catch (err) {
+      console.error('[Kaspi Checkout Error]', err);
+      const errMsg = err.message || 'Ошибка инициализации платежа';
+      setCheckoutError(errMsg);
+      alert(`Ошибка оплаты: ${errMsg}`);
+      setIsCheckingOut(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <Helmet>
@@ -224,7 +258,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                   <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
                 </div>
 
-                <motion.div
+                 <motion.div
                   whileHover={{ scale: 1.01 }} 
                   whileTap={{ scale: 0.99 }}
                   className="pt-2"
@@ -240,6 +274,35 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                       <polyline points="12 5 19 12 12 19" />
                     </svg>
                   </Link>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }} 
+                  whileTap={{ scale: 0.99 }}
+                  className="pt-1"
+                >
+                  <button
+                    onClick={handleKaspiCheckout}
+                    disabled={isCheckingOut}
+                    className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none"
+                    id="cart-cta-kaspi"
+                  >
+                    {isCheckingOut ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                          <circle cx="12" cy="12" r="9" />
+                        </svg>
+                        <span>Обработка...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Оплатить через Kaspi Pay</span>
+                        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                          <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
                 </motion.div>
 
                 {/* Trust micro-copy */}
