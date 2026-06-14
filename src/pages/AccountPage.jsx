@@ -93,6 +93,43 @@ export default function AccountPage({ onAddToCart, lang }) {
   useEffect(() => {
     let active = true;
 
+    // Helper to check if URL contains OAuth/PKCE callback auth parameters
+    const hasAuthParams = () => {
+      const search = window.location.search;
+      const hash = window.location.hash;
+      return search.includes('code=') || 
+             hash.includes('access_token=') || 
+             hash.includes('id_token=') || 
+             search.includes('error=') ||
+             hash.includes('error=');
+    };
+
+    // Parse URL query parameters and hash fragment for auth errors
+    const checkUrlErrors = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      let errorVal = searchParams.get('error');
+      let errorDescVal = searchParams.get('error_description');
+
+      // If not in search, check hash parameters (OAuth sometimes returns errors in hash)
+      if (!errorVal && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        errorVal = hashParams.get('error');
+        errorDescVal = hashParams.get('error_description');
+      }
+
+      if (errorVal) {
+        console.error('[Auth Callback Error]', errorVal, errorDescVal);
+        const decodedDesc = errorDescVal ? decodeURIComponent(errorDescVal.replace(/\+/g, ' ')) : '';
+        setError(`Ошибка авторизации (${errorVal}): ${decodedDesc || 'Не удалось войти в аккаунт'}`);
+        // Clear parameters from URL so they don't persist on reload
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    };
+
+    // Run error check immediately
+    checkUrlErrors();
+
     const handleAuthSession = (session) => {
       if (session && session.user) {
         const email = session.user.email.trim().toLowerCase();
@@ -151,7 +188,8 @@ export default function AccountPage({ onAddToCart, lang }) {
           setIsSessionLoading(false);
         }
       } else {
-        if (active) {
+        // If there are OAuth/callback params in the URL, wait for getSession() to exchange code/tokens instead of stopping early
+        if (active && !hasAuthParams()) {
           setIsSessionLoading(false);
         }
       }
