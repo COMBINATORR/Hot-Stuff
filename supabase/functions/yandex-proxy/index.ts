@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
     const yandexResponse = await fetch("https://login.yandex.ru/info?format=json", {
       headers: {
         Authorization: yandexAuthHeader,
+        "User-Agent": "HotStuff-Ecommerce-App/1.0",
       },
     });
 
