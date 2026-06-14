@@ -18,6 +18,7 @@ export default function AccountPage({ onAddToCart, lang }) {
     const savedUser = localStorage.getItem('hs_user');
     return !!savedUser;
   });
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(() => {
     const savedUser = localStorage.getItem('hs_user');
     if (savedUser) {
@@ -90,6 +91,8 @@ export default function AccountPage({ onAddToCart, lang }) {
 
   // Listen to Supabase auth state change on mount
   useEffect(() => {
+    let active = true;
+
     const handleAuthSession = (session) => {
       if (session && session.user) {
         const email = session.user.email.trim().toLowerCase();
@@ -117,12 +120,22 @@ export default function AccountPage({ onAddToCart, lang }) {
           });
         }
       }
+      if (active) {
+        setIsSessionLoading(false);
+      }
     };
 
     console.log('[AccountPage] Checking current active Supabase session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('[AccountPage] getSession result:', session?.user?.email ? 'Active session found' : 'No active session');
-      handleAuthSession(session);
+      if (active) {
+        handleAuthSession(session);
+      }
+    }).catch(err => {
+      console.error('[AccountPage] getSession error:', err);
+      if (active) {
+        setIsSessionLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -134,10 +147,18 @@ export default function AccountPage({ onAddToCart, lang }) {
         setIsLoggedIn(false);
         setLoggedInUser(null);
         localStorage.removeItem('hs_user');
+        if (active) {
+          setIsSessionLoading(false);
+        }
+      } else {
+        if (active) {
+          setIsSessionLoading(false);
+        }
       }
     });
 
     return () => {
+      active = false;
       if (subscription) {
         if (subscription.unsubscribe) subscription.unsubscribe();
         else if (subscription.subscription && subscription.subscription.unsubscribe) subscription.subscription.unsubscribe();
@@ -238,10 +259,13 @@ export default function AccountPage({ onAddToCart, lang }) {
     setError('');
     setLoading(true);
     try {
+      const langPrefix = lang && lang !== 'ru' ? `/${lang}` : '';
+      const redirectUrl = `${window.location.origin}${langPrefix}/account`;
+      console.log('[Yandex OAuth] Redirecting to:', redirectUrl);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'custom:yandex',
         options: {
-          redirectTo: window.location.origin + window.location.pathname
+          redirectTo: redirectUrl
         }
       });
       if (error) throw error;
@@ -480,6 +504,34 @@ export default function AccountPage({ onAddToCart, lang }) {
       alert(`Товар ${product.name} добавлен в корзину!`);
     }
   };
+
+  if (isSessionLoading) {
+    return (
+      <div className="w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface">
+        <div className="flex flex-col items-center gap-4">
+          <h1 className="text-xl font-light tracking-[0.2em] text-black uppercase animate-pulse">
+            HOT STUFF
+          </h1>
+          <div className="flex items-center gap-2">
+            <svg 
+              className="animate-spin h-6 w-6 text-black" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeDasharray="3 3"
+            >
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" />
+            </svg>
+            <span className="text-xs text-neutral-400 font-bold uppercase tracking-widest font-sans">
+              Проверка сессии...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface py-20 md:py-28 px-4 md:px-8">
