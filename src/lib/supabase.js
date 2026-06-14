@@ -37,7 +37,8 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storageKey: 'hs-supabase-auth-token'
+      storageKey: 'hs-supabase-auth-token',
+      flowType: 'implicit'
     }
   }
 );
