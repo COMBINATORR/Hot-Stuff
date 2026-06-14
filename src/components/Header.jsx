@@ -92,7 +92,8 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const [promo, setPromo] = useState('');
   const [appliedPromo, setAppliedPromo] = useState('');
-  const navigate = useNavigate();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
 
   // lock body scroll when open
   useEffect(() => {
@@ -115,6 +116,36 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
     } else {
       alert('Неверный промокод. Попробуйте LELO15 или HOT15');
       setAppliedPromo('');
+    }
+  };
+
+  const handleKaspiCheckout = async () => {
+    setIsCheckingOut(true);
+    setCheckoutError('');
+    try {
+      const orderId = `HS-${Date.now()}`;
+      const amount = finalTotal;
+      
+      console.log(`[Kaspi Checkout] Requesting invoice for ${amount} ₸ (Order ID: ${orderId})`);
+      
+      const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
+        body: { amount, orderId }
+      });
+
+      if (error) throw error;
+      
+      if (data && data.paymentUrl) {
+        console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
+        window.location.href = data.paymentUrl;
+      } else {
+        throw new Error('Не удалось получить ссылку на оплату от сервера');
+      }
+    } catch (err) {
+      console.error('[Kaspi Checkout Error]', err);
+      const errMsg = err.message || 'Ошибка инициализации платежа';
+      setCheckoutError(errMsg);
+      alert(`Ошибка оплаты: ${errMsg}`);
+      setIsCheckingOut(false);
     }
   };
 
@@ -304,6 +335,28 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
             >
               ОФОРМИТЬ ЗАКАЗ
             </button>
+            <button
+              onClick={handleKaspiCheckout}
+              disabled={isCheckingOut}
+              className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-5 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none mt-2"
+              id="cart-drawer-kaspi"
+            >
+              {isCheckingOut ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                  <span>Обработка...</span>
+                </>
+              ) : (
+                <>
+                  <span>Оплатить через Kaspi Pay</span>
+                  <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                    <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
+                  </svg>
+                </>
+              )}
+            </button>
           </div>
         )}
       </div>
@@ -321,6 +374,22 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     async function loadCategories() {
@@ -487,9 +556,73 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">search</span>
             </button>
-            <NavLink to="/account" onClick={handleAccountClick} className={`hidden sm:flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
-            </NavLink>
+            <AnimatePresence mode="wait">
+              {session ? (
+                <motion.div
+                  key="auth-user"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="hidden sm:flex items-center gap-3 relative"
+                >
+                  <Link to="/account" className="flex items-center focus:outline-none transition-transform hover:scale-105 duration-200">
+                    {session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
+                      <img
+                        src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
+                        alt="Avatar"
+                        className="w-[28px] h-[28px] rounded-full object-cover border border-white/20 hover:border-primary transition-all duration-300"
+                      />
+                    ) : (
+                      <div className="w-[28px] h-[28px] rounded-full bg-primary text-black flex items-center justify-center text-[12px] font-bold font-mono hover:bg-[#ffe088] transition-all duration-300">
+                        {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
+                      </div>
+                    )}
+                  </Link>
+                  <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase font-sans">
+                    <Link
+                      to="/account"
+                      className={`hover:text-primary transition-colors ${
+                        isLightPage ? 'text-black font-bold' : 'text-white font-bold'
+                      }`}
+                    >
+                      кабинет
+                    </Link>
+                    <span className="opacity-30">/</span>
+                    <button
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        navigate(getHomePath());
+                      }}
+                      className={`hover:text-error transition-colors uppercase font-bold cursor-pointer bg-transparent border-none p-0 ${
+                        isLightPage ? 'text-black/60' : 'text-white/60'
+                      }`}
+                      title="Выйти"
+                    >
+                      выйти
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="guest-user"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="hidden sm:flex"
+                >
+                  <NavLink
+                    to="/account"
+                    onClick={handleAccountClick}
+                    className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}
+                    title="Вход / Регистрация"
+                  >
+                    <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
+                  </NavLink>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block">shopping_bag</span>
               {cartCount > 0 && (
@@ -575,10 +708,59 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 </Link>
               </nav>
 
-              <div className="px-10 pb-12 mt-auto">
-                <Link to="/account" className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors" onClick={(e) => { setNavOpen(false); handleAccountClick(e); }}>
-                  <span className="material-symbols-outlined text-[20px]">person</span>
-                </Link>
+              <div className="px-10 pb-12 mt-auto flex items-center gap-4">
+                {session ? (
+                  <>
+                    <Link
+                      to="/account"
+                      className="flex-none transition-transform active:scale-95 duration-200"
+                      onClick={() => setNavOpen(false)}
+                    >
+                      {session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
+                        <img
+                          src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
+                          alt="Avatar"
+                          className="w-12 h-12 rounded-full object-cover border border-white/20"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center text-sm font-bold font-mono">
+                          {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
+                        </div>
+                      )}
+                    </Link>
+                    <div className="flex flex-col items-start gap-1">
+                      <Link
+                        to="/account"
+                        className="text-white text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest"
+                        onClick={() => setNavOpen(false)}
+                      >
+                        Кабинет
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          setNavOpen(false);
+                          await supabase.auth.signOut();
+                          navigate(getHomePath());
+                        }}
+                        className="text-[10px] text-white/50 hover:text-red-500 transition-colors uppercase tracking-widest font-black bg-transparent border-none p-0 cursor-pointer"
+                      >
+                        Выйти
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    to="/account"
+                    className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors"
+                    title="Вход / Регистрация"
+                    onClick={(e) => {
+                      setNavOpen(false);
+                      handleAccountClick(e);
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">person</span>
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>
@@ -696,12 +878,26 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           to="/account" 
           onClick={handleAccountClick}
           className={({ isActive }) => 
-            `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            `flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 ${
               isActive ? 'text-primary' : 'text-white/60 hover:text-white'
             }`
           }
         >
-          <span className="material-symbols-outlined text-[22px] font-light">person</span>
+          {session ? (
+            session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
+              <img
+                src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
+                alt="Avatar"
+                className="w-[22px] h-[22px] rounded-full object-cover border border-white/20"
+              />
+            ) : (
+              <div className="w-[22px] h-[22px] rounded-full bg-primary text-black flex items-center justify-center text-[9px] font-bold font-mono">
+                {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
+              </div>
+            )
+          ) : (
+            <span className="material-symbols-outlined text-[22px] font-light">person</span>
+          )}
           <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Кабинет</span>
         </NavLink>
 
