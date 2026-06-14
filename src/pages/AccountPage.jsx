@@ -132,7 +132,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
     const handleAuthSession = (session) => {
       if (session && session.user) {
-        const email = session.user.email.trim().toLowerCase();
+        const email = (session.user.email || '').trim().toLowerCase();
         console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
         setIsLoggedIn(true);
         setLoggedInUser(email);
@@ -303,7 +303,10 @@ export default function AccountPage({ onAddToCart, lang }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'custom:yandex',
         options: {
-          redirectTo: redirectUrl
+          redirectTo: redirectUrl,
+          queryParams: {
+            force_confirm: 'yes'
+          }
         }
       });
       if (error) throw error;

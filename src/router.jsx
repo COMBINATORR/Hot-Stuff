@@ -46,7 +46,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
-          const email = session.user.email.trim().toLowerCase();
+          const email = (session.user.email || '').trim().toLowerCase();
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
           localStorage.setItem('hs_remembered_email', email);
           
@@ -68,7 +68,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[Router] onAuthStateChange event:', event, 'Session active:', !!session);
       if (session && session.user) {
-        const email = session.user.email.trim().toLowerCase();
+        const email = (session.user.email || '').trim().toLowerCase();
         // Save user state in localStorage to login immediately on all pages
         localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
         localStorage.setItem('hs_remembered_email', email);
