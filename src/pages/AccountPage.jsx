@@ -57,6 +57,12 @@ export default function AccountPage({ onAddToCart, lang }) {
     return all.map(u => u.trim().toLowerCase());
   });
 
+  const [savedAccounts, setSavedAccounts] = useState(() => {
+    const saved = localStorage.getItem('hs_registered_users');
+    const parsed = saved ? JSON.parse(saved).map(u => u.trim().toLowerCase()) : [];
+    return parsed.filter(email => !['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(email));
+  });
+
 
   // Countdown timer for resending OTP
   useEffect(() => {
@@ -101,6 +107,15 @@ export default function AccountPage({ onAddToCart, lang }) {
           localStorage.setItem('hs_registered_users', JSON.stringify(next));
           return next;
         });
+
+        // Add to saved accounts list if it's not a mock account
+        const emailClean = email.trim().toLowerCase();
+        if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
+          setSavedAccounts(prev => {
+            if (prev.includes(emailClean)) return prev;
+            return [...prev, emailClean];
+          });
+        }
       }
     };
 
@@ -355,6 +370,13 @@ export default function AccountPage({ onAddToCart, lang }) {
       const updatedList = [...registeredUsers, normalizedUser];
       setRegisteredUsers(updatedList);
       localStorage.setItem('hs_registered_users', JSON.stringify(updatedList));
+    }
+
+    if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(normalizedUser)) {
+      setSavedAccounts(prev => {
+        if (prev.includes(normalizedUser)) return prev;
+        return [...prev, normalizedUser];
+      });
     }
   };
 
@@ -714,6 +736,65 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           {step === 1 ? (
             <div className="w-full flex flex-col">
+              {/* List of previously saved / authorized accounts */}
+              {savedAccounts.length > 0 && (
+                <div className="flex flex-col gap-3 mb-6 w-full">
+                  <span className="text-[11px] font-sans font-black tracking-widest text-neutral-400 uppercase text-center mb-1">
+                    Войти как
+                  </span>
+                  <div className="flex flex-col gap-2.5 max-h-[180px] overflow-y-auto pr-1">
+                    {savedAccounts.map((email) => (
+                      <div
+                        key={email}
+                        className="group flex items-center justify-between w-full h-[54px] bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-[20px] px-5 transition-all duration-300 cursor-pointer"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIdentifier(email);
+                            loginSuccess(email);
+                          }}
+                          className="flex items-center gap-3 flex-1 h-full text-left bg-transparent border-none p-0 outline-none cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[20px] text-neutral-400 group-hover:text-black transition-colors">
+                            account_circle
+                          </span>
+                          <span className="text-[14px] text-black font-medium truncate max-w-[200px]">
+                            {email}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Delete from saved accounts list
+                            setSavedAccounts(prev => {
+                              const next = prev.filter(x => x !== email);
+                              const savedList = localStorage.getItem('hs_registered_users');
+                              const parsedList = savedList ? JSON.parse(savedList) : [];
+                              const nextParsed = parsedList.filter(x => x.trim().toLowerCase() !== email);
+                              localStorage.setItem('hs_registered_users', JSON.stringify(nextParsed));
+                              return next;
+                            });
+                            // Also remove from registeredUsers state
+                            setRegisteredUsers(prev => prev.filter(x => x !== email));
+                          }}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-neutral-200/50 transition-all cursor-pointer border-none bg-transparent outline-none"
+                          title="Удалить из списка"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-2 mb-2 w-full">
+                    <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
+                    <span className="px-4 text-[11px] text-neutral-400 font-bold uppercase tracking-wider whitespace-nowrap">Или другой аккаунт</span>
+                    <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleIdentifierSubmit} className="w-full flex flex-col text-left">
                 {/* Input block */}
                 <div className="flex flex-col mb-4">
