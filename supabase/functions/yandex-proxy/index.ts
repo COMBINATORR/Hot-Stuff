@@ -9,13 +9,28 @@ const corsHeaders = {
 // Global in-memory logs buffer
 const logs: any[] = [];
 
+function maskSensitiveData(data: any): any {
+  if (typeof data === "string") {
+    return data.replace(/(client_secret=)([^&]+)/g, "$1******");
+  }
+  if (typeof data === "object" && data !== null) {
+    const cloned = { ...data };
+    if (cloned.client_secret) cloned.client_secret = "******";
+    if (cloned.clientSecret) cloned.clientSecret = "******";
+    if (cloned.Authorization) cloned.Authorization = cloned.Authorization.substring(0, 15) + "...";
+    if (cloned.authorization) cloned.authorization = cloned.authorization.substring(0, 15) + "...";
+    return cloned;
+  }
+  return data;
+}
+
 async function addLog(message: string, detail?: any) {
   const logEntry = {
     timestamp: new Date().toISOString(),
     message,
-    detail
+    detail: maskSensitiveData(detail)
   };
-  console.log(`${message}:`, JSON.stringify(detail || ""));
+  console.log(`${message}:`, JSON.stringify(logEntry.detail || ""));
   logs.unshift(logEntry);
   if (logs.length > 50) {
     logs.pop();
@@ -58,17 +73,63 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Proxy Token exchange request to inspect errors
+  if (url.pathname.endsWith("/token")) {
+    try {
+      const contentType = req.headers.get("content-type") || "";
+      let bodyText = "";
+      if (contentType.includes("form") || contentType.includes("json")) {
+        bodyText = await req.text();
+      }
+
+      await addLog("Token Endpoint Called", {
+        url: req.url,
+        method: req.method,
+        headers: Object.fromEntries(req.headers.entries()),
+        body: bodyText,
+      });
+
+      // Forward request to Yandex Token URL
+      const yandexResponse = await fetch("https://oauth.yandex.ru/token", {
+        method: req.method,
+        headers: {
+          "Content-Type": contentType,
+          "User-Agent": "HotStuff-Ecommerce-App/1.0",
+        },
+        body: bodyText,
+      });
+
+      const responseText = await yandexResponse.text();
+      await addLog("Yandex Token Response", {
+        status: yandexResponse.status,
+        body: responseText,
+      });
+
+      // Forward response back to Supabase
+      const responseHeaders = new Headers(corsHeaders);
+      responseHeaders.set("Content-Type", yandexResponse.headers.get("Content-Type") || "application/json");
+
+      return new Response(responseText, {
+        status: yandexResponse.status,
+        headers: responseHeaders,
+      });
+    } catch (error) {
+      await addLog("Exception in token proxy", { error: error.message });
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
+  // Userinfo Endpoint
   try {
     const headersObj = Object.fromEntries(req.headers.entries());
-    const maskedHeaders = { ...headersObj };
-    if (maskedHeaders.authorization) {
-      maskedHeaders.authorization = maskedHeaders.authorization.substring(0, 15) + "...";
-    }
 
     await addLog("Incoming request to Userinfo", {
       method: req.method,
       url: req.url,
-      headers: maskedHeaders,
+      headers: headersObj,
     });
 
     // Extract token from Authorization header
