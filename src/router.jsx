@@ -41,7 +41,32 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
 
   // Global Auth Listener to detect Google OAuth login redirect on any page and forward the user immediately to the cabinet
   useEffect(() => {
+    // 1. Sync session on startup (Automatic login check)
+    async function syncSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          const email = session.user.email.trim().toLowerCase();
+          localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
+          localStorage.setItem('hs_remembered_email', email);
+          
+          // Update registered users list
+          const saved = localStorage.getItem('hs_registered_users');
+          const parsed = saved ? JSON.parse(saved) : [];
+          const normalizedList = parsed.map(u => u.trim().toLowerCase());
+          if (!normalizedList.includes(email)) {
+            localStorage.setItem('hs_registered_users', JSON.stringify([...normalizedList, email]));
+          }
+        }
+      } catch (err) {
+        console.error('[Router] Error checking initial session:', err);
+      }
+    }
+    syncSession();
+
+    // 2. Listen to active auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[Router] onAuthStateChange event:', event, 'Session active:', !!session);
       if (session && session.user) {
         const email = session.user.email.trim().toLowerCase();
         // Save user state in localStorage to login immediately on all pages

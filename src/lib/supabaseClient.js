@@ -9,7 +9,14 @@ let supabase;
 try {
   if (supabaseUrl && supabaseAnonKey &&
       supabaseUrl !== 'undefined' && supabaseAnonKey !== 'undefined') {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'hs-supabase-auth-token'
+      }
+    });
   } else {
     console.warn('[Supabase] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY не заданы. Работаем в режиме заглушек.');
     supabase = null;
