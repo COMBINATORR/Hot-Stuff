@@ -1,46 +1,93 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { withSupabase } from "@supabase/server";
 
-console.log("Hello from Functions!");
-
-// This endpoint uses 'publishable' | 'secret' access, apiKey is required.
-// Use publishable for Client-facing, key-validated endpoints
-// Use secret for Server-to-server, internal calls
-export default {
-  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
-    // Called by another service with a secret key
-    // ctx.supabaseAdmin bypasses RLS — use for privileged operations
-    /*
-    if (ctx.authMode === "secret") {
-      const { user_id } = await req.json();
-      const { data } = await ctx.supabaseAdmin.auth.admin.getUserById(user_id);
-
-      return Response.json({
-        email: data?.user?.email,
-      });
-    }
-    */
-
-    const { name } = await req.json();
-
-    return Response.json({
-      message: `Hello ${name}!`,
-    });
-  }),
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
 };
 
-/* To invoke locally:
+Deno.serve(async (req) => {
+  // Handle CORS preflight request
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
 
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
+  try {
+    // Extract token from Authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.warn("Authorization header is missing");
+      return new Response(
+        JSON.stringify({ error: "Missing Authorization header" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/yandex-proxy' \
-    --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
-    --data '{"name":"Functions"}'
+    // Call Yandex API to retrieve user profile info
+    console.log("Fetching profile from Yandex login info API...");
+    const yandexResponse = await fetch("https://login.yandex.ru/info?format=json", {
+      headers: {
+        Authorization: authHeader,
+      },
+    });
 
-*/
+    if (!yandexResponse.ok) {
+      const errorText = await yandexResponse.text();
+      console.error("Yandex API responded with error:", errorText);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch user info from Yandex", details: errorText }),
+        {
+          status: yandexResponse.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const yandexData = await yandexResponse.json();
+    console.log("Original Yandex profile data received:", JSON.stringify(yandexData));
+
+    // Normalize keys for GoTrue (Supabase Auth) compatibility
+    const normalizedData = { ...yandexData };
+
+    // 1. Map email (GoTrue requires 'email')
+    if (!normalizedData.email && normalizedData.default_email) {
+      normalizedData.email = normalizedData.default_email;
+    }
+    
+    // Fallback if email is still missing but emails array is present
+    if (!normalizedData.email && normalizedData.emails && normalizedData.emails.length > 0) {
+      normalizedData.email = normalizedData.emails[0];
+    }
+
+    // 2. Map name (real_name -> name)
+    if (!normalizedData.name && normalizedData.real_name) {
+      normalizedData.name = normalizedData.real_name;
+    } else if (!normalizedData.name && normalizedData.display_name) {
+      normalizedData.name = normalizedData.display_name;
+    }
+
+    // 3. Map avatar (default_avatar_id -> picture)
+    if (normalizedData.default_avatar_id) {
+      normalizedData.picture = `https://avatars.yandex.net/get-yapic/${normalizedData.default_avatar_id}/islands-200`;
+    }
+
+    console.log("Normalized profile response data:", JSON.stringify(normalizedData));
+
+    return new Response(JSON.stringify(normalizedData), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Exception in yandex-proxy edge function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+});
