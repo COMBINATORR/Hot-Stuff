@@ -8,7 +8,7 @@ import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
 import heroBg from '../assets/images/hero-bg.png';
-import heroVideo from '../assets/hero-bg.mp4';
+import heroVideo from '../assets/hero-bg.webm';
 import logoInaThrustPromo from '../assets/images/ina_thrust_promo.png';
 import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
 import logoNewsletterBg from '../assets/images/newsletter_bg.png';
@@ -612,7 +612,7 @@ export default function HomePage({ onAddToCart }) {
           playsInline
           className="w-full h-screen object-cover absolute inset-0 -z-10"
         >
-          <source src={heroVideo} type="video/mp4" />
+          <source src={heroVideo} type="video/webm" />
           {/* Fallback to responsive image if video is not supported */}
           <img src={heroBg} alt="Hero Fallback" className="w-full h-full object-cover" />
         </video>
