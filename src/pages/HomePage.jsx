@@ -8,6 +8,7 @@ import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
 import heroBg from '../assets/images/hero-bg.png';
+import heroVideo from '../assets/hero-bg.mp4';
 import logoInaThrustPromo from '../assets/images/ina_thrust_promo.png';
 import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
 import logoNewsletterBg from '../assets/images/newsletter_bg.png';
@@ -602,53 +603,58 @@ export default function HomePage({ onAddToCart }) {
   return (
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image using ResponsiveImage for WebP/AVIF support */}
-        <ResponsiveImage 
-          src={heroBg} 
-          alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-100" 
-          loading="eager"
-        />
-        {/* Subtle bottom fade to black for seamless transition */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
-        {/* Taller bottom gradient overlay to completely hide the hard image boundary */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* HTML5 Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-screen object-cover absolute inset-0 -z-10"
+        >
+          <source src={heroVideo} type="video/mp4" />
+          {/* Fallback to responsive image if video is not supported */}
+          <img src={heroBg} alt="Hero Fallback" className="w-full h-full object-cover" />
+        </video>
+
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-black/40 -z-10" />
+
+        {/* Bottom gradient fade for transition to black content */}
         <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black to-transparent z-[1]" />
-        {/* Subtle gold glow */}
-        <div
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
-          style={{ background: 'radial-gradient(circle, #f2ca50, transparent 70%)' }}
-        />
 
         <motion.div
-          className="relative z-10 text-left w-full container-hs flex flex-col items-start"
+          className="relative z-10 text-center flex flex-col items-center px-4"
           initial="hidden" animate="visible" variants={stagger}
         >
           {/* Headline */}
           <motion.h1
             variants={fadeUp}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-black leading-[1.1] tracking-[-0.02em] mb-4 text-white lowercase text-left max-w-4xl font-sans"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-[44px] sm:text-[68px] md:text-[86px] lg:text-[100px] font-extralight tracking-[0.3em] text-white uppercase leading-none select-none font-sans mr-[-0.3em]"
           >
-            {HERO.headline}
+            HOT STUFF
           </motion.h1>
 
-          {/* Sub */}
+          {/* Slogan */}
           <motion.p
             variants={fadeUp}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-body-lg md:text-xl text-white/90 max-w-xl mb-12 text-left"
+            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+            className="text-[12px] sm:text-[14px] md:text-[16px] tracking-[0.4em] uppercase text-white/80 mt-6 mb-12 select-none mr-[-0.4em]"
           >
-            {HERO.sub}
+            Искусство чувственности
           </motion.p>
 
           {/* CTA */}
-          <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.3 }} className="flex items-start">
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+          >
             <Link 
-              to="/catalog?cat=new" 
-              className="bg-white text-black font-sans font-bold text-[12px] tracking-[0.2em] py-4 px-10 uppercase transition-all hover:bg-gray-200 inline-block"
+              to="/catalog" 
+              className="border border-white hover:bg-white hover:text-black font-sans font-bold text-[11px] tracking-[0.25em] py-4.5 px-12 uppercase transition-all duration-300 active:scale-95 inline-block text-white"
             >
-              ПОДРОБНЕЕ
+              Перейти в каталог
             </Link>
           </motion.div>
         </motion.div>
