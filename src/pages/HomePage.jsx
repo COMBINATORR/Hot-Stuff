@@ -605,7 +605,7 @@ export default function HomePage({ onAddToCart }) {
   return (
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative z-0 h-screen flex items-center justify-center overflow-hidden">
         {/* Poster image shown behind the video for seamless transition */}
         <img 
           src={heroPoster} 
