@@ -7,8 +7,9 @@ import logoNoirDress from '../assets/images/products/noir_silhouette_dress.png';
 import logoEtherealWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import logoGoldBoots from '../assets/images/products/gold_trimmed_boots.png';
 
-import heroBg from '../assets/images/hero-bg.png';
+import heroBg from '../assets/images/hero-bg.png?as=url&format=png';
 import heroVideo from '../assets/hero-bg.webm';
+import heroPoster from '../assets/hero-poster.webp?as=url&format=webp';
 import logoInaThrustPromo from '../assets/images/ina_thrust_promo.png';
 import logoQuizBg from '../assets/images/sex_toy_quiz_bg.png';
 import logoNewsletterBg from '../assets/images/newsletter_bg.png';
@@ -607,7 +608,7 @@ export default function HomePage({ onAddToCart }) {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Poster image shown behind the video for seamless transition */}
         <img 
-          src="/assets/hero-poster.jpg" 
+          src={heroPoster} 
           alt="Hero Background Poster" 
           className="w-full h-screen object-cover absolute inset-0 -z-20"
         />
@@ -619,7 +620,7 @@ export default function HomePage({ onAddToCart }) {
           muted
           playsInline
           preload="auto"
-          poster="/assets/hero-poster.jpg"
+          poster={heroPoster}
           onPlay={() => setIsVideoLoaded(true)}
           className={`w-full h-screen object-cover absolute inset-0 -z-10 transition-opacity duration-1000 ${
             isVideoLoaded ? 'opacity-100' : 'opacity-0'
