@@ -110,6 +110,7 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 export default function HomePage({ onAddToCart }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   // Supabase states
   const [categories, setCategories] = useState(() => {
@@ -604,13 +605,25 @@ export default function HomePage({ onAddToCart }) {
     <div className="page-enter">
       {/* ═══ HERO ══════════════════════════════════ */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Poster image shown behind the video for seamless transition */}
+        <img 
+          src="/assets/hero-poster.jpg" 
+          alt="Hero Background Poster" 
+          className="w-full h-screen object-cover absolute inset-0 -z-20"
+        />
+
         {/* HTML5 Video Background */}
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-screen object-cover absolute inset-0 -z-10"
+          preload="auto"
+          poster="/assets/hero-poster.jpg"
+          onPlay={() => setIsVideoLoaded(true)}
+          className={`w-full h-screen object-cover absolute inset-0 -z-10 transition-opacity duration-1000 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
         >
           <source src={heroVideo} type="video/webm" />
           {/* Fallback to responsive image if video is not supported */}
