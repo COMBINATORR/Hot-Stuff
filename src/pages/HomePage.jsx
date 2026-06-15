@@ -17,6 +17,7 @@ import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductGrid from '../components/ProductGrid';
 import { supabase } from '../lib/supabase';
+import { ALL_PRODUCTS as DATA_PRODUCTS } from '../data/products';
 
 const HERO = {
   headline: 'в погоне за наслаждением',
@@ -103,7 +104,14 @@ const ALL_PRODUCTS = [
     description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.',
     socialProof: '⭐ 99% рекомендаций'
   },
-];
+].map(p => {
+  const dataProd = DATA_PRODUCTS.find(dp => dp.id === p.id);
+  return {
+    ...p,
+    price: dataProd ? dataProd.price : (Math.floor(Math.random() * 101) + 100),
+    oldPrice: null
+  };
+});
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
@@ -173,7 +181,15 @@ export default function HomePage({ onAddToCart }) {
         
         if (error) throw error;
         if (data && data.length > 0) {
-          setDbProducts(data);
+          const mutated = data.map(p => {
+            const localProduct = ALL_PRODUCTS.find(lp => lp.id === p.id);
+            return {
+              ...p,
+              price: localProduct ? localProduct.price : (Math.floor(Math.random() * 101) + 100),
+              oldPrice: null
+            };
+          });
+          setDbProducts(mutated);
         }
       } catch (err) {
         console.warn('[HomePage] Error loading products from Supabase, using local fallback:', err);

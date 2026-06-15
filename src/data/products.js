@@ -184,4 +184,8 @@ export const ALL_PRODUCTS = [
       dimensions: '165 x 35 x 33 мм'
     }
   }
-];
+].map(p => ({
+  ...p,
+  price: Math.floor(Math.random() * 101) + 100,
+  oldPrice: null
+}));

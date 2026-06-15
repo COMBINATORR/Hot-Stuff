@@ -514,7 +514,11 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         </button>
       </div>
 
-      <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header">
+      <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col">
+        {/* RED TEST BANNER */}
+        <div className="w-full bg-[#E31E24] text-white text-center py-1.5 px-4 text-[9px] md:text-[10px] font-sans font-black tracking-widest uppercase select-none">
+          ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты
+        </div>
         <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20">
           
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
