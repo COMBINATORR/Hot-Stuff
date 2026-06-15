@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       
       // Kaspi Pay custom deep link mock format
       // In production, this would open the Kaspi app directly
-      paymentUrl = `https://kaspi.kz/pay/hotstuff?order=${orderId}&amount=${amount}&invoice=${invoiceNumber}`;
+      paymentUrl = 'https://pay.kaspi.kz/pay/oqg3hrij';
     }
 
     const responseBody = {
