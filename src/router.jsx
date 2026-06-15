@@ -8,6 +8,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import SorayaMockupPage from './pages/SorayaMockupPage.jsx';
 import CartPage from './pages/CartPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
+import LegalPage from './pages/LegalPage.jsx';
 import { supabase } from './lib/supabase';
 
 // Языковые префиксы: ru (default), kz, en
@@ -118,6 +119,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         <Route path="/cart"         element={<PageWrapper><CartPage cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
         <Route path="/checkout"     element={<PageWrapper><CheckoutPage cartItems={cartItems} /></PageWrapper>} />
         <Route path="/account"      element={<PageWrapper><AccountPage onAddToCart={onAddToCart} /></PageWrapper>} />
+        <Route path="/legal"        element={<PageWrapper><LegalPage /></PageWrapper>} />
         <Route path="/mockup/soraya-wave" element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />
 
         {/* Маршруты с языковыми префиксами /kz/... /en/... /ru/... */}
@@ -129,6 +131,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
             <Route path={`/${lang}/cart`}         element={<PageWrapper><CartPage lang={lang} cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
             <Route path={`/${lang}/checkout`}    element={<PageWrapper><CheckoutPage lang={lang} cartItems={cartItems} /></PageWrapper>} />
             <Route path={`/${lang}/account`}     element={<PageWrapper><AccountPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
+            <Route path={`/${lang}/legal`}        element={<PageWrapper><LegalPage /></PageWrapper>} />
             <Route path={`/${lang}/mockup/soraya-wave`} element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />
           </React.Fragment>
         ))}

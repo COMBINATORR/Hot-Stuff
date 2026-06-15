@@ -19,7 +19,7 @@ const FOOTER_CONFIG = {
     links: [
       { label: "Таблица размеров", to: "/size-guide" },
       { label: "FAQ", to: "/faq" },
-      { label: "Правила возврата нижнего белья", to: "/returns-policy" },
+      { label: "Правила возврата нижнего белья", to: "/legal?tab=return" },
       { label: "Служба поддержки", to: "/support" }
     ]
   },
@@ -37,8 +37,8 @@ const FOOTER_CONFIG = {
   legal: {
     title: "Правовая информация",
     links: [
-      { label: "Политика конфиденциальности", to: "/privacy" },
-      { label: "Публичная оферта", to: "/terms" }
+      { label: "Политика конфиденциальности", to: "/legal?tab=privacy" },
+      { label: "Публичная оферта", to: "/legal?tab=terms" }
     ],
     ageRestriction: "18+",
     warningText: "Сайт содержит материалы для взрослых. Продажа товаров осуществляется строго лицам старше 18 лет."
