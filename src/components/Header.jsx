@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import ResponsiveImage from './ResponsiveImage';
 import { supabase } from '../lib/supabase';
 
@@ -12,6 +13,7 @@ const TICKER_ITEMS = [
 ];
 
 function CategoryLink({ category, onClick }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const subcategories = category.subcategories || [];
@@ -26,7 +28,7 @@ function CategoryLink({ category, onClick }) {
               onClick={() => setIsOpen(!isOpen)}
               className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors text-left flex-1"
             >
-              {category.name}
+              {t(`menu.${category.name.toLowerCase()}`, category.name)}
             </span>
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -60,7 +62,7 @@ function CategoryLink({ category, onClick }) {
                     onClick={onClick}
                     className="text-neutral-400 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
                   >
-                    {sub.name}
+                    {t(`menu.${sub.name.toLowerCase()}`, sub.name)}
                   </Link>
                 ))}
               </motion.div>
@@ -74,7 +76,7 @@ function CategoryLink({ category, onClick }) {
             onClick={onClick}
             className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-1.5 hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
           >
-            {category.name}
+            {t(`menu.${category.name.toLowerCase()}`, category.name)}
           </Link>
           {category.description && (
             <span className="text-[10px] text-neutral-400 leading-normal block -mt-1 pb-2 font-normal font-sans text-left">
@@ -365,8 +367,10 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
 }
 
 export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToCart }) {
+  const { t, i18n } = useTranslation();
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [tickerIndex, setTickerIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -374,6 +378,14 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const getLangLabel = (lng) => {
+    if (!lng) return 'RU';
+    const l = lng.toLowerCase();
+    if (l === 'kk' || l === 'kz') return 'KZ';
+    if (l === 'en') return 'EN';
+    return 'RU';
+  };
 
   const [session, setSession] = useState(null);
 
@@ -676,9 +688,53 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                   </div>
                   <span className="font-bold text-[11px] tracking-[0.2em] uppercase text-white">МЕНЮ</span>
                 </div>
-                <div className="flex items-center gap-1 cursor-pointer text-white hover:text-primary transition-colors">
-                  <span className="font-bold text-[11px] tracking-wider uppercase mt-[1px]">RU</span>
-                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                <div className="relative">
+                  <button
+                    onClick={() => setLangMenuOpen(!langMenuOpen)}
+                    className="flex items-center gap-1 bg-transparent border-none text-white hover:text-primary transition-colors focus:outline-none font-bold text-[11px] tracking-wider uppercase cursor-pointer"
+                  >
+                    <span>{getLangLabel(i18n.language)}</span>
+                    <span className="material-symbols-outlined text-[20px] transition-transform duration-200" style={{ transform: langMenuOpen ? 'rotate(180deg)' : 'none' }}>
+                      expand_more
+                    </span>
+                  </button>
+                  
+                  <AnimatePresence>
+                    {langMenuOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-[100]" 
+                          onClick={() => setLangMenuOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-2 w-24 bg-surface-container-lowest border border-white/10 shadow-xl z-[101] flex flex-col py-1 rounded-[2px]"
+                        >
+                          {[
+                            { code: 'ru', label: 'RU' },
+                            { code: 'kk', label: 'KZ' },
+                            { code: 'en', label: 'EN' }
+                          ].map((lang) => (
+                            <button
+                              key={lang.code}
+                              onClick={() => {
+                                i18n.changeLanguage(lang.code);
+                                setLangMenuOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-2 text-[10px] tracking-widest uppercase font-bold transition-colors hover:bg-white/5 hover:text-primary ${
+                                getLangLabel(i18n.language) === lang.label ? 'text-primary bg-white/5' : 'text-neutral-300'
+                              }`}
+                            >
+                              {lang.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
