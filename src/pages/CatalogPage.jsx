@@ -626,12 +626,6 @@ export default function CatalogPage({ onAddToCart }) {
 
           {/* RIGHT GRID & DETAILS */}
           <main className="flex-1 w-full">
-            {/* Breadcrumbs */}
-            <div className="mb-2">
-              <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-gray-400 uppercase">
-                {pageTitle}
-              </span>
-            </div>
 
             {/* Title & Count Row */}
             <div className="flex justify-between items-baseline border-b border-black pb-4 mb-6">

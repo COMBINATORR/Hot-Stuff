@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
@@ -7,6 +7,20 @@ export default function Breadcrumbs() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const pathname = location.pathname;
+
+  // Слушатель для обновления хлебных крошек при изменении категории в кэше
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const cached = localStorage.getItem('hs_categories');
+    if (cached) {
+      try {
+        setCategories(JSON.parse(cached));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [location]);
 
   // Разбираем путь на части
   const pathParts = pathname.split('/').filter(Boolean);
@@ -24,67 +38,152 @@ export default function Breadcrumbs() {
     return null;
   }
 
-  const getStepName = (step, index, allSteps) => {
-    if (step === 'catalog') return t('nav.catalog', 'Каталог');
-    if (step === 'cart') return t('nav.cart', 'Корзина');
-    if (step === 'checkout') return t('nav.checkout', 'Оформление');
-    if (step === 'account') return t('nav.account', 'Профиль');
-    if (step === 'legal') return t('footer.legal_title', 'Правовая информация');
-    if (step === 'blog') return t('header.blog', 'блог');
+  const searchParams = new URLSearchParams(location.search);
+  const catSlug = searchParams.get('cat');
 
-    if (step === 'product' && index === 0) {
-      return t('nav.catalog', 'Каталог');
-    }
+  // Массив для хранения звеньев хлебных крошек
+  let breadcrumbItems = [];
 
-    // Если это ID товара после 'product'
-    if (index > 0 && allSteps[index - 1] === 'product') {
-      const productId = parseInt(step, 10);
-      const product = ALL_PRODUCTS.find(p => p.id === productId);
-      return product ? product.name : step;
-    }
+  // 1. Звено: Главная
+  breadcrumbItems.push({
+    name: t('nav.home', 'Главная'),
+    link: langPrefix || '/',
+    isLast: false
+  });
 
-    if (step === 'mockup' && index === 0) {
-      return t('nav.catalog', 'Каталог');
-    }
-    if (index > 0 && allSteps[index - 1] === 'mockup' && step === 'soraya-wave') {
-      return 'SORAYA WAVE™';
-    }
+  // 2. Логика для страницы каталога с параметром категории
+  if (steps[0] === 'catalog') {
+    breadcrumbItems.push({
+      name: t('nav.catalog', 'Каталог'),
+      link: `${langPrefix}/catalog`,
+      isLast: !catSlug
+    });
 
-    return step;
-  };
+    if (catSlug && categories.length > 0) {
+      // Ищем родительскую категорию
+      const parentCat = categories.find(c => c.slug === catSlug);
+      if (parentCat) {
+        breadcrumbItems.push({
+          name: t('menu.' + parentCat.name.toLowerCase(), parentCat.name),
+          link: `${langPrefix}/catalog?cat=${parentCat.slug}`,
+          isLast: true
+        });
+      } else {
+        // Ищем подкатегорию
+        for (const c of categories) {
+          const sub = (c.subcategories || []).find(s => s.slug === catSlug);
+          if (sub) {
+            breadcrumbItems.push({
+              name: t('menu.' + c.name.toLowerCase(), c.name),
+              link: `${langPrefix}/catalog?cat=${c.slug}`,
+              isLast: false
+            });
+            breadcrumbItems.push({
+              name: t('menu.' + sub.name.toLowerCase(), sub.name),
+              link: `${langPrefix}/catalog?cat=${sub.slug}`,
+              isLast: true
+            });
+            break;
+          }
+        }
+      }
+    }
+  }
+  // 3. Логика для страницы товара с категорией и подкатегорией
+  else if (steps[0] === 'product' && steps[1]) {
+    breadcrumbItems.push({
+      name: t('nav.catalog', 'Каталог'),
+      link: `${langPrefix}/catalog`,
+      isLast: false
+    });
 
-  const getStepLink = (step, index, allSteps) => {
-    if (step === 'product') {
-      return `${langPrefix}/catalog`;
+    const productId = parseInt(steps[1], 10);
+    const product = ALL_PRODUCTS.find(p => p.id === productId);
+
+    if (product) {
+      // Определяем родительскую категорию
+      let parentSlug = 'toys-women';
+      if (product.category === 'massagers') parentSlug = 'toys-men';
+      if (product.category === 'couples') parentSlug = 'toys-couples';
+      if (product.categoryLabel === 'АНАЛЬНЫЕ ПРОБКИ' || product.categoryLabel === 'АНАЛЬНЫЕ ВИБРОШАРИКИ') parentSlug = 'toys-anal';
+
+      const parentNames = {
+        'toys-women': t('menu.игрушки для женщин', 'Игрушки для женщин'),
+        'toys-men': t('menu.игрушки для мужчин', 'Игрушки для мужчин'),
+        'toys-couples': t('menu.игрушки для пар', 'Игрушки для пар'),
+        'toys-anal': t('menu.анальные игрушки', 'Анальные игрушки')
+      };
+
+      breadcrumbItems.push({
+        name: parentNames[parentSlug] || parentSlug,
+        link: `${langPrefix}/catalog?cat=${parentSlug}`,
+        isLast: false
+      });
+
+      // Определяем подкатегорию
+      if (categories.length > 0) {
+        for (const c of categories) {
+          const sub = (c.subcategories || []).find(s => s.name.toLowerCase() === product.categoryLabel.toLowerCase());
+          if (sub) {
+            breadcrumbItems.push({
+              name: t('menu.' + sub.name.toLowerCase(), sub.name),
+              link: `${langPrefix}/catalog?cat=${sub.slug}`,
+              isLast: false
+            });
+            break;
+          }
+        }
+      }
+
+      // Добавляем сам товар
+      breadcrumbItems.push({
+        name: product.name,
+        link: `${langPrefix}/product/${product.id}`,
+        isLast: true
+      });
+    } else {
+      breadcrumbItems.push({
+        name: steps[1],
+        link: `${langPrefix}/product/${steps[1]}`,
+        isLast: true
+      });
     }
-    if (step === 'mockup') {
-      return `${langPrefix}/catalog`;
-    }
-    const path = allSteps.slice(0, index + 1).join('/');
-    return `${langPrefix}/${path}`;
-  };
+  }
+  // 4. Логика для остальных стандартных страниц
+  else {
+    const getStepName = (step) => {
+      if (step === 'cart') return t('nav.cart', 'Корзина');
+      if (step === 'checkout') return t('nav.checkout', 'Оформление');
+      if (step === 'account') return t('nav.account', 'Профиль');
+      if (step === 'legal') return t('footer.legal_title', 'Правовая информация');
+      if (step === 'blog') return t('header.blog', 'блог');
+      return step;
+    };
+
+    steps.forEach((step, idx) => {
+      const isLast = idx === steps.length - 1;
+      const path = steps.slice(0, idx + 1).join('/');
+      breadcrumbItems.push({
+        name: getStepName(step),
+        link: `${langPrefix}/${path}`,
+        isLast: isLast
+      });
+    });
+  }
 
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8 text-left">
-      <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase text-outline text-neutral-400">
-        <Link to={langPrefix || '/'} className="hover:text-white transition-colors">
-          {t('nav.home', 'Главная')}
-        </Link>
-        {steps.map((step, idx) => {
-          if (step === 'product' || step === 'mockup') return null;
-
-          const isLast = idx === steps.length - 1;
-          const name = getStepName(step, idx, steps);
-          const link = getStepLink(step, idx, steps);
-
+      <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase text-neutral-400">
+        {breadcrumbItems.map((item, idx) => {
+          const isLast = item.isLast;
           return (
             <React.Fragment key={idx}>
-              <span>/</span>
+              {idx > 0 && <span className="text-outline">/</span>}
               {isLast ? (
-                <span className="text-primary">{name}</span>
+                <span className="text-primary">{item.name}</span>
               ) : (
-                <Link to={link} className="hover:text-white transition-colors">
-                  {name}
+                <Link to={item.link} className="hover:text-white transition-colors">
+                  {item.name}
                 </Link>
               )}
             </React.Fragment>
