@@ -561,7 +561,7 @@ export default function CatalogPage({ onAddToCart }) {
                             <span className="text-[13px] font-light w-4 flex-none text-center">
                               {isExpanded ? '–' : '+'}
                             </span>
-                            <span>{cat.name.toUpperCase()}</span>
+                            <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
                           </button>
                           
                           {isExpanded && (
