@@ -5,13 +5,6 @@ import { useTranslation } from 'react-i18next';
 import ResponsiveImage from './ResponsiveImage';
 import { supabase } from '../lib/supabase';
 
-// Promo Ticker Data
-const TICKER_ITEMS = [
-  { text: "АКЦИИ ДЛЯ САМОНАСЛАЖДЕНИЯ: СКИДКИ ДО 50% + БЕСПЛАТНАЯ ИГРУШКА", link: "/catalog" },
-  { text: "БЕСПЛАТНАЯ ДОСТАВКА ПО ВСЕМУ КАЗАХСТАНУ ОТ 30 000 ₸", link: "/delivery" },
-  { text: "НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ", link: "/catalog?cat=wellness" }
-];
-
 function CategoryLink({ category, onClick }) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,7 +46,7 @@ function CategoryLink({ category, onClick }) {
                   onClick={onClick}
                   className="text-neutral-300 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
                 >
-                  посмотреть все
+                  {t('header.view_all', 'посмотреть все')}
                 </Link>
                 {subcategories.map((sub) => (
                   <Link
@@ -91,11 +84,13 @@ function CategoryLink({ category, onClick }) {
 
 /** CartDrawer — slide-in panel (Stitch design) */
 function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddToCart }) {
+  const { t } = useTranslation();
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const [promo, setPromo] = useState('');
   const [appliedPromo, setAppliedPromo] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  const navigate = useNavigate();
 
   // lock body scroll when open
   useEffect(() => {
@@ -116,7 +111,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
     if (code === 'LELO15' || code === 'HOT15') {
       setAppliedPromo(code);
     } else {
-      alert('Неверный промокод. Попробуйте LELO15 или HOT15');
+      alert(t('account.err_invalid_promo', 'Неверный промокод. Попробуйте LELO15 или HOT15'));
       setAppliedPromo('');
     }
   };
@@ -140,13 +135,13 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
         console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
         window.location.href = data.paymentUrl;
       } else {
-        throw new Error('Не удалось получить ссылку на оплату от сервера');
+        throw new Error(t('header.err_payment_init_fail', 'Не удалось получить ссылку на оплату от сервера'));
       }
     } catch (err) {
       console.error('[Kaspi Checkout Error]', err);
-      const errMsg = err.message || 'Ошибка инициализации платежа';
+      const errMsg = err.message || t('account.auth_error_default', 'Ошибка инициализации платежа');
       setCheckoutError(errMsg);
-      alert(`Ошибка оплаты: ${errMsg}`);
+      alert(`${t('common.error', 'Ошибка')}: ${errMsg}`);
       setIsCheckingOut(false);
     }
   };
@@ -166,7 +161,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
       >
         {/* Header */}
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
-          <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">ВАША КОРЗИНА</h2>
+          <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">{t('header.cart_title', 'ВАША КОРЗИНА')}</h2>
           <button className="text-on-surface-variant hover:text-primary transition-colors" onClick={onClose}>
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -178,11 +173,11 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
             <div className="text-[10px] font-sans font-black tracking-[0.15em] text-on-surface-variant uppercase flex justify-between">
               {subtotal < FREE_SHIPPING_THRESHOLD ? (
                 <>
-                  <span>Добавьте еще {(FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ru-KZ')} ₸ до бесплатной доставки</span>
+                  <span>{t('header.free_shipping_hint', { amount: (FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ru-KZ') })}</span>
                   <span className="text-primary">{Math.round(progressPercent)}%</span>
                 </>
               ) : (
-                <span className="text-green-400">✨ Поздравляем! Доставка бесплатна!</span>
+                <span className="text-green-400">{t('header.free_shipping_success', '✨ Поздравляем! Доставка бесплатна!')}</span>
               )}
             </div>
             <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -199,7 +194,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center gap-4">
               <span className="material-symbols-outlined text-5xl text-outline">shopping_bag</span>
-              <p className="font-label-caps text-on-surface-variant">Корзина пуста</p>
+              <p className="font-label-caps text-on-surface-variant">{t('header.cart_empty', 'Корзина пуста')}</p>
             </div>
           ) : (
             <>
@@ -234,7 +229,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                         <button 
                           className="text-xs text-on-surface-variant hover:text-error uppercase tracking-widest"
                           onClick={() => onRemove(item.id, item.variant)}
-                        >Удалить</button>
+                        >{t('header.remove', 'Удалить')}</button>
                       </div>
                     </div>
                   </div>
@@ -243,7 +238,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
 
               {/* Cross-selling Section inside scrollable list */}
               <div className="pt-8 border-t border-white/5 space-y-4">
-                <h4 className="font-sans font-black text-[10px] tracking-[0.15em] text-white uppercase">ДОБАВЬТЕ К ЗАКАЗУ:</h4>
+                <h4 className="font-sans font-black text-[10px] tracking-[0.15em] text-white uppercase">{t('header.add_to_order', 'ДОБАВЬТЕ К ЗАКАЗУ:')}</h4>
                 <div className="space-y-3">
                   {/* LELO Personal Moisturizer */}
                   {onAddToCart && !items.some(i => i.id === 101) && (
@@ -259,7 +254,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                         onClick={() => onAddToCart({ id: 101, name: 'Personal Moisturizer', price: 12500, emoji: '🧴', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
-                        + ДОБАВИТЬ
+                        + {t('header.add_btn', 'ДОБАВИТЬ')}
                       </button>
                     </div>
                   )}
@@ -277,7 +272,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                         onClick={() => onAddToCart({ id: 102, name: 'Cleaning Spray', price: 8900, emoji: '🧼', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
-                        + ДОБАВИТЬ
+                        + {t('header.add_btn', 'ДОБАВИТЬ')}
                       </button>
                     </div>
                   )}
@@ -292,11 +287,11 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
           <div className="p-8 bg-surface-container-low space-y-6">
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
-                <label className="font-label-caps text-[10px] text-on-surface-variant uppercase">ПРОМОКОД</label>
+                <label className="font-label-caps text-[10px] text-on-surface-variant uppercase">{t('header.promo_label', 'ПРОМОКОД')}</label>
                 <div className="flex gap-2">
                   <input 
                     className="flex-1 bg-background border border-white/10 px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors" 
-                    placeholder="Введите код" 
+                    placeholder={t('header.promo_placeholder', 'Введите код')} 
                     type="text"
                     value={promo}
                     onChange={e => setPromo(e.target.value)}
@@ -305,37 +300,37 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                     onClick={handleApplyPromo}
                     className="px-4 py-2 border border-primary text-primary font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-all"
                   >
-                    ПРИМЕНИТЬ
+                    {t('header.promo_btn', 'ПРИМЕНИТЬ')}
                   </button>
                 </div>
                 {appliedPromo && (
-                  <p className="text-[10px] text-green-400 font-sans mt-1">✓ Промокод {appliedPromo} применен (-15%)</p>
+                  <p className="text-[10px] text-green-400 font-sans mt-1">{t('header.promo_applied', { code: appliedPromo })}</p>
                 )}
               </div>
               <div className="h-px bg-white/10"></div>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-end text-on-surface-variant">
-                  <span className="font-label-caps uppercase">ПОДЫТОГ</span>
+                  <span className="font-label-caps uppercase">{t('header.subtotal', 'ПОДЫТОГ')}</span>
                   <span>{subtotal.toLocaleString('ru-KZ')} ₸</span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between items-end text-red-400">
-                    <span className="font-label-caps uppercase">СКИДКА 15%</span>
+                    <span className="font-label-caps uppercase">{t('header.discount', 'СКИДКА 15%')}</span>
                     <span>- {discountAmount.toLocaleString('ru-KZ')} ₸</span>
                   </div>
                 )}
                 <div className="h-px bg-white/10 my-2"></div>
                 <div className="flex justify-between items-end">
-                  <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">ИТОГО</span>
+                  <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">{t('header.total', 'ИТОГО')}</span>
                   <span className="font-title-md text-title-md text-primary">{finalTotal.toLocaleString('ru-KZ')} ₸</span>
                 </div>
               </div>
             </div>
             <button 
               className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase py-5 hover:bg-[#ffe088] transition-colors tracking-widest"
-              onClick={() => { onClose(); navigate('/checkout'); }}
+              onClick={() => { onClose(); navigate(i18n.language === 'ru' ? '/checkout' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/checkout`); }}
             >
-              ОФОРМИТЬ ЗАКАЗ
+              {t('header.checkout_btn', 'ОФОРМИТЬ ЗАКАЗ')}
             </button>
             <button
               onClick={handleKaspiCheckout}
@@ -348,11 +343,11 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                   <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
                     <circle cx="12" cy="12" r="9" />
                   </svg>
-                  <span>Обработка...</span>
+                  <span>{t('header.processing', 'Обработка...')}</span>
                 </>
               ) : (
                 <>
-                  <span>Оплатить через Kaspi Pay</span>
+                  <span>{t('header.pay_kaspi', 'Оплатить через Kaspi Pay')}</span>
                   <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
                     <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
                   </svg>
@@ -377,17 +372,38 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-
-  const getLangLabel = (lng) => {
-    if (!lng) return 'RU';
-    const l = lng.toLowerCase();
-    if (l === 'kk' || l === 'kz') return 'KZ';
-    if (l === 'en') return 'EN';
-    return 'RU';
-  };
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const [session, setSession] = useState(null);
+
+  // Localized Ticker items computed dynamically using t()
+  const tickerItems = [
+    { text: t('header.promo1', 'АКЦИИ ДЛЯ САМОНАСЛАЖДЕНИЯ: СКИДКИ ДО 50% + БЕСПЛАТНАЯ ИГРУШКА'), link: "/catalog" },
+    { text: t('header.promo2', 'БЕСПЛАТНАЯ ДОСТАВКА ПО ВСЕМУ КАЗАХСТАНУ ОТ 30 000 ₸'), link: "/delivery" },
+    { text: t('header.promo3', 'НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ'), link: "/catalog?cat=wellness" }
+  ];
+
+  const handleLangChange = (langCode) => {
+    i18n.changeLanguage(langCode);
+    setLangMenuOpen(false);
+    
+    // Parse current pathname
+    const parts = location.pathname.split('/');
+    if (['ru', 'kz', 'en'].includes(parts[1])) {
+      parts.splice(1, 1);
+    }
+    
+    let newPathname = parts.join('/');
+    if (newPathname === '') newPathname = '/';
+    
+    const prefix = langCode === 'kk' ? 'kz' : langCode;
+    localStorage.setItem('app_language', prefix);
+    
+    const targetPath = (prefix === 'ru' ? newPathname : `/${prefix}${newPathname === '/' ? '' : newPathname}`) + location.search + location.hash;
+    
+    navigate(targetPath);
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -459,35 +475,45 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
   const isLightPage = pathname.includes('/catalog');
 
-  // Автоматическая смена сообщений каждые 12 секунд
+  // Switch promo ticker items
   useEffect(() => {
     const timer = setInterval(() => {
-      setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
-    }, 12000); // интервал 12 секунд (в диапазоне 10-15 секунд)
+      setTickerIndex((prev) => (prev + 1) % tickerItems.length);
+    }, 12000);
     return () => clearInterval(timer);
-  }, [tickerIndex]);
+  }, [tickerIndex, tickerItems.length]);
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
       setSearchOpen(false);
-      navigate(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
+      const prefix = i18n.language === 'ru' ? '' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}`;
+      navigate(`${prefix}/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
   };
 
   const handleSearchTermClick = (term) => {
     setSearchOpen(false);
-    navigate(`/catalog?search=${encodeURIComponent(term)}`);
+    const prefix = i18n.language === 'ru' ? '' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}`;
+    navigate(`${prefix}/catalog?search=${encodeURIComponent(term)}`);
   };
 
   const handleNextTicker = () => {
-    setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
+    setTickerIndex((prev) => (prev + 1) % tickerItems.length);
   };
 
   const handlePrevTicker = () => {
-    setTickerIndex((prev) => (prev - 1 + TICKER_ITEMS.length) % TICKER_ITEMS.length);
+    setTickerIndex((prev) => (prev - 1 + tickerItems.length) % tickerItems.length);
+  };
+
+  const getLangLabel = (lng) => {
+    if (!lng) return 'RU';
+    const l = lng.toLowerCase();
+    if (l === 'kk' || l === 'kz') return 'KZ';
+    if (l === 'en') return 'EN';
+    return 'RU';
   };
 
   return (
@@ -509,13 +535,13 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               className="flex items-center justify-center gap-2 md:gap-4 w-full h-full"
             >
               <span className="text-[9.5px] md:text-xs tracking-[0.05em] md:tracking-[0.15em] font-sans whitespace-normal leading-tight md:leading-normal text-center">
-                {TICKER_ITEMS[tickerIndex].text}
+                {tickerItems[tickerIndex]?.text}
               </span>
               <Link 
-                to={TICKER_ITEMS[tickerIndex].link} 
+                to={i18n.language === 'ru' ? tickerItems[tickerIndex].link : `/${i18n.language === 'kk' ? 'kz' : i18n.language}${tickerItems[tickerIndex].link}`}
                 className="bg-primary hover:bg-[#ffe088] active:scale-95 transition-all text-on-primary text-[8px] md:text-[9px] font-black tracking-widest uppercase py-1 px-2.5 md:py-1.5 md:px-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary inline-block flex-none"
               >
-                КУПИТЬ
+                {t('header.buy', 'КУПИТЬ')}
               </Link>
             </motion.div>
           </AnimatePresence>
@@ -529,7 +555,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
       <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col">
         {/* RED TEST BANNER */}
         <div className="w-full bg-[#E31E24] text-white text-center py-1.5 px-4 text-[9px] md:text-[10px] font-sans font-black tracking-widest uppercase select-none">
-          ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты
+          {t('header.test_banner', 'ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты')}
         </div>
         <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20">
           
@@ -542,28 +568,28 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
               </div>
               <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary transition-colors flex items-center mt-[1px]`}>
-                МЕНЮ
+                {t('header.menu', 'МЕНЮ')}
               </span>
             </button>
 
             {/* Logo for Mobile */}
             <div className="flex md:hidden flex-col items-start justify-center select-none">
-              <Link to="/" className={`text-[22px] font-light tracking-[0.25em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none font-sans`}>
+              <Link to={getHomePath()} className={`text-[22px] font-light tracking-[0.25em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none font-sans`}>
                 HOT STUFF
               </Link>
               <span className={`text-[12px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-normal mt-1.5 uppercase font-sans`}>
-                АТЫРАУ
+                {t('footer.subtitle', 'АТЫРАУ')}
               </span>
             </div>
           </div>
 
           {/* CENTER: Logo (Desktop only) */}
           <div className="hidden md:flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
-            <Link to="/" className={`text-[36px] font-medium tracking-[0.3em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none`}>
+            <Link to={getHomePath()} className={`text-[36px] font-medium tracking-[0.3em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none`}>
               HOT STUFF
             </Link>
             <span className={`text-[18px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-medium mt-2 uppercase`}>
-              АТЫРАУ
+              {t('footer.subtitle', 'АТЫРАУ')}
             </span>
           </div>
 
@@ -582,7 +608,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className="hidden sm:flex items-center gap-3 relative"
                 >
-                  <Link to="/account" className="flex items-center focus:outline-none transition-transform hover:scale-105 duration-200">
+                  <Link to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`} className="flex items-center focus:outline-none transition-transform hover:scale-105 duration-200">
                     {session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
                       <img
                         src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
@@ -597,12 +623,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                   </Link>
                   <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase font-sans">
                     <Link
-                      to="/account"
+                      to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                       className={`hover:text-primary transition-colors ${
                         isLightPage ? 'text-black font-bold' : 'text-white font-bold'
                       }`}
                     >
-                      кабинет
+                      {t('header.cabinet', 'кабинет')}
                     </Link>
                     <span className="opacity-30">/</span>
                     <button
@@ -613,9 +639,9 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                       className={`hover:text-error transition-colors uppercase font-bold cursor-pointer bg-transparent border-none p-0 ${
                         isLightPage ? 'text-black/60' : 'text-white/60'
                       }`}
-                      title="Выйти"
+                      title={t('header.logout', 'выйти')}
                     >
-                      выйти
+                      {t('header.logout', 'выйти')}
                     </button>
                   </div>
                 </motion.div>
@@ -629,10 +655,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                   className="hidden sm:flex"
                 >
                   <NavLink
-                    to="/account"
+                    to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                     onClick={handleAccountClick}
                     className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}
-                    title="Вход / Регистрация"
+                    title={t('header.login_register', 'Вход / Регистрация')}
                   >
                     <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
                   </NavLink>
@@ -674,9 +700,9 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.32, ease: [0.25,0.46,0.45,0.94] }}
-              style={{ left: 0, right: 'auto' }} // Slide from left instead of right for menu
+              style={{ left: 0, right: 'auto' }}
             >
-              {/* Drawer Header matching screenshot */}
+              {/* Drawer Header */}
               <div className="flex justify-between items-center p-8 pb-6">
                 <div className="flex items-center gap-4">
                   <div 
@@ -686,8 +712,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors"></span>
                     <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors"></span>
                   </div>
-                  <span className="font-bold text-[11px] tracking-[0.2em] uppercase text-white">МЕНЮ</span>
+                  <span className="font-bold text-[11px] tracking-[0.2em] uppercase text-white">{t('header.menu', 'МЕНЮ')}</span>
                 </div>
+                
+                {/* Interactive Language Dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setLangMenuOpen(!langMenuOpen)}
@@ -721,8 +749,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                             <button
                               key={lang.code}
                               onClick={() => {
-                                i18n.changeLanguage(lang.code);
-                                setLangMenuOpen(false);
+                                handleLangChange(lang.code);
                               }}
                               className={`w-full text-left px-4 py-2 text-[10px] tracking-widest uppercase font-bold transition-colors hover:bg-white/5 hover:text-primary ${
                                 getLangLabel(i18n.language) === lang.label ? 'text-primary bg-white/5' : 'text-neutral-300'
@@ -741,7 +768,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               {/* Navigation Links */}
               <nav className="flex flex-col px-10 py-2 gap-4 overflow-y-auto flex-1">
                 {categories.length === 0 ? (
-                  <span className="text-[10px] text-neutral-500 font-sans text-left">Загрузка категорий...</span>
+                  <span className="text-[10px] text-neutral-500 font-sans text-left">{t('header.loading_categories', 'Загрузка категорий...')}</span>
                 ) : (
                   categories.map((cat) => (
                     <CategoryLink
@@ -753,18 +780,18 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 )}
                 <div className="w-full h-px bg-white/10 my-2"></div>
                 <Link 
-                  to="/blog" 
+                  to={i18n.language === 'ru' ? '/blog' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/blog`}
                   className="text-white text-[11px] font-bold tracking-widest lowercase hover:text-primary transition-colors text-left" 
                   onClick={() => setNavOpen(false)}
                 >
-                  блог
+                  {t('header.blog', 'блог')}
                 </Link>
                 <Link 
-                  to="/mockup/soraya-wave" 
+                  to={i18n.language === 'ru' ? '/mockup/soraya-wave' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/mockup/soraya-wave`}
                   className="text-white text-[11px] font-bold tracking-widest lowercase hover:text-primary transition-colors text-left mt-1" 
                   onClick={() => setNavOpen(false)}
                 >
-                  МАКЕТ SORAYA WAVE™
+                  {t('header.mockup_link', 'МАКЕТ SORAYA WAVE™')}
                 </Link>
               </nav>
 
@@ -772,7 +799,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 {session ? (
                   <>
                     <Link
-                      to="/account"
+                      to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                       className="flex-none transition-transform active:scale-95 duration-200"
                       onClick={() => setNavOpen(false)}
                     >
@@ -790,11 +817,11 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     </Link>
                     <div className="flex flex-col items-start gap-1">
                       <Link
-                        to="/account"
+                        to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                         className="text-white text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest"
                         onClick={() => setNavOpen(false)}
                       >
-                        Кабинет
+                        {t('header.cabinet', 'кабинет')}
                       </Link>
                       <button
                         onClick={async () => {
@@ -804,15 +831,15 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                         }}
                         className="text-[10px] text-white/50 hover:text-red-500 transition-colors uppercase tracking-widest font-black bg-transparent border-none p-0 cursor-pointer"
                       >
-                        Выйти
+                        {t('header.logout', 'выйти')}
                       </button>
                     </div>
                   </>
                 ) : (
                   <Link
-                    to="/account"
+                    to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                     className="flex items-center justify-center w-12 h-12 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors"
-                    title="Вход / Регистрация"
+                    title={t('header.login_register', 'Вход / Регистрация')}
                     onClick={(e) => {
                       setNavOpen(false);
                       handleAccountClick(e);
@@ -854,7 +881,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               <div className="flex justify-between items-center border-b border-white/20 pb-4">
                 <input 
                   autoFocus 
-                  placeholder="Поиск аксессуаров..." 
+                  placeholder={t('header.search_placeholder', 'Поиск аксессуаров...')} 
                   className="bg-transparent text-2xl font-light text-white outline-none w-full placeholder-white/30"
                   type="text"
                   value={searchQuery}
@@ -872,15 +899,21 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               
               {/* Suggestions */}
               <div>
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/50 mb-4">Популярные запросы</p>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/50 mb-4">{t('header.popular_searches', 'Популярные запросы')}</p>
                 <div className="flex flex-wrap gap-3">
-                  {['Вибраторы', 'Для пар', 'Массажеры', 'Новинки', 'Soraya'].map(term => (
+                  {[
+                    { key: 'header.query_vibrators', defaultVal: 'Вибраторы' },
+                    { key: 'header.query_couples', defaultVal: 'Для пар' },
+                    { key: 'header.query_massagers', defaultVal: 'Массажеры' },
+                    { key: 'header.query_new', defaultVal: 'Новинки' },
+                    { key: 'header.query_soraya', defaultVal: 'Soraya' }
+                  ].map(item => (
                     <button
-                      key={term}
-                      onClick={() => handleSearchTermClick(term)}
+                      key={item.key}
+                      onClick={() => handleSearchTermClick(t(item.key, item.defaultVal))}
                       className="px-4 py-2 border border-white/10 rounded-full text-xs font-bold hover:border-primary hover:text-primary hover:bg-white/5 transition-all text-white bg-transparent"
                     >
-                      {term}
+                      {t(item.key, item.defaultVal)}
                     </button>
                   ))}
                 </div>
@@ -890,7 +923,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         )}
       </AnimatePresence>
 
-      {/* Mobile Tab Bar (Thumb Zone) - Cigar shaped floating bar */}
+      {/* Mobile Tab Bar */}
       <div 
         className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 flex items-center justify-around px-4 z-50 md:hidden rounded-full"
         style={{
@@ -902,7 +935,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         }}
       >
         <NavLink 
-          to="/catalog" 
+          to={i18n.language === 'ru' ? '/catalog' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/catalog`}
           className={({ isActive }) => 
             `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
               isActive ? 'text-primary' : 'text-white/60 hover:text-white'
@@ -910,7 +943,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           }
         >
           <span className="material-symbols-outlined text-[22px] font-light">grid_view</span>
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Каталог</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.catalog', 'Каталог')}</span>
         </NavLink>
 
         <button 
@@ -918,7 +951,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-white/60 hover:text-white transition-colors focus:outline-none"
         >
           <span className="material-symbols-outlined text-[22px] font-light">search</span>
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Поиск</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.search', 'Поиск')}</span>
         </button>
 
         <button 
@@ -931,11 +964,11 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               {cartCount}
             </span>
           )}
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Корзина</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.cart', 'Корзина')}</span>
         </button>
 
         <NavLink 
-          to="/account" 
+          to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
           onClick={handleAccountClick}
           className={({ isActive }) => 
             `flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 ${
@@ -958,7 +991,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           ) : (
             <span className="material-symbols-outlined text-[22px] font-light">person</span>
           )}
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Кабинет</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.cabinet', 'Кабинет')}</span>
         </NavLink>
 
         <button 
@@ -966,7 +999,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-primary hover:text-[#ffe088] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-90"
         >
           <span className="material-symbols-outlined text-[22px] font-light">visibility_off</span>
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Паника</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.panic', 'Паника')}</span>
         </button>
       </div>
     </>

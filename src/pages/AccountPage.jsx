@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 import { supabase } from '../lib/supabase';
 
 export default function AccountPage({ onAddToCart, lang }) {
+  const { t, i18n } = useTranslation();
   const [identifier, setIdentifier] = useState(() => {
     return localStorage.getItem('hs_remembered_email') || '';
   });
@@ -120,7 +122,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       if (errorVal) {
         console.error('[Auth Callback Error]', errorVal, errorDescVal);
         const decodedDesc = errorDescVal ? decodeURIComponent(errorDescVal.replace(/\+/g, ' ')) : '';
-        setError(`Ошибка авторизации (${errorVal}): ${decodedDesc || 'Не удалось войти в аккаунт'}`);
+        setError(t('account.auth_error', { error: errorVal, desc: decodedDesc || t('account.auth_error_default', 'Не удалось войти в аккаунт') }));
         // Clear parameters from URL so they don't persist on reload
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
@@ -217,9 +219,9 @@ export default function AccountPage({ onAddToCart, lang }) {
       if (error) throw error;
     } catch (err) {
       console.error('[Google OAuth Error]', err);
-      let errMsg = err.message || 'Ошибка авторизации через Google';
+      let errMsg = err.message || t('account.auth_error_google', 'Ошибка авторизации через Google');
       if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
-        errMsg = 'Провайдер Google не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, перейдите в Supabase Dashboard -> Authentication -> Providers -> Google и активируйте его.';
+        errMsg = t('account.google_provider_error', 'Провайдер Google не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, перейдите в Supabase Dashboard -> Authentication -> Providers -> Google и активируйте его.');
       }
       setError(errMsg);
       setLoading(false);
@@ -251,7 +253,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       const email = `tg_${mockUser.id}@hotstuff.kz`;
       loginSuccess(email);
       setLoading(false);
-      alert(`[Тест] Успешный вход под именем ${mockUser.first_name} ${mockUser.last_name}`);
+      alert(t('account.welcome_test', { name: `${mockUser.first_name} ${mockUser.last_name}` }));
     }, 800);
   };
 
@@ -275,7 +277,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || 'Ошибка проверки данных Telegram на сервере');
+        throw new Error(result.error || t('account.err_telegram_verify', 'Ошибка проверки данных Telegram на сервере'));
       }
 
       if (result.success && result.action_link) {
@@ -283,12 +285,12 @@ export default function AccountPage({ onAddToCart, lang }) {
         // Redirect browser to magiclink, which will sign the user in via Supabase
         window.location.href = result.action_link;
       } else {
-        throw new Error('Неверный формат ответа от сервера авторизации');
+        throw new Error(t('account.err_invalid_response', 'Неверный формат ответа от сервера авторизации'));
       }
 
     } catch (err) {
       console.error('[Telegram Auth Error]', err);
-      setError(err.message || 'Не удалось войти через Telegram. Пожалуйста, попробуйте позже.');
+      setError(err.message || t('account.err_telegram_fail', 'Не удалось войти через Telegram. Пожалуйста, попробуйте позже.'));
       setLoading(false);
     }
   };
@@ -312,9 +314,9 @@ export default function AccountPage({ onAddToCart, lang }) {
       if (error) throw error;
     } catch (err) {
       console.error('[Yandex OAuth Error]', err);
-      let errMsg = err.message || 'Ошибка авторизации через Яндекс';
+      let errMsg = err.message || t('account.auth_error_yandex', 'Ошибка авторизации через Яндекс');
       if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
-        errMsg = 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте кастомный провайдер (custom:yandex) в Supabase Dashboard.';
+        errMsg = t('account.yandex_provider_error', 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте кастомный провайдер (custom:yandex) в Supabase Dashboard.');
       }
       setError(errMsg);
       setLoading(false);
@@ -364,12 +366,12 @@ export default function AccountPage({ onAddToCart, lang }) {
     const cleanedVal = identifier.trim().toLowerCase();
 
     if (!cleanedVal) {
-      setError('Пожалуйста, введите Email');
+      setError(t('account.err_email', 'Пожалуйста, введите Email'));
       return;
     }
 
     if (!validateEmail(cleanedVal)) {
-      setError('Неверный формат почты. Пример: test@mail.ru');
+      setError(t('account.err_email_invalid', 'Неверный формат почты. Пример: test@mail.ru'));
       return;
     }
 
@@ -393,7 +395,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
     const enteredCode = code.join('').trim();
     if (enteredCode.length < 6) {
-      setError('Пожалуйста, введите все 6 цифр кода');
+      setError(t('account.err_otp_digits', 'Пожалуйста, введите все 6 цифр кода'));
       setLoading(false);
       return;
     }
@@ -432,11 +434,11 @@ export default function AccountPage({ onAddToCart, lang }) {
       if (data?.user) {
         loginSuccess(data.user.email);
       } else {
-        throw new Error('Не удалось подтвердить код. Пользователь не найден.');
+        throw new Error(t('account.err_user_not_found', 'Не удалось подтвердить код. Пользователь не найден.'));
       }
     } catch (err) {
       console.error('[Supabase Verify Error]', err);
-      setError(err.message || 'Неверный код подтверждения. Пожалуйста, попробуйте еще раз.');
+      setError(err.message || t('account.err_otp_invalid', 'Неверный код подтверждения. Пожалуйста, попробуйте еще раз.'));
     } finally {
       setLoading(false);
     }
@@ -542,7 +544,7 @@ export default function AccountPage({ onAddToCart, lang }) {
         qty: 1,
         image: product.image
       });
-      alert(`Товар ${product.name} добавлен в корзину!`);
+      alert(t('product.added_alert', { name: product.name }, `Товар ${product.name} добавлен в корзину!`));
     }
   };
 
@@ -566,7 +568,7 @@ export default function AccountPage({ onAddToCart, lang }) {
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" />
             </svg>
             <span className="text-xs text-neutral-400 font-bold uppercase tracking-widest font-sans">
-              Проверка сессии...
+              {t('account.checking_session', 'Проверка сессии...')}
             </span>
           </div>
         </div>
@@ -596,12 +598,12 @@ export default function AccountPage({ onAddToCart, lang }) {
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">Сообщения</span>
-                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">сейчас</span>
+                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">{t('account.messages', 'Сообщения')}</span>
+                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">{t('account.now', 'сейчас')}</span>
               </div>
               <h4 className="text-xs font-black text-black dark:text-white mb-0.5 uppercase tracking-wide">Hot Stuff</h4>
               <p className="text-[11.5px] text-black/70 dark:text-white/70 leading-relaxed font-normal">
-                Код подтверждения: <span className="font-bold text-black dark:text-white font-mono bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-xs select-all">{generatedOtp}</span>. Не сообщайте его никому.
+                {t('account.otp_label', 'Код подтверждения')}: <span className="font-bold text-black dark:text-white font-mono bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-xs select-all">{generatedOtp}</span>. {t('account.otp_sec_warn', 'Не сообщайте его никому.')}
               </p>
             </div>
           </motion.div>
@@ -627,12 +629,12 @@ export default function AccountPage({ onAddToCart, lang }) {
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">Поделиться</span>
-                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">сейчас</span>
+                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">{t('account.share', 'Поделиться')}</span>
+                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">{t('account.now', 'сейчас')}</span>
               </div>
-              <h4 className="text-xs font-black text-black dark:text-white mb-0.5 uppercase tracking-wide">Hot Stuff Анонимность</h4>
+              <h4 className="text-xs font-black text-black dark:text-white mb-0.5 uppercase tracking-wide">{t('account.anon_title_short', 'Hot Stuff Анонимность')}</h4>
               <p className="text-[11.5px] text-black/70 dark:text-white/70 leading-relaxed font-normal">
-                Ссылка скопирована! Получатель подарка останется полностью анонимным.
+                {t('account.hint_copied')}
               </p>
             </div>
           </motion.div>
@@ -652,7 +654,7 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="flex items-center gap-4">
                 <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
                 <div>
-                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">Личный кабинет</h1>
+                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">{t('account.title', 'Личный кабинет')}</h1>
                   <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">{loggedInUser}</p>
                 </div>
               </div>
@@ -666,18 +668,18 @@ export default function AccountPage({ onAddToCart, lang }) {
                       ? 'bg-black border-black text-white'
                       : 'bg-white border-black/10 text-neutral-500 hover:text-black hover:border-black'
                   }`}
-                  title={isPrivate ? "Выключить режим приватности" : "Включить режим приватности"}
+                  title={isPrivate ? t('account.private_title_off', 'Выключить режим приватности') : t('account.private_title_on', 'Включить режим приватности')}
                 >
                   <span className="material-symbols-outlined text-[16px] leading-none">
                     {isPrivate ? 'visibility_off' : 'visibility'}
                   </span>
-                  <span>{isPrivate ? 'Приватно' : 'Публично'}</span>
+                  <span>{isPrivate ? t('account.private', 'Приватно') : t('account.public', 'Публично')}</span>
                 </button>
                 <button
                   onClick={handleLogout}
                   className="border border-black/10 hover:border-red-500 hover:text-red-500 text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 active:scale-95"
                 >
-                  ВЫЙТИ ИЗ АККАУНТА
+                  {t('account.logout_btn', 'ВЫЙТИ ИЗ АККАУНТА')}
                 </button>
               </div>
             </div>
@@ -689,19 +691,19 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2 flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-black tracking-wider text-black uppercase">Клуб Привилегий</h3>
+                    <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.privileges', 'Клуб Привилегий')}</h3>
                     <span className="bg-primary/15 text-[#b28b10] text-[8px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase">
                       HOT STUFF GOLD
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-black text-black leading-none">12%</span>
-                    <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wide">Ваша персональная скидка</span>
+                    <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wide">{t('account.personal_discount', 'Ваша персональная скидка')}</span>
                   </div>
                 </div>
                 <div className="space-y-2 mt-4">
                   <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
-                    <span>До скидки 15% (VIP уровень) осталось:</span>
+                    <span>{t('account.to_vip', 'До скидки 15% (VIP уровень) осталось:')}</span>
                     <span className="text-black">45 000 ₸</span>
                   </div>
                   <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
@@ -715,11 +717,11 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div>
                   <div className="flex items-center gap-3 text-green-600 mb-4">
                     <span className="material-symbols-outlined text-[20px] font-light">local_shipping</span>
-                    <h3 className="text-xs font-black tracking-wider text-black uppercase">Текущая Доставка</h3>
+                    <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.current_delivery', 'Текущая Доставка')}</h3>
                   </div>
                   <div className="border-l-2 border-primary pl-4 py-1 space-y-2">
-                    <p className="text-xs font-black text-black">Заказ №10492 — Доставляется курьером сегодня</p>
-                    <p className="text-[10px] text-neutral-500">Интервал: 18:00 – 22:00. Курьер свяжется за 30 минут.</p>
+                    <p className="text-xs font-black text-black">{t('account.delivery_order', 'Заказ №10492 — Доставляется курьером сегодня')}</p>
+                    <p className="text-[10px] text-neutral-500">{t('account.delivery_interval', 'Интервал: 18:00 – 22:00. Курьер свяжется за 30 минут.')}</p>
                   </div>
                 </div>
 
@@ -727,9 +729,9 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="bg-neutral-100 border border-black/5 p-4 rounded-[16px] flex items-start gap-3 mt-4">
                   <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">visibility_off</span>
                   <div>
-                    <h4 className="text-[9px] font-black text-black uppercase tracking-wider">Гарантия 100% анонимности доставки:</h4>
+                    <h4 className="text-[9px] font-black text-black uppercase tracking-wider">{t('account.anon_title', 'Гарантия 100% анонимности доставки:')}</h4>
                     <p className="text-[9px] text-neutral-600 leading-relaxed mt-1 font-normal">
-                      Заказ упакован в плотный непрозрачный сейф-пакет без каких-либо логотипов. В накладной содержимое указано как «Аксессуары (косметика)».
+                      {t('account.anon_desc', 'Заказ упакован в плотный непрозрачный сейф-пакет без каких-либо логотипов. В накладной содержимое указано как «Аксессуары (косметика)».')}
                     </p>
                   </div>
                 </div>
@@ -737,14 +739,14 @@ export default function AccountPage({ onAddToCart, lang }) {
 
               {/* 3. Order History (Bento: 2 cols) */}
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2">
-                <h3 className="text-xs font-black tracking-wider text-black uppercase mb-2">История Покупок</h3>
+                <h3 className="text-xs font-black tracking-wider text-black uppercase mb-2">{t('account.history', 'История Покупок')}</h3>
                 
                 <div className="divide-y divide-black/5 text-xs font-sans">
                   <div className="py-4 flex justify-between items-center gap-4">
                     <div>
-                      <p className="font-bold text-black uppercase">Заказ №9810 от 14.05.2026</p>
+                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 9810, date: '14.05.2026' })}</p>
                       <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? 'Деликатный аксессуар •••• x1' : 'LELO Sona™ 3 Cruise x1'} — Выполнен
+                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'LELO Sona™ 3 Cruise x1'} — {t('account.completed', 'Выполнен')}
                       </p>
                     </div>
                     <div className="text-right">
@@ -756,20 +758,20 @@ export default function AccountPage({ onAddToCart, lang }) {
                         }}
                         className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
                       >
-                        Повторить в 1 клик
+                        {t('account.repeat', 'Повторить в 1 клик')}
                       </button>
                     </div>
                   </div>
                   <div className="py-4 flex justify-between items-center gap-4">
                     <div>
-                      <p className="font-bold text-black uppercase">Заказ №8520 от 02.04.2026</p>
+                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 8520, date: '02.04.2026' })}</p>
                       <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? 'Деликатный аксессуар •••• x1' : 'Personal Moisturizer x1'} — Выполнен
+                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'Personal Moisturizer x1'} — {t('account.completed', 'Выполнен')}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-neutral-900">12 500 ₸</p>
-                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">Архив</span>
+                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
                     </div>
                   </div>
                 </div>
@@ -778,7 +780,7 @@ export default function AccountPage({ onAddToCart, lang }) {
               {/* 4. Wishlist (Избранное) (Bento: 1 col) */}
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-1 flex flex-col justify-between">
                 <div className="space-y-6">
-                  <h3 className="text-xs font-black tracking-wider text-black uppercase">Избранные Товары</h3>
+                  <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.favorites', 'Избранные Товары')}</h3>
                   
                   <div className="space-y-5">
                     {wishlistProducts.map(product => (
@@ -787,7 +789,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                           {isPrivate ? (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
                               <span className="material-symbols-outlined text-[18px]">visibility_off</span>
-                              <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">Скрыто</span>
+                              <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
                             </div>
                           ) : (
                             <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
@@ -796,7 +798,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                         <div className="flex-1 flex flex-col justify-between">
                           <div>
                             <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
-                              {isPrivate ? 'Интимный девайс ••••' : product.name}
+                              {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
                             </h4>
                             <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
                           </div>
@@ -804,7 +806,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                             onClick={() => handleAddWishlistItem(product)}
                             className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
                           >
-                            В КОРЗИНУ
+                            {t('account.to_cart', 'В КОРЗИНУ')}
                           </button>
                         </div>
                       </div>
@@ -829,10 +831,10 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <div>
                     <h3 className="text-xs font-black tracking-wider text-black uppercase mb-1 flex items-center gap-2">
                       <span className="material-symbols-outlined text-[18px] text-black">security</span>
-                      <span>Безопасность и управление сессиями</span>
+                      <span>{t('account.security', 'Безопасность и управление сессиями')}</span>
                     </h3>
                     <p className="text-[11px] text-neutral-500 font-sans">
-                      Вы можете завершить сессии на других устройствах или стереть историю входов на этом компьютере.
+                      {t('account.security_desc', 'Вы можете завершить сессии на других устройствах или стереть историю входов на этом компьютере.')}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
@@ -842,29 +844,29 @@ export default function AccountPage({ onAddToCart, lang }) {
                         try {
                           const { error } = await supabase.auth.signOut({ scope: 'others' });
                           if (error) throw error;
-                          alert('Все сессии на других устройствах успешно завершены!');
+                          alert(t('account.err_others_success', 'Все сессии на других устройствах успешно завершены!'));
                         } catch (err) {
                           console.error(err);
-                          alert('Не удалось завершить сессии: ' + err.message);
+                          alert(t('common.error', 'Ошибка') + ': ' + err.message);
                         }
                       }}
                       className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
                     >
-                      Выйти на других устройствах
+                      {t('account.logout_others', 'Выйти на других устройствах')}
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm('Вы уверены, что хотите очистить историю входов на этом устройстве? При следующем входе вам потребуется подтверждение по коду.')) {
+                        if (confirm(t('account.clear_history_confirm', 'Вы уверены, что хотите очистить историю входов на этом устройстве? При следующем входе вам потребуется подтверждение по коду.'))) {
                           localStorage.removeItem('hs_registered_users');
                           setSavedAccounts([]);
                           setRegisteredUsers(MOCK_REGISTERED_USERS);
-                          alert('История входов на этом устройстве очищена!');
+                          alert(t('account.err_history_cleared', 'История входов на этом устройстве очищена!'));
                         }
                       }}
                       className="border border-black/10 hover:border-black text-black font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
                     >
-                      Стереть историю входов здесь
+                      {t('account.clear_history', 'Стереть историю входов здесь')}
                     </button>
                   </div>
                 </div>
@@ -884,7 +886,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           {/* Dynamic Form Header */}
           <h2 className="text-[11px] font-sans font-black tracking-widest text-neutral-400 uppercase mb-8 text-center">
-            {step === 1 ? 'Вход / Регистрация' : (isRegistered ? 'Вход' : 'Регистрация')}
+            {step === 1 ? t('header.login_register') : (isRegistered ? t('account.login') : t('account.register'))}
           </h2>
 
           {error && (
@@ -899,7 +901,7 @@ export default function AccountPage({ onAddToCart, lang }) {
               {savedAccounts.length > 0 && (
                 <div className="flex flex-col gap-3 mb-6 w-full">
                   <span className="text-[11px] font-sans font-black tracking-widest text-neutral-400 uppercase text-center mb-1">
-                    Войти как
+                    {t('account.login_as')}
                   </span>
                   <div className="flex flex-col gap-2.5 max-h-[180px] overflow-y-auto pr-1">
                     {savedAccounts.map((email) => (
@@ -939,7 +941,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                             setRegisteredUsers(prev => prev.filter(x => x !== email));
                           }}
                           className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-neutral-200/50 transition-all cursor-pointer border-none bg-transparent outline-none"
-                          title="Удалить из списка"
+                          title={t('account.delete_from_list', 'Удалить из списка')}
                         >
                           <span className="material-symbols-outlined text-[18px]">close</span>
                         </button>
@@ -948,7 +950,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   </div>
                   <div className="flex items-center justify-between mt-2 mb-2 w-full">
                     <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
-                    <span className="px-4 text-[11px] text-neutral-400 font-bold uppercase tracking-wider whitespace-nowrap">Или другой аккаунт</span>
+                    <span className="px-4 text-[11px] text-neutral-400 font-bold uppercase tracking-wider whitespace-nowrap">{t('account.other_account')}</span>
                     <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
                   </div>
                 </div>
@@ -958,14 +960,14 @@ export default function AccountPage({ onAddToCart, lang }) {
                 {/* Input block */}
                 <div className="flex flex-col mb-4">
                   <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">
-                    Email
+                    {t('account.email', 'Email')}
                   </label>
                   <input
                     type="email"
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="Email"
+                    placeholder={t('account.email', 'Email')}
                     className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
                     disabled={loading}
                   />
@@ -977,7 +979,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   disabled={loading}
                   className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
                 >
-                  <span className="font-normal tracking-wide">Продолжить</span>
+                  <span className="font-normal tracking-wide">{t('account.continue')}</span>
                   {/* Rotating dotted/dashed circle spinner always visible to match image_2.png */}
                   <svg 
                     className="animate-spin h-[18px] w-[18px] text-white" 
@@ -996,7 +998,7 @@ export default function AccountPage({ onAddToCart, lang }) {
               {/* Divider */}
               <div className="flex items-center justify-between mt-8 mb-6 w-full">
                 <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
-                <span className="px-4 text-[13px] text-neutral-400 font-normal whitespace-nowrap">Или через</span>
+                <span className="px-4 text-[13px] text-neutral-400 font-normal whitespace-nowrap">{t('account.or_via')}</span>
                 <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
               </div>
 
@@ -1010,7 +1012,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     type="button"
                     onClick={handleGoogleLogin}
                     className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black"
-                    title="Войти через Google"
+                    title={t('account.google')}
                     disabled={loading}
                   >
                     <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 512 512">
@@ -1023,7 +1025,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     type="button"
                     onClick={handleYandexClick}
                     className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black"
-                    title="Войти через Yandex"
+                    title={t('account.yandex')}
                     disabled={loading}
                   >
                     <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 24 24">
@@ -1045,7 +1047,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                       <svg className="w-[18px] h-[18px] fill-white" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
                       </svg>
-                      <span>Войти через Telegram</span>
+                      <span>{t('account.telegram')}</span>
                     </button>
                   ) : (
                     /* Official Telegram Widget for Production */
@@ -1064,10 +1066,10 @@ export default function AccountPage({ onAddToCart, lang }) {
               {isRegistered && password ? (
                 <div className="flex flex-col mb-4">
                   <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 ml-1">
-                    Вы зарегистрированы в системе. Пожалуйста, введите пароль.
+                    {t('account.registered_pwd')}
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">Ваш Пароль</label>
+                    <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">{t('account.password_label')}</label>
                     <input
                       type="password"
                       required
@@ -1082,11 +1084,11 @@ export default function AccountPage({ onAddToCart, lang }) {
               ) : (
                 <div className="flex flex-col mb-4">
                   <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 px-1 text-center">
-                    Мы отправили 6-значный код на контакт: <br />
+                    {t('account.sent_code')} <br />
                     <strong className="text-black font-mono">{identifier}</strong>.
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[14px] text-black font-normal text-center mb-3">Код подтверждения</label>
+                    <label className="text-[14px] text-black font-normal text-center mb-3">{t('account.otp_label')}</label>
                     <div className="flex justify-center gap-1.5 sm:gap-2">
                       {[0, 1, 2, 3, 4, 5].map((idx) => (
                         <input
@@ -1105,7 +1107,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     <div className="text-center mt-6">
                       {countdown > 0 ? (
                         <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider font-sans">
-                          Отправить код повторно через {countdown} сек
+                          {t('account.resend_timer', { count: countdown })}
                         </span>
                       ) : (
                         <button
@@ -1114,7 +1116,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                           className="text-[11px] font-bold text-black hover:text-primary uppercase tracking-wider bg-transparent border-none cursor-pointer transition-colors font-sans focus-visible:outline-none focus-visible:underline"
                           disabled={loading}
                         >
-                          Отправить код повторно
+                          {t('account.resend_btn')}
                         </button>
                       )}
                     </div>
@@ -1128,7 +1130,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   disabled={loading}
                   className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
                 >
-                  <span>Подтвердить</span>
+                  <span>{t('account.confirm')}</span>
                   {loading && (
                     <svg className="animate-spin h-[18px] w-[18px] text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
                       <circle cx="12" cy="12" r="9" />
@@ -1142,7 +1144,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   className="w-full text-center text-[11px] font-bold text-neutral-500 hover:text-black uppercase tracking-wider py-1 bg-transparent border-none cursor-pointer"
                   disabled={loading}
                 >
-                  ← Назад к вводу
+                  {t('account.back')}
                 </button>
               </div>
             </form>
@@ -1150,7 +1152,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           {/* Image-accurate Disclaimer */}
           <p className="text-[9.5px] text-black/90 leading-[1.6] text-center font-normal px-2 mt-4 max-w-[325px]">
-            Нажимая продолжить, вы соглашаетесь с <span className="underline decoration-black underline-offset-2 cursor-pointer">условиями</span>. Ваши Ваши данные шифруются по протоколу SSL. Мы гарантируем 100% анонимность. Мы никогда не передаем их третьим лицам. Ваша почта используется только для отправки чеков и статуса заказа.
+            {t('account.terms_text')}
           </p>
 
         </div>

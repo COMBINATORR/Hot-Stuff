@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveImage from './ResponsiveImage';
+import { useTranslation } from 'react-i18next';
 
 // Mapping for color labels
 const COLOR_LABEL_MAP = {
@@ -19,6 +20,7 @@ const COLOR_LABEL_MAP = {
 
 export default function ProductPreviewModal({ product, isOpen, onClose, onAddToCart }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // States
   const [selectedColor, setSelectedColor] = useState('');
@@ -251,7 +253,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 {/* Subtitle & Title */}
                 <div>
                   <span className="text-[9px] tracking-[0.25em] font-sans font-bold text-gray-400 uppercase block mb-1">
-                    {product.categoryLabel || 'СЕКС-ИГРУШКИ'}
+                    {t('menu.' + (product.categoryLabel || 'СЕКС-ИГРУШКИ').toLowerCase(), product.categoryLabel || 'СЕКС-ИГРУШКИ')}
                   </span>
                   <h2 className="text-[22px] font-medium tracking-[0.1em] font-display uppercase leading-tight text-black">
                     {product.name}
@@ -275,7 +277,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       {product.price.toLocaleString('ru-KZ')} ₸
                     </span>
                     <span className="text-gray-500 text-[10px] font-sans">
-                      сохранить {savedAmount.toLocaleString('ru-KZ')} ₸
+                      {t('product.save', { amount: savedAmount.toLocaleString('ru-KZ') })}
                     </span>
                   </div>
                 </div>
@@ -316,13 +318,13 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     onClick={handleNavigateToProduct}
                     className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
                   >
-                    ПОСМОТРЕТЬ
+                    {t('product.view')}
                   </button>
                   <button
                     onClick={handleAdd}
                     className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
                   >
-                    ADD TO CART
+                    {t('product.add_to_cart')}
                   </button>
                 </div>
 
@@ -334,14 +336,14 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       onClick={() => toggleSection('description')}
                       className="w-full flex justify-between items-center text-left"
                     >
-                      <span className="text-[11px] font-bold tracking-wider text-black">ОПИСАНИЕ</span>
+                      <span className="text-[11px] font-bold tracking-wider text-black">{t('product.desc_tab')}</span>
                       <span className="material-symbols-outlined text-[16px] text-gray-500">
                         {expandedSection === 'description' ? 'expand_less' : 'expand_more'}
                       </span>
                     </button>
                     {expandedSection === 'description' && (
                       <p className="mt-2.5 text-[11px] text-gray-600 leading-relaxed font-sans">
-                        {product.description || `Вибромассажер премиального класса ${product.name}.`}
+                        {t('product.tech_defaults.' + product.id, product.description || `Вибромассажер премиального класса ${product.name}.`)}
                       </p>
                     )}
                   </div>
@@ -354,7 +356,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     >
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">verified_user</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">ГАРАНТИЯ</span>
+                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.warranty_tab')}</span>
                       </div>
                       <span className="material-symbols-outlined text-[16px] text-gray-500">
                         {expandedSection === 'warranty' ? 'expand_less' : 'expand_more'}
@@ -362,7 +364,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     </button>
                     {expandedSection === 'warranty' && (
                       <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        гарантия 2 года на все механизмы
+                        {t('product.warranty_desc')}
                       </p>
                     )}
                   </div>
@@ -375,7 +377,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     >
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">credit_card</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">БЕЗОПАСНАЯ ПОКУПКА</span>
+                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.safe_tab')}</span>
                       </div>
                       <span className="material-symbols-outlined text-[16px] text-gray-500">
                         {expandedSection === 'secure' ? 'expand_less' : 'expand_more'}
@@ -383,7 +385,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     </button>
                     {expandedSection === 'secure' && (
                       <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        100% безопасная оплата через защищенный шлюз
+                        {t('product.safe_desc')}
                       </p>
                     )}
                   </div>
@@ -396,7 +398,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     >
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">local_shipping</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">ИНФОРМАЦИЯ О ДОСТАВКЕ</span>
+                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.delivery_tab')}</span>
                       </div>
                       <span className="material-symbols-outlined text-[16px] text-gray-500">
                         {expandedSection === 'delivery' ? 'expand_less' : 'expand_more'}
@@ -404,7 +406,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     </button>
                     {expandedSection === 'delivery' && (
                       <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        анонимная курьерская доставка по всему миру
+                        {t('product.delivery_desc')}
                       </p>
                     )}
                   </div>
@@ -417,7 +419,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     >
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">visibility_off</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">НЕПРИМЕТНАЯ УПАКОВКА</span>
+                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.discreet_tab')}</span>
                       </div>
                       <span className="material-symbols-outlined text-[16px] text-gray-500">
                         {expandedSection === 'package' ? 'expand_less' : 'expand_more'}
@@ -425,7 +427,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                     </button>
                     {expandedSection === 'package' && (
                       <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        сохраняйте инкогнито: коробка без опознавательных знаков
+                        {t('product.discreet_desc')}
                       </p>
                     )}
                   </div>
@@ -516,7 +518,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                           {product.name}
                         </h2>
                         <span className="text-[9px] tracking-[0.2em] font-bold text-gray-400 uppercase mt-1 block">
-                          {product.categoryLabel || 'СЕКС-ИГРУШКИ'}
+                          {t('menu.' + (product.categoryLabel || 'СЕКС-ИГРУШКИ').toLowerCase(), product.categoryLabel || 'СЕКС-ИГРУШКИ')}
                         </span>
                       </div>
 
@@ -537,7 +539,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             {product.price.toLocaleString('ru-KZ')} ₸
                           </span>
                           <span className="text-gray-500 text-[10px] font-sans">
-                            сохранить {savedAmount.toLocaleString('ru-KZ')} ₸
+                            {t('product.save', { amount: savedAmount.toLocaleString('ru-KZ') })}
                           </span>
                         </div>
                       </div>
@@ -576,13 +578,13 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                           onClick={handleNavigateToProduct}
                           className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-black hover:text-white transition-all text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98]"
                         >
-                          ПОСМОТРЕТЬ
+                          {t('product.view')}
                         </button>
                         <button
                           onClick={handleAdd}
                           className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-gray-800 transition-all"
                         >
-                          ADD TO CART
+                          {t('product.add_to_cart')}
                         </button>
                       </div>
 
@@ -591,14 +593,14 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                         {/* Description */}
                         <div className="border-b border-gray-100 py-3.5">
                           <button onClick={() => toggleSection('description')} className="w-full flex justify-between items-center text-left">
-                            <span className="text-[11px] font-bold tracking-wider text-black">ОПИСАНИЕ</span>
+                            <span className="text-[11px] font-bold tracking-wider text-black">{t('product.desc_tab')}</span>
                             <span className="material-symbols-outlined text-[16px] text-gray-400">
                               {expandedSection === 'description' ? 'expand_less' : 'expand_more'}
                             </span>
                           </button>
                           {expandedSection === 'description' && (
                             <p className="mt-2 text-[11px] text-gray-600 leading-relaxed font-sans">
-                              {product.description || `Вибромассажер премиального класса ${product.name}.`}
+                              {t('product.tech_defaults.' + product.id, product.description || `Вибромассажер премиального класса ${product.name}.`)}
                             </p>
                           )}
                         </div>
@@ -609,8 +611,8 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             <div className="flex items-center gap-2">
                               <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">verified_user</span>
                               <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">ГАРАНТИЯ</span>
-                                <span className="text-[9px] text-gray-400 font-sans">гарантия 2 года</span>
+                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.warranty_tab')}</span>
+                                <span className="text-[9px] text-gray-400 font-sans">{t('product.warranty_badge')}</span>
                               </div>
                             </div>
                             <span className="material-symbols-outlined text-[16px] text-gray-400">
@@ -618,7 +620,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             </span>
                           </button>
                           {expandedSection === 'warranty' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">гарантия 2 года на все механизмы</p>
+                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.warranty_desc')}</p>
                           )}
                         </div>
 
@@ -628,8 +630,8 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             <div className="flex items-center gap-2">
                               <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">credit_card</span>
                               <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">БЕЗОПАСНАЯ ПОКУПКА</span>
-                                <span className="text-[9px] text-gray-400 font-sans">100% безопасная оплата</span>
+                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.safe_tab')}</span>
+                                <span className="text-[9px] text-gray-400 font-sans">{t('product.safe')}</span>
                               </div>
                             </div>
                             <span className="material-symbols-outlined text-[16px] text-gray-400">
@@ -637,7 +639,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             </span>
                           </button>
                           {expandedSection === 'secure' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">100% безопасная оплата через защищенный шлюз</p>
+                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.safe_desc')}</p>
                           )}
                         </div>
 
@@ -647,8 +649,8 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             <div className="flex items-center gap-2">
                               <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">local_shipping</span>
                               <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">ИНФОРМАЦИЯ О ДОСТАВКЕ</span>
-                                <span className="text-[9px] text-gray-400 font-sans">доставка по всему миру</span>
+                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.delivery_tab')}</span>
+                                <span className="text-[9px] text-gray-400 font-sans">{t('product.delivery_tab')}</span>
                               </div>
                             </div>
                             <span className="material-symbols-outlined text-[16px] text-gray-400">
@@ -656,7 +658,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             </span>
                           </button>
                           {expandedSection === 'delivery' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">анонимная курьерская доставка по всему миру</p>
+                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.delivery_desc')}</p>
                           )}
                         </div>
 
@@ -666,8 +668,8 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             <div className="flex items-center gap-2">
                               <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">visibility_off</span>
                               <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">НЕПРИМЕТНАЯ УПАКОВКА</span>
-                                <span className="text-[9px] text-gray-400 font-sans">сохраняйте инкогнито</span>
+                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.discreet_tab')}</span>
+                                <span className="text-[9px] text-gray-400 font-sans">{t('product.discreet_tab')}</span>
                               </div>
                             </div>
                             <span className="material-symbols-outlined text-[16px] text-gray-400">
@@ -675,7 +677,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                             </span>
                           </button>
                           {expandedSection === 'package' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">сохраняйте инкогнито: коробка без опознавательных знаков</p>
+                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.discreet_desc')}</p>
                           )}
                         </div>
                       </div>

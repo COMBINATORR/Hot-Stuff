@@ -1,31 +1,38 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
-// Footer Configuration Data (Config)
-const FOOTER_CONFIG = {
-  brand: {
+export default function Footer() {
+  const { t } = useTranslation();
+  const [buyersOpen, setBuyersOpen] = useState(false);
+  const [paymentsOpen, setPaymentsOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+
+  const brand = {
     logo: "HOT STUFF",
-    subtitle: "АТЫРАУ",
-    description: "Мы гарантируем 100% анонимность доставки. Все заказы отправляются в плотных непрозрачных сейф-пакетах без каких-либо логотипов или названия магазина. Курьер не знает о содержимом посылки.",
+    subtitle: t('footer.subtitle'),
+    description: t('footer.anon_desc'),
     socials: [
       { name: 'Instagram', url: 'https://instagram.com', icon: 'instagram' },
       { name: 'Telegram', url: 'https://t.me', icon: 'telegram' },
       { name: 'WhatsApp', url: 'https://wa.me', icon: 'whatsapp' }
     ]
-  },
-  buyers: {
-    title: "Покупателям",
+  };
+
+  const buyers = {
+    title: t('footer.buyers'),
     links: [
-      { label: "Таблица размеров", to: "/size-guide" },
+      { label: t('footer.size_guide'), to: "/size-guide" },
       { label: "FAQ", to: "/faq" },
-      { label: "Правила возврата нижнего белья", to: "/legal?tab=return" },
-      { label: "Служба поддержки", to: "/support" }
+      { label: t('footer.returns'), to: "/legal?tab=return" },
+      { label: t('footer.support'), to: "/support" }
     ]
-  },
-  paymentsLogistics: {
-    title: "Оплата и Логистика",
-    description: "Бережная и оперативная доставка осуществляется по всей территории Казахстана. Выберите любой удобный способ оплаты при оформлении заказа.",
+  };
+
+  const paymentsLogistics = {
+    title: t('footer.delivery_title'),
+    description: t('footer.delivery_desc'),
     payments: [
       { id: "kaspi", name: "Kaspi Pay", type: "highlight", label: "KASPI PAY" },
       { id: "visa", name: "Visa", type: "standard", label: "VISA" },
@@ -33,22 +40,17 @@ const FOOTER_CONFIG = {
       { id: "halyk", name: "Halyk", type: "standard", label: "HALYK" },
       { id: "cash", name: "Cash", type: "standard", label: "CASH" }
     ]
-  },
-  legal: {
-    title: "Правовая информация",
+  };
+
+  const legal = {
+    title: t('footer.legal_title'),
     links: [
-      { label: "Политика конфиденциальности", to: "/legal?tab=privacy" },
-      { label: "Публичная оферта", to: "/legal?tab=terms" }
+      { label: t('footer.privacy'), to: "/legal?tab=privacy" },
+      { label: t('footer.offer'), to: "/legal?tab=terms" }
     ],
     ageRestriction: "18+",
-    warningText: "Сайт содержит материалы для взрослых. Продажа товаров осуществляется строго лицам старше 18 лет."
-  }
-};
-
-export default function Footer() {
-  const [buyersOpen, setBuyersOpen] = useState(false);
-  const [paymentsOpen, setPaymentsOpen] = useState(false);
-  const [legalOpen, setLegalOpen] = useState(false);
+    warningText: t('footer.warning')
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -80,18 +82,18 @@ export default function Footer() {
           <div className="flex flex-col items-start space-y-4 md:space-y-6">
             <div className="flex flex-col select-none">
               <Link to="/" className="font-sans font-black text-2xl tracking-[0.2em] text-white uppercase hover:text-primary transition-colors">
-                {FOOTER_CONFIG.brand.logo}
+                {brand.logo}
               </Link>
               <span className="text-[10px] tracking-[0.45em] text-[#71717a] font-bold mt-1.5 uppercase font-sans">
-                {FOOTER_CONFIG.brand.subtitle}
+                {brand.subtitle}
               </span>
             </div>
             <p className="text-[13px] text-[#a1a1aa] leading-relaxed max-w-sm font-sans font-normal">
-              {FOOTER_CONFIG.brand.description}
+              {brand.description}
             </p>
             {/* Social Icons */}
             <div className="flex items-center gap-5 pt-2">
-              {FOOTER_CONFIG.brand.socials.map(social => (
+              {brand.socials.map(social => (
                 <a 
                   key={social.name}
                   href={social.url} 
@@ -122,7 +124,7 @@ export default function Footer() {
               ))}
             </div>
           </div>
-
+ 
           {/* Column 2: Buyers */}
           <div className="flex flex-col items-start w-full">
             <button
@@ -132,7 +134,7 @@ export default function Footer() {
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {buyersOpen ? '–' : '+'}
               </span>
-              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{FOOTER_CONFIG.buyers.title}</h4>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{buyers.title}</h4>
             </button>
             <AnimatePresence initial={false}>
               {buyersOpen && (
@@ -143,7 +145,7 @@ export default function Footer() {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden flex flex-col gap-1.5 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
-                  {FOOTER_CONFIG.buyers.links.map(l => (
+                  {buyers.links.map(l => (
                     <Link
                       key={l.to}
                       to={l.to}
@@ -156,7 +158,7 @@ export default function Footer() {
               )}
             </AnimatePresence>
           </div>
-
+ 
           {/* Column 3: Payments & Logistics */}
           <div className="flex flex-col items-start w-full">
             <button
@@ -166,7 +168,7 @@ export default function Footer() {
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {paymentsOpen ? '–' : '+'}
               </span>
-              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{FOOTER_CONFIG.paymentsLogistics.title}</h4>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{paymentsLogistics.title}</h4>
             </button>
             <AnimatePresence initial={false}>
               {paymentsOpen && (
@@ -178,10 +180,10 @@ export default function Footer() {
                   className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
                   <p className="text-[13px] text-[#a1a1aa] leading-relaxed font-sans font-normal">
-                    {FOOTER_CONFIG.paymentsLogistics.description}
+                    {paymentsLogistics.description}
                   </p>
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {FOOTER_CONFIG.paymentsLogistics.payments.map(pay => {
+                    {paymentsLogistics.payments.map(pay => {
                       if (pay.type === 'highlight') {
                         return (
                           <div 
@@ -210,7 +212,7 @@ export default function Footer() {
               )}
             </AnimatePresence>
           </div>
-
+ 
           {/* Column 4: Legal */}
           <div className="flex flex-col items-start w-full">
             <button
@@ -220,7 +222,7 @@ export default function Footer() {
               <span className="text-[14px] font-light leading-none text-white/50 mr-2.5 transition-colors group-hover:text-primary md:hidden">
                 {legalOpen ? '–' : '+'}
               </span>
-              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{FOOTER_CONFIG.legal.title}</h4>
+              <h4 className="font-sans font-black text-xs tracking-[0.2em] uppercase">{legal.title}</h4>
             </button>
             <AnimatePresence initial={false}>
               {legalOpen && (
@@ -232,7 +234,7 @@ export default function Footer() {
                   className="overflow-hidden flex flex-col gap-3 w-full pl-5 md:pl-0 pb-3 md:pb-0"
                 >
                   <nav className="flex flex-col gap-1.5">
-                    {FOOTER_CONFIG.legal.links.map(l => (
+                    {legal.links.map(l => (
                       <Link
                         key={l.to}
                         to={l.to}
@@ -246,32 +248,32 @@ export default function Footer() {
                   {/* Strict 18+ Warning Marker */}
                   <div className="flex items-start gap-3 border-t border-white/5 pt-3 mt-1">
                     <span className="w-8 h-8 bg-primary text-on-primary rounded-none flex items-center justify-center font-sans font-black text-[11px] flex-none select-none shadow-sm">
-                      {FOOTER_CONFIG.legal.ageRestriction}
+                      {legal.ageRestriction}
                     </span>
                     <p className="text-[10px] text-[#71717a] leading-normal font-sans font-medium tracking-wide">
-                      {FOOTER_CONFIG.legal.warningText}
+                      {legal.warningText}
                     </p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-
+ 
         </div>
-
+ 
         {/* Divider */}
         <div className="w-full h-px bg-white/5 mt-6 mb-4 md:mt-12 md:mb-6" />
-
+ 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[#71717a] font-sans text-xs">
           <p className="tracking-wider text-center md:text-left">
-            © {new Date().getFullYear()} {FOOTER_CONFIG.brand.logo}. Все права защищены.
+            {t('footer.copyright')}
           </p>
           <p className="tracking-wider text-center md:text-right text-[10px] uppercase font-bold">
-            100% анонимность гарантирована
+            {t('footer.anon_guaranteed')}
           </p>
         </div>
-
+ 
       </div>
     </footer>
   );

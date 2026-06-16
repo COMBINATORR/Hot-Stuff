@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 // SVG components to render sharp premium assets without needing external files
 const SorayaWaveSvg = ({ color }) => (
@@ -48,6 +49,7 @@ const SorayaExperienceSvg = () => (
 
 export default function SorayaMockupPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // Interactive Swatches & Gallery Options
   const [selectedColor, setSelectedColor] = useState('Deep Rose'); // Deep Rose (Magenta), Black, Blue
@@ -79,8 +81,8 @@ export default function SorayaMockupPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-0 md:py-8 text-black">
       <Helmet>
-        <title>SORAYA WAVE™ — Мобильный макет</title>
-        <meta name="description" content="Интерактивный мобильный макет страницы премиум вибратора-кролика SORAYA WAVE™." />
+        <title>{t('mockup.title', 'SORAYA WAVE™ — Мобильный макет')}</title>
+        <meta name="description" content={t('mockup.meta_desc', 'Интерактивный мобильный макет страницы премиум вибратора-кролика SORAYA WAVE™.')} />
       </Helmet>
 
       {/* Centered mobile-width container for desktop, full screen on mobile */}
@@ -93,7 +95,7 @@ export default function SorayaMockupPage() {
               SORAYA WAVE™
             </h2>
             <span className="text-[8px] tracking-[0.2em] font-sans font-bold text-gray-400 uppercase mt-1 block">
-              ВИБРАТОРЫ-КРОЛИКИ
+              {t('mockup.rabbit', 'ВИБРАТОРЫ-КРОЛИКИ')}
             </span>
           </div>
           
@@ -101,7 +103,7 @@ export default function SorayaMockupPage() {
             <button 
               onClick={() => setIsFavorited(!isFavorited)}
               className="text-black hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-none"
-              aria-label="В избранное"
+              aria-label={t('account.favorites', 'В избранное')}
             >
               <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                 {isFavorited ? 'favorite' : 'favorite_border'}
@@ -110,7 +112,7 @@ export default function SorayaMockupPage() {
             <button 
               onClick={() => navigate('/catalog')}
               className="text-black hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-none"
-              aria-label="Закрыть"
+              aria-label={t('catalog.close', 'Закрыть')}
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -124,7 +126,7 @@ export default function SorayaMockupPage() {
             <button 
               onClick={() => setSelectedImageIndex(prev => (prev - 1 + 4) % 4)}
               className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black"
-              aria-label="Назад"
+              aria-label={t('home.quiz.back', 'Назад')}
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </button>
@@ -136,7 +138,7 @@ export default function SorayaMockupPage() {
             <button 
               onClick={() => setSelectedImageIndex(prev => (prev + 1) % 4)}
               className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black"
-              aria-label="Вперед"
+              aria-label={t('home.quiz.next', 'Вперед')}
             >
               <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
             </button>
@@ -145,7 +147,7 @@ export default function SorayaMockupPage() {
           {/* 3D Review Floating Button */}
           <button className="absolute bottom-12 right-6 flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-4 py-1.5 shadow-sm hover:border-black transition-all">
             <span className="material-symbols-outlined text-[14px] text-gray-600">3d_rotation</span>
-            <span className="font-sans font-bold text-[9px] tracking-wider uppercase text-gray-600">3D ОБЗОР</span>
+            <span className="font-sans font-bold text-[9px] tracking-wider uppercase text-gray-600">{t('mockup.view_3d', '3D ОБЗОР')}</span>
           </button>
 
           {/* Gallery Progress/Slider Indicator */}
@@ -174,7 +176,7 @@ export default function SorayaMockupPage() {
                 202,02 EUR
               </span>
               <span className="text-primary font-bold text-[10px] mt-1.5">
-                сохранить 56,98 EUR
+                {t('mockup.save_eur', { amount: '56,98' })}
               </span>
             </div>
 
@@ -216,10 +218,10 @@ export default function SorayaMockupPage() {
           {/* Actions Button Grid */}
           <div className="mt-6 flex gap-2.5">
             <button className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
-              ПОСМОТРЕТЬ
+              {t('product.view', 'ПОСМОТРЕТЬ')}
             </button>
             <button className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
-              ADD TO CART
+              {t('product.add_to_cart', 'ADD TO CART')}
             </button>
           </div>
         </section>
@@ -228,7 +230,7 @@ export default function SorayaMockupPage() {
         <section className="border-t border-gray-100">
           <div className="bg-gray-50/50 px-6 py-3 border-b border-gray-100">
             <span className="text-[10px] font-bold tracking-[0.15em] text-black uppercase block">
-              ОПИСАНИЕ И ГАРАНТИЯ
+              {t('mockup.desc_tab', 'ОПИСАНИЕ И ГАРАНТИЯ')}
             </span>
           </div>
 
@@ -236,7 +238,7 @@ export default function SorayaMockupPage() {
           <div className="border-b border-gray-100 py-4 px-6">
             <div className="flex justify-between items-start text-left">
               <p className="text-[11px] text-gray-600 leading-relaxed font-sans flex-1 pr-4">
-                Нежный вибратор-кролик WaveMotion™ стимулирует не только клитор, но и точку G, позволяя уверенно дойти до самого удовлетворяющего оргазма в жизни.
+                {t('mockup.desc_text', 'Нежный вибратор-кролик WaveMotion™ стимулирует не только клитор, но и точку G, позволяя уверенно дойти до самого удовлетворяющего оргазма в жизни.')}
               </p>
               <button 
                 onClick={() => toggleAccordion('desc')}
@@ -258,7 +260,7 @@ export default function SorayaMockupPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">verified_user</span>
-                <span className="text-[10px] font-bold tracking-wider text-black">ГАРАНТИЯ</span>
+                <span className="text-[10px] font-bold tracking-wider text-black">{t('product.warranty_tab', 'ГАРАНТИЯ')}</span>
               </div>
               <span className="material-symbols-outlined text-[16px] text-gray-500">
                 {expandedAccordions.warranty ? 'expand_less' : 'expand_more'}
@@ -266,7 +268,7 @@ export default function SorayaMockupPage() {
             </button>
             {expandedAccordions.warranty && (
               <p className="mt-2 pl-8 text-[10px] text-gray-500 font-sans">
-                Гарантия 2 года на все функциональные части.
+                {t('mockup.warranty', 'Гарантия 2 года на все функциональные части.')}
               </p>
             )}
           </div>
@@ -279,7 +281,7 @@ export default function SorayaMockupPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">credit_card</span>
-                <span className="text-[10px] font-bold tracking-wider text-black">БЕЗОПАСНАЯ ПОКУПКА</span>
+                <span className="text-[10px] font-bold tracking-wider text-black">{t('product.safe_tab', 'БЕЗОПАСНАЯ ПОКУПКА')}</span>
               </div>
               <span className="material-symbols-outlined text-[16px] text-gray-500">
                 {expandedAccordions.secure ? 'expand_less' : 'expand_more'}
@@ -287,7 +289,7 @@ export default function SorayaMockupPage() {
             </button>
             {expandedAccordions.secure && (
               <p className="mt-2 pl-8 text-[10px] text-gray-500 font-sans">
-                100% безопасная оплата с шифрованием данных SSL.
+                {t('mockup.safe', '100% безопасная оплата с шифрованием данных SSL.')}
               </p>
             )}
           </div>
@@ -300,7 +302,7 @@ export default function SorayaMockupPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">local_shipping</span>
-                <span className="text-[10px] font-bold tracking-wider text-black">ИНФОРМАЦИЯ О ДОСТАВКЕ</span>
+                <span className="text-[10px] font-bold tracking-wider text-black">{t('product.delivery_tab', 'ИНФОРМАЦИЯ О ДОСТАВКЕ')}</span>
               </div>
               <span className="material-symbols-outlined text-[16px] text-gray-500">
                 {expandedAccordions.delivery ? 'expand_less' : 'expand_more'}
@@ -308,7 +310,7 @@ export default function SorayaMockupPage() {
             </button>
             {expandedAccordions.delivery && (
               <p className="mt-2 pl-8 text-[10px] text-gray-500 font-sans">
-                Быстрая и надежная доставка по всему миру.
+                {t('mockup.delivery', 'Быстрая и надежная доставка по всему миру.')}
               </p>
             )}
           </div>
@@ -321,7 +323,7 @@ export default function SorayaMockupPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">visibility_off</span>
-                <span className="text-[10px] font-bold tracking-wider text-black">НЕПРИМЕТНАЯ УПАКОВКА</span>
+                <span className="text-[10px] font-bold tracking-wider text-black">{t('product.discreet_tab', 'НЕПРИМЕТНАЯ УПАКОВКА')}</span>
               </div>
               <span className="material-symbols-outlined text-[16px] text-gray-500">
                 {expandedAccordions.package ? 'expand_less' : 'expand_more'}
@@ -329,7 +331,7 @@ export default function SorayaMockupPage() {
             </button>
             {expandedAccordions.package && (
               <p className="mt-2 pl-8 text-[10px] text-gray-500 font-sans">
-                Сохраняйте инкогнито: коробка без логотипов и надписей.
+                {t('mockup.package', 'Сохраняйте инкогнито: коробка без логотипов и надписей.')}
               </p>
             )}
           </div>
@@ -338,7 +340,7 @@ export default function SorayaMockupPage() {
         {/* BUNDLES BLOCK (КУПИ НАБОР И СЭКОНОМЬ) */}
         <section className="py-8 px-6 bg-gray-50/20 border-t border-gray-100">
           <h3 className="font-sans font-black text-[13px] tracking-[0.2em] text-black text-center uppercase mb-8">
-            КУПИ НАБОР И СЭКОНОМЬ
+            {t('mockup.bundle_title', 'КУПИ НАБОР И СЭКОНОМЬ')}
           </h3>
 
           {/* Bundle 1 */}
@@ -359,13 +361,13 @@ export default function SorayaMockupPage() {
                     319 EUR
                   </span>
                   <span className="text-primary font-bold text-[9px] mt-0.5">
-                    сохранить 159,80 EUR
+                    {t('mockup.save_eur', { amount: '159,80' })}
                   </span>
                 </div>
               </div>
             </div>
             <button className="w-full mt-4 bg-white text-black border border-black font-sans font-bold text-[9px] tracking-widest py-2.5 uppercase hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all">
-              ПРЕДПРОСМОТР
+              {t('product.preview', 'ПРЕДПРОСМОТР')}
             </button>
           </div>
 
@@ -387,7 +389,7 @@ export default function SorayaMockupPage() {
                     359 EUR
                   </span>
                   <span className="text-primary font-bold text-[9px] mt-0.5">
-                    сохранить 159,90 EUR
+                    {t('mockup.save_eur', { amount: '159,90' })}
                   </span>
                 </div>
               </div>

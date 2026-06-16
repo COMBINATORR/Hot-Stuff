@@ -10,12 +10,13 @@ import { supabase } from '../lib/supabase';
 
 /* ── Qty stepper ──────────────────────────── */
 function QtyControl({ qty, onMinus, onPlus }) {
+  const { t } = useTranslation();
   return (
     <div className="inline-flex items-center border border-white/10 bg-neutral-900 rounded-none h-8">
       <button 
         onClick={onMinus} 
         className="w-8 h-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 active:scale-90 transition-all focus:outline-none focus-visible:bg-white/10" 
-        aria-label="Уменьшить"
+        aria-label={t('common.decrease', 'Уменьшить')}
       >
         −
       </button>
@@ -25,7 +26,7 @@ function QtyControl({ qty, onMinus, onPlus }) {
       <button 
         onClick={onPlus} 
         className="w-8 h-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 active:scale-90 transition-all focus:outline-none focus-visible:bg-white/10" 
-        aria-label="Увеличить"
+        aria-label={t('common.increase', 'Увеличить')}
       >
         +
       </button>
@@ -35,6 +36,7 @@ function QtyControl({ qty, onMinus, onPlus }) {
 
 /* ── Cart item row ───────────────────────── */
 function CartItemRow({ item, onQtyChange, onRemove }) {
+  const { t } = useTranslation();
   return (
     <motion.div
       className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 bg-neutral-900/40 border border-white/5 hover:border-white/10 transition-all duration-300 relative rounded-none"
@@ -66,11 +68,11 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
           </h3>
           {item.variant && (
             <p className="text-[10px] text-primary font-bold uppercase tracking-wider">
-              Цвет: {item.variant}
+              {t('product.color_label', { color: item.variant })}
             </p>
           )}
           <p className="text-[9px] text-white/40 font-mono tracking-wider">
-            АРТ. HS-{String(item.id).padStart(4, '0')}
+            {t('product.sku', 'АРТ.')} HS-{String(item.id).padStart(4, '0')}
           </p>
           <div className="pt-2">
             <QtyControl
@@ -89,10 +91,10 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
         </span>
         <button
           onClick={() => onRemove(item.id, item.variant)}
-          aria-label={`Удалить ${item.name}`}
+          aria-label={`${t('header.remove', 'Удалить')} ${item.name}`}
           className="text-[10px] font-bold text-white/40 hover:text-error uppercase tracking-wider transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-error focus-visible:ring-offset-1 focus-visible:ring-offset-black rounded-none"
         >
-          Удалить
+          {t('header.remove', 'Удалить')}
         </button>
       </div>
     </motion.div>
@@ -141,13 +143,13 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
         console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
         window.location.href = data.paymentUrl;
       } else {
-        throw new Error('Не удалось получить ссылку на оплату от сервера');
+        throw new Error(t('header.payment_url_error', 'Не удалось получить ссылку на оплату от сервера'));
       }
     } catch (err) {
       console.error('[Kaspi Checkout Error]', err);
-      const errMsg = err.message || 'Ошибка инициализации платежа';
+      const errMsg = err.message || t('header.payment_init_error', 'Ошибка инициализации платежа');
       setCheckoutError(errMsg);
-      alert(`Ошибка оплаты: ${errMsg}`);
+      alert(t('header.payment_failed', 'Ошибка оплаты: {{error}}', { error: errMsg }));
       setIsCheckingOut(false);
     }
   };
@@ -155,8 +157,8 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <Helmet>
-        <title>Hot Stuff — Корзина</title>
-        <meta name="description" content="Ваша корзина в Hot Stuff. Оформите заказ с доставкой по Казахстану." />
+        <title>Hot Stuff — {t('cart.title')}</title>
+        <meta name="description" content={t('cart.meta_desc')} />
       </Helmet>
 
       <Header />
@@ -171,7 +173,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
             {t('cart.title')}
             {items.length > 0 && (
               <span className="font-sans font-normal text-xs text-white/40 uppercase tracking-widest">
-                ({items.length} {items.length === 1 ? 'товар' : 'товара'})
+                {items.length === 1 ? t('cart.count_label', { count: items.length }) : t('cart.count_label_plural', { count: items.length })}
               </span>
             )}
           </motion.h1>
@@ -187,7 +189,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                   {t('cart.empty')}
                 </p>
                 <p className="text-[11px] text-white/50 tracking-wide mt-1">
-                  Добавьте товары, чтобы оформить заказ
+                  {t('cart.empty_hint')}
                 </p>
               </div>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -196,7 +198,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                   className="inline-flex items-center justify-center bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] px-8 py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
                   id="cart-cta-catalog"
                 >
-                  Перейти в каталог →
+                  {t('cart.go_to_catalog')}
                 </Link>
               </motion.div>
             </div>
@@ -222,7 +224,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                     to="/catalog"
                     className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 hover:text-primary uppercase tracking-widest transition-colors duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-none"
                   >
-                    ← Продолжить покупки
+                    {t('cart.continue_shopping')}
                   </Link>
                 </div>
               </div>
@@ -230,31 +232,31 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
               {/* Right: order summary */}
               <aside className="lg:col-span-1 bg-neutral-950 border border-white/5 p-6 sm:p-8 space-y-6 sticky top-28 rounded-none">
                 <p className="font-sans text-[10px] font-bold tracking-widest text-white/40 uppercase text-left">
-                  Итого заказа
+                  {t('cart.order_summary')}
                 </p>
 
                 <div className="space-y-3">
                   <div className="flex justify-between text-xs tracking-wide text-white/60">
-                    <span>Товары ({items.reduce((s, i) => s + i.qty, 0)} шт.)</span>
+                    <span>{t('cart.items_count', { count: items.reduce((s, i) => s + i.qty, 0) })}</span>
                     <span className="font-semibold text-white">{subtotal.toLocaleString('ru-KZ')} ₸</span>
                   </div>
 
                   <div className="flex justify-between text-xs tracking-wide text-white/60">
-                    <span>Доставка</span>
+                    <span>{t('cart.delivery')}</span>
                     <span className={`font-semibold ${delivery === 0 ? 'text-green-400' : 'text-white'}`}>
-                      {delivery === 0 ? 'Бесплатно' : `${delivery.toLocaleString('ru-KZ')} ₸`}
+                      {delivery === 0 ? t('cart.free') : `${delivery.toLocaleString('ru-KZ')} ₸`}
                     </span>
                   </div>
 
                   {delivery > 0 && (
                     <p className="text-[10px] text-white/40 text-left mt-1 leading-normal">
-                      Бесплатно при заказе от 15 000 ₸ (осталось {(15000 - subtotal).toLocaleString('ru-KZ')} ₸)
+                      {t('cart.free_hint', { amount: (15000 - subtotal).toLocaleString('ru-KZ') })}
                     </p>
                   )}
                 </div>
 
                 <div className="flex justify-between items-baseline border-t border-white/10 pt-4 text-white">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">К оплате</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t('cart.to_pay')}</span>
                   <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
                 </div>
 
@@ -268,7 +270,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                     className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
                     id="cart-cta-checkout"
                   >
-                    Оформить заказ
+                    {t('cart.checkout')}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="12" x2="19" y2="12" />
                       <polyline points="12 5 19 12 12 19" />
@@ -292,11 +294,11 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                         <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
                           <circle cx="12" cy="12" r="9" />
                         </svg>
-                        <span>Обработка...</span>
+                        <span>{t('header.processing')}</span>
                       </>
                     ) : (
                       <>
-                        <span>Оплатить через Kaspi Pay</span>
+                        <span>{t('cart.kaspi')}</span>
                         <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
                           <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
                         </svg>
@@ -308,9 +310,9 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                 {/* Trust micro-copy */}
                 <div className="border-t border-white/5 pt-6 space-y-3">
                   {[
-                    { text: '🔒 Безопасная оплата SSL' },
-                    { text: '💳 Оплата Kaspi Pay / рассрочка' },
-                    { text: '↩️ Возврат в течение 30 дней' }
+                    { text: t('cart.sec_ssl') },
+                    { text: t('cart.sec_kaspi') },
+                    { text: t('cart.sec_returns') }
                   ].map(item => (
                     <p 
                       key={item.text} 

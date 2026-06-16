@@ -2,19 +2,21 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-
-const TABS = [
-  { id: 'terms', label: 'Публичная оферта' },
-  { id: 'return', label: 'Политика возврата' },
-  { id: 'privacy', label: 'Политика конфиденциальности и Cookie' }
-];
+import { useTranslation } from 'react-i18next';
 
 export default function LegalPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTabId = searchParams.get('tab') || 'terms';
 
+  const tabs = [
+    { id: 'terms', label: t('legal.terms_tab', 'Публичная оферта') },
+    { id: 'return', label: t('legal.return_tab', 'Политика возврата') },
+    { id: 'privacy', label: t('legal.privacy_tab', 'Политика конфиденциальности и Cookie') }
+  ];
+
   // Ensure activeTabId is valid, fallback to 'terms'
-  const currentTab = TABS.find(t => t.id === activeTabId) ? activeTabId : 'terms';
+  const currentTab = tabs.find(t => t.id === activeTabId) ? activeTabId : 'terms';
 
   const handleTabChange = (id) => {
     setSearchParams({ tab: id });
@@ -28,14 +30,14 @@ export default function LegalPage() {
   return (
     <div className="min-h-screen bg-black text-white pt-[110px] pb-20">
       <Helmet>
-        <title>Hot Stuff — Правовая информация</title>
-        <meta name="description" content="Правовая информация, публичная оферта, политика возврата и конфиденциальности интернет-магазина Hot Stuff." />
+        <title>{t('legal.meta_title', 'Hot Stuff — Правовая информация')}</title>
+        <meta name="description" content={t('legal.meta_desc', 'Правовая информация, публичная оферта, политика возврата и конфиденциальности интернет-магазина Hot Stuff.')} />
       </Helmet>
 
       <div className="container-hs py-12 px-6 md:px-12 lg:px-16">
         {/* Title */}
         <h1 className="text-[28px] md:text-[34px] font-bold tracking-[0.1em] text-white uppercase mb-12 border-b border-white/10 pb-6 font-display text-left">
-          ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ
+          {t('legal.title', 'ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ')}
         </h1>
 
         {/* Columns Grid */}
@@ -44,7 +46,7 @@ export default function LegalPage() {
           {/* LEFT SIDEBAR: Desktop Tab Menu */}
           <aside className="hidden md:block w-[280px] flex-none sticky top-[140px] text-left">
             <nav className="flex flex-col space-y-6">
-              {TABS.map((tab) => {
+              {tabs.map((tab) => {
                 const isActive = tab.id === currentTab;
                 return (
                   <button
@@ -65,7 +67,7 @@ export default function LegalPage() {
 
           {/* MOBILE NAVIGATION: Horizontal Scrollable List */}
           <div className="md:hidden w-full overflow-x-auto scrollbar-none border-b border-white/10 pb-4 mb-4 flex gap-4 select-none">
-            {TABS.map((tab) => {
+            {tabs.map((tab) => {
               const isActive = tab.id === currentTab;
               return (
                 <button
@@ -97,28 +99,28 @@ export default function LegalPage() {
                 {currentTab === 'terms' && (
                   <>
                     <h2 className="text-xl font-bold tracking-wider text-white uppercase mb-6 font-sans">
-                      Публичная оферта
+                      {t('legal.terms_tab', 'Публичная оферта')}
                     </h2>
                     <p className="text-neutral-400 text-xs sm:text-sm italic border-l-2 border-primary/50 pl-4 py-1 font-sans font-normal">
-                      [Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]
+                      {t('legal.placeholder', '[Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]')}
                     </p>
                     <div className="space-y-6">
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">1. Общие положения</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.general_title', '1. Общие положения')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Настоящий документ является публичной офертой интернет-магазина Hot Stuff. В соответствии со статьей 395 Гражданского Кодекса Республики Казахстан, оформление заказа на Сайте является полным и безоговорочным принятием условий настоящего Договора купли-продажи.
+                          {t('legal.general_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">2. Предмет договора</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.subject_title', '2. Предмет договора')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Продавец обязуется передать в собственность Покупателя товары, представленные в каталоге Сайта, а Покупатель обязуется принять и оплатить товары в соответствии с условиями настоящего Договора.
+                          {t('legal.subject_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">3. Заказ и оплата</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.payment_title', '3. Заказ и оплата')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Цены на товары указаны на Сайте и могут быть временно скорректированы для проверки и проведения тестовых операций оплаты. Доставка осуществляется анонимно по всей территории Республики Казахстан.
+                          {t('legal.payment_desc')}
                         </p>
                       </section>
                     </div>
@@ -128,28 +130,28 @@ export default function LegalPage() {
                 {currentTab === 'return' && (
                   <>
                     <h2 className="text-xl font-bold tracking-wider text-white uppercase mb-6 font-sans">
-                      Политика возврата
+                      {t('legal.return_tab', 'Политика возврата')}
                     </h2>
                     <p className="text-neutral-400 text-xs sm:text-sm italic border-l-2 border-primary/50 pl-4 py-1 font-sans font-normal">
-                      [Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]
+                      {t('legal.placeholder', '[Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]')}
                     </p>
                     <div className="space-y-6">
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">1. Интимные товары и белье</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.returns_title', '1. Интимные товары и белье')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          В соответствии с Законом Республики Казахстан «О защите прав потребителей», товары личной гигиены, парфюмерно-косметические товары, нательное белье и чулочно-носочные изделия надлежащего качества возврату или обмену на аналогичный товар другого размера, формы, габарита, фасона, расцветки или комплектации не подлежат.
+                          {t('legal.returns_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">2. Гарантийные обязательства</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.warranty_title', '2. Гарантийные обязательства')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          На электротехнические интимные девайсы и вибромассажеры предоставляется официальная гарантия качества. В случае обнаружения заводского брака или дефектов в течение гарантийного периода, Покупатель имеет право на бесплатный обмен девайса или возврат средств.
+                          {t('legal.warranty_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">3. Порядок возврата по браку</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.return_procedure_title', '3. Порядок возврата по браку')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Для инициации возврата по браку свяжитесь со службой поддержки Hot Stuff через указанные в футере контакты, предоставив описание проблемы и чек о покупке.
+                          {t('legal.return_procedure_desc')}
                         </p>
                       </section>
                     </div>
@@ -159,28 +161,28 @@ export default function LegalPage() {
                 {currentTab === 'privacy' && (
                   <>
                     <h2 className="text-xl font-bold tracking-wider text-white uppercase mb-6 font-sans">
-                      Политика конфиденциальности и Cookie
+                      {t('legal.privacy_tab', 'Политика конфиденциальности и Cookie')}
                     </h2>
                     <p className="text-neutral-400 text-xs sm:text-sm italic border-l-2 border-primary/50 pl-4 py-1 font-sans font-normal">
-                      [Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]
+                      {t('legal.placeholder', '[Здесь будет размещен официальный текст документа, предоставленный владельцем бизнеса]')}
                     </p>
                     <div className="space-y-6">
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">1. Сбор персональных данных</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.data_title', '1. Сбор персональных данных')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Мы собираем только ту информацию, которая необходима для обработки ваших заказов и обеспечения анонимной доставки. Ваша конфиденциальность является нашим главным приоритетом — мы никогда не передаем ваши данные третьим лицам, за исключением логистических партнеров для осуществления доставки.
+                          {t('legal.data_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">2. Использование файлов Cookie</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.cookies_title', '2. Использование файлов Cookie')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Сайт использует файлы Cookie для сохранения состояния вашей корзины, выбранного языка интерфейса и настроек авторизации. Вы можете отключить поддержку Cookie в настройках своего браузера.
+                          {t('legal.cookies_desc')}
                         </p>
                       </section>
                       <section className="space-y-3">
-                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">3. Безопасность транзакций</h3>
+                        <h3 className="text-sm font-bold text-white tracking-widest uppercase">{t('legal.security_title', '3. Безопасность транзакций')}</h3>
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                          Все платежные транзакции шифруются и проходят через защищенные шлюзы Kaspi Pay или Freedom Pay. Мы не сохраняем данные ваших банковских карт на наших серверах.
+                          {t('legal.security_desc')}
                         </p>
                       </section>
                     </div>

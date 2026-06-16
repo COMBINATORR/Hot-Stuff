@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function CookieBanner() {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,12 +35,12 @@ export default function CookieBanner() {
         >
           {/* Left Description Text */}
           <p className="text-xs sm:text-[13px] text-white/80 leading-relaxed font-sans font-normal text-center md:text-left flex-1">
-            Мы используем cookies. Продолжая использовать сайт, вы соглашаетесь с условиями{" "}
+            {t('cookie.text')}{" "}
             <Link 
               to="/terms" 
               className="text-white hover:text-primary underline decoration-white/30 hover:decoration-primary underline-offset-4 transition-colors font-bold uppercase tracking-wider text-[11px]"
             >
-              Пользовательского соглашения
+              {t('cookie.policy')}
             </Link>
             .
           </p>
@@ -48,7 +50,7 @@ export default function CookieBanner() {
             onClick={handleAccept}
             className="w-full md:w-auto bg-white hover:bg-neutral-100 text-black font-sans font-black text-[11px] tracking-widest uppercase px-6 py-2.5 rounded-[8px] transition-colors cursor-pointer flex-none text-center focus:outline-none"
           >
-            Окей
+            {t('cookie.ok')}
           </button>
         </motion.div>
       )}

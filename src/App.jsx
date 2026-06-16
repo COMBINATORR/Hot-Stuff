@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { I18nextProvider } from 'react-i18next';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './i18n.js';
 import AppRouter from './router.jsx';
 import Header from './components/Header.jsx';
@@ -9,6 +9,32 @@ import Footer from './components/Footer.jsx';
 import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
 import CookieBanner from './components/CookieBanner.jsx';
+
+function LanguageSync() {
+  const location = useLocation();
+  const { i18n: i18nInstance } = useTranslation();
+
+  useEffect(() => {
+    const parts = location.pathname.split('/');
+    const pathLang = parts[1]; // e.g. 'kz', 'en', 'ru'
+    
+    if (['ru', 'kz', 'en'].includes(pathLang)) {
+      const i18nLang = pathLang === 'kz' ? 'kk' : pathLang;
+      if (i18nInstance.language !== i18nLang) {
+        i18nInstance.changeLanguage(i18nLang);
+      }
+      localStorage.setItem('app_language', pathLang);
+    } else {
+      const savedLang = localStorage.getItem('app_language') || 'ru';
+      const i18nLang = savedLang === 'kz' ? 'kk' : savedLang;
+      if (i18nInstance.language !== i18nLang) {
+        i18nInstance.changeLanguage(i18nLang);
+      }
+    }
+  }, [location.pathname, i18nInstance]);
+
+  return null;
+}
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -42,6 +68,7 @@ function App() {
       <HelmetProvider>
         <SecureProvider>
           <BrowserRouter>
+            <LanguageSync />
             <PanicButton />
             <Header
               cartItems={cartItems}
