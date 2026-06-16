@@ -468,25 +468,28 @@ export default function AccountPage({ onAddToCart, lang }) {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (err) {
       console.error('[Logout Error]', err);
+      alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
+    } finally {
+      localStorage.removeItem('hs_user');
+
+      const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
+      navigate(targetPath);
+
+      setTimeout(() => {
+        setIsLoggedIn(false);
+        setLoggedInUser(null);
+        setStep(1);
+        setIdentifier(localStorage.getItem('hs_remembered_email') || '');
+        setPassword('');
+        setCode(['', '', '', '', '', '']);
+        setError('');
+        setLoading(false);
+      }, 500);
     }
-    localStorage.removeItem('hs_user');
-
-    const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
-    navigate(targetPath);
-
-    setTimeout(() => {
-      setIsLoggedIn(false);
-      setLoggedInUser(null);
-      setStep(1);
-      setIdentifier(localStorage.getItem('hs_remembered_email') || '');
-      setPassword('');
-      setCode(['', '', '', '', '', '']);
-      setError('');
-      setLoading(false);
-    }, 500);
   };
 
   const handleTogglePrivate = () => {
@@ -677,9 +680,11 @@ export default function AccountPage({ onAddToCart, lang }) {
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="border border-black/10 hover:border-red-500 hover:text-red-500 text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 active:scale-95"
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 border border-black/10 hover:border-red-500 hover:text-red-500 text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 active:scale-95 disabled:opacity-50"
                 >
-                  {t('account.logout_btn', 'ВЫЙТИ ИЗ АККАУНТА')}
+                  <span className="material-symbols-outlined text-[16px] leading-none">logout</span>
+                  <span>{t('account.logout_btn', 'ВЫЙТИ ИЗ АККАУНТА')}</span>
                 </button>
               </div>
             </div>

@@ -405,6 +405,19 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
     navigate(targetPath);
   };
 
+  const handleHeaderLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (err) {
+      console.error('[Header Logout Error]', err);
+      alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
+    } finally {
+      localStorage.removeItem('hs_user');
+      navigate(getHomePath());
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -632,10 +645,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     </Link>
                     <span className="opacity-30">/</span>
                     <button
-                      onClick={async () => {
-                        await supabase.auth.signOut();
-                        navigate(getHomePath());
-                      }}
+                      onClick={handleHeaderLogout}
                       className={`hover:text-error transition-colors uppercase font-bold cursor-pointer bg-transparent border-none p-0 ${
                         isLightPage ? 'text-black/60' : 'text-white/60'
                       }`}
@@ -824,10 +834,9 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                         {t('header.cabinet', 'кабинет')}
                       </Link>
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           setNavOpen(false);
-                          await supabase.auth.signOut();
-                          navigate(getHomePath());
+                          handleHeaderLogout();
                         }}
                         className="text-[10px] text-white/50 hover:text-red-500 transition-colors uppercase tracking-widest font-black bg-transparent border-none p-0 cursor-pointer"
                       >

@@ -305,17 +305,6 @@ export default function ProductPage({ onAddToCart }) {
     <div className="bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
       <main className="pt-20">
         
-        {/* Breadcrumbs */}
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8">
-          <nav className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase text-outline">
-            <Link to="/" className="hover:text-white transition-colors">{t('nav.home')}</Link>
-            <span>/</span>
-            <Link to="/catalog" className="hover:text-white transition-colors">{t('nav.catalog')}</Link>
-            <span>/</span>
-            <span className="text-white">{product.name}</span>
-          </nav>
-        </div>
-
         {/* Hero Section */}
         <section className="min-h-[700px] md:min-h-[850px] flex flex-col md:flex-row max-w-container-max mx-auto relative mt-4">
           <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 md:py-20 z-10 text-left">
