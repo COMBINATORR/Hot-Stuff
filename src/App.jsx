@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import i18n from './i18n.js';
 import AppRouter from './router.jsx';
 import Header from './components/Header.jsx';
@@ -59,6 +60,7 @@ function App() {
             </main>
             <Footer />
             <CookieBanner />
+            <Analytics />
           </BrowserRouter>
         </SecureProvider>
       </HelmetProvider>
