@@ -116,7 +116,12 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
     }
   };
 
-  const handleKaspiCheckout = async () => {
+  const handleKaspiCheckout = async (e) => {
+    // Prevent event bubbling to any parent form or navigation handler
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsCheckingOut(true);
     setCheckoutError('');
     try {
@@ -327,12 +332,14 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
               </div>
             </div>
             <button 
+              type="button"
               className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase py-5 hover:bg-[#ffe088] transition-colors tracking-widest"
               onClick={() => { onClose(); navigate(i18n.language === 'ru' ? '/checkout' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/checkout`); }}
             >
               {t('header.checkout_btn', 'ОФОРМИТЬ ЗАКАЗ')}
             </button>
             <button
+              type="button"
               onClick={handleKaspiCheckout}
               disabled={isCheckingOut}
               className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-5 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none mt-2"
@@ -565,12 +572,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
         </button>
       </div>
 
-      <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col">
+      <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col pointer-events-none">
         {/* RED TEST BANNER */}
-        <div className="w-full bg-[#E31E24] text-white text-center py-1.5 px-4 text-[9px] md:text-[10px] font-sans font-black tracking-widest uppercase select-none">
+        <div className="w-full bg-[#E31E24] text-white text-center py-1.5 px-4 text-[9px] md:text-[10px] font-sans font-black tracking-widest uppercase select-none pointer-events-auto">
           {t('header.test_banner', 'ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты')}
         </div>
-        <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20">
+        <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20 pointer-events-auto">
           
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">

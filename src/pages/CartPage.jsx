@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import Header from '../components/Header.jsx';
-import Footer from '../components/Footer.jsx';
 import ResponsiveImage from '../components/ResponsiveImage';
 import { supabase } from '../lib/supabase';
 
@@ -101,9 +100,19 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
   );
 }
 
-export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
+export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }) {
   const { t } = useTranslation();
+  const location = useLocation();
   const items = cartItems;
+
+  // Determine checkout path respecting locale prefix (/kz/checkout, /en/checkout, /checkout)
+  const checkoutPath = (() => {
+    const parts = location.pathname.split('/');
+    if (parts.length > 1 && ['ru', 'kz', 'en'].includes(parts[1])) {
+      return `/${parts[1]}/checkout`;
+    }
+    return '/checkout';
+  })();
 
   const handleQty = (id, variant, newQty) => {
     if (newQty < 1) {
@@ -124,7 +133,12 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
-  const handleKaspiCheckout = async () => {
+  const handleKaspiCheckout = async (e) => {
+    // Prevent any parent form submission or event bubbling
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsCheckingOut(true);
     setCheckoutError('');
     try {
@@ -155,15 +169,19 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
   };
 
   return (
+    // NOTE: Header and Footer are intentionally omitted here.
+    // They are already rendered by App.jsx wrapping all routes.
+    // Rendering them here again would cause double-mount conflicts.
     <div className="min-h-screen bg-black text-white flex flex-col">
       <Helmet>
         <title>Hot Stuff — {t('cart.title')}</title>
         <meta name="description" content={t('cart.meta_desc')} />
       </Helmet>
 
-      <Header />
+      {/* Header is rendered by App.jsx — do NOT add it here */}
 
       <main className="flex-1 pt-32 pb-20" id="main-content">
+        <Breadcrumbs theme="dark" />
         <div className="container-hs">
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -266,7 +284,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                   className="pt-2"
                 >
                   <Link 
-                    to="/checkout" 
+                    to={checkoutPath} 
                     className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
                     id="cart-cta-checkout"
                   >
@@ -284,6 +302,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
                   className="pt-1"
                 >
                   <button
+                    type="button"
                     onClick={handleKaspiCheckout}
                     disabled={isCheckingOut}
                     className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none"
@@ -328,7 +347,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove }) {
         </div>
       </main>
 
-      <Footer />
+      {/* Footer is rendered by App.jsx — do NOT add it here */}
     </div>
   );
 }
