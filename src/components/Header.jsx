@@ -84,13 +84,29 @@ function CategoryLink({ category, onClick }) {
 
 /** CartDrawer — slide-in panel (Stitch design) */
 function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddToCart }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const [promo, setPromo] = useState('');
   const [appliedPromo, setAppliedPromo] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const navigate = useNavigate();
+
+  // Build locale-aware checkout path
+  const checkoutPath = i18n.language === 'ru' ? '/checkout' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/checkout`;
+
+  // Safe checkout navigation: navigate FIRST, then close drawer.
+  // If we close first, CartDrawer unmounts (returns null when !isOpen),
+  // and navigate() from an unmounted component may silently fail in React 18.
+  const handleCheckoutNavigate = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    navigate(checkoutPath);
+    // Close drawer AFTER navigation is scheduled
+    setTimeout(() => onClose(), 0);
+  };
 
   // lock body scroll when open
   useEffect(() => {
@@ -334,7 +350,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
             <button 
               type="button"
               className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase py-5 hover:bg-[#ffe088] transition-colors tracking-widest"
-              onClick={() => { onClose(); navigate(i18n.language === 'ru' ? '/checkout' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/checkout`); }}
+              onClick={handleCheckoutNavigate}
             >
               {t('header.checkout_btn', 'ОФОРМИТЬ ЗАКАЗ')}
             </button>
