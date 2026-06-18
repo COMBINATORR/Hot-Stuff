@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from '../components/ResponsiveImage';
 import { useTranslation } from 'react-i18next';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function ProductPage({ onAddToCart }) {
   const { t, i18n } = useTranslation();
@@ -304,6 +305,7 @@ export default function ProductPage({ onAddToCart }) {
   return (
     <div className="bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
       <main className="pt-20">
+        <Breadcrumbs theme="dark" />
         
         {/* Hero Section */}
         <section className="min-h-[700px] md:min-h-[850px] flex flex-col md:flex-row max-w-container-max mx-auto relative mt-4">
