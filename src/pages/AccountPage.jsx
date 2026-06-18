@@ -988,18 +988,6 @@ export default function AccountPage({ onAddToCart, lang }) {
                   className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
                 >
                   <span className="font-normal tracking-wide">{t('account.continue')}</span>
-                  {/* Rotating dotted/dashed circle spinner always visible to match image_2.png */}
-                  <svg 
-                    className="animate-spin h-[18px] w-[18px] text-white" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeDasharray="3 3"
-                  >
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" />
-                  </svg>
                 </button>
               </form>
 
