@@ -1000,20 +1000,19 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
               </div>
 
-              {/* Social Buttons */}
+              {/* Social Buttons — Google · Yandex · Telegram in one row */}
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
-                
-                {/* Standard buttons layout */}
+
                 <div className="flex justify-center gap-4 w-full">
                   {/* Google */}
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black"
+                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black active:scale-95"
                     title={t('account.google')}
                     disabled={loading}
                   >
-                    <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 512 512">
+                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 512 512">
                       <path d="M500 261.8C500 403.3 403.1 504 260 504 122.8 504 12 393.2 12 256S122.8 8 260 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9c-88.3-85.2-252.5-21.2-252.5 118.2 0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9l-140.8 0 0-85.3 236.1 0c2.3 12.7 3.9 24.9 3.9 41.4z"/>
                     </svg>
                   </button>
@@ -1022,39 +1021,38 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black"
+                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black active:scale-95"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 24 24">
+                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 24 24">
                       <path d="M16.376 12.644L21 2h-3.842l-4.624 10.644h3.842z M13.915 24v-3.733c0-2.822-.352-3.64-1.407-5.988L6.933 2H3l7.124 15.709V24h3.79z" />
+                    </svg>
+                  </button>
+
+                  {/* Telegram */}
+                  <button
+                    type="button"
+                    onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
+                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-[#2AABEE] active:scale-95"
+                    title={t('account.telegram', 'Telegram')}
+                    disabled={loading}
+                  >
+                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
                     </svg>
                   </button>
                 </div>
 
-                {/* Telegram Login area */}
-                <div className="w-full flex justify-center mt-2">
-                  {isLocalHost() ? (
-                    /* Emulator for local testing */
-                    <button
-                      type="button"
-                      onClick={handleLocalTelegramLogin}
-                      className="h-[40px] px-6 bg-[#2AABEE] hover:bg-[#229ED9] text-white font-sans font-bold text-xs uppercase tracking-wider rounded-[20px] transition-colors flex items-center justify-center gap-2 cursor-pointer border border-[#2AABEE]"
-                    >
-                      {/* Telegram Icon */}
-                      <svg className="w-[18px] h-[18px] fill-white" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
-                      </svg>
-                      <span>{t('account.telegram')}</span>
-                    </button>
-                  ) : (
-                    /* Official Telegram Widget for Production */
+                {/* Hidden official Telegram widget — production only, triggered by our styled button above */}
+                {!isLocalHost() && (
+                  <div id="tg-widget-trigger" className="hidden">
                     <TelegramWidgetContainer
                       botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStoreBot'}
                       onAuth={handleTelegramLoginSuccess}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
 
               </div>
             </div>
