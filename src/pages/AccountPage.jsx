@@ -1004,18 +1004,23 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
 
                 <div className="flex justify-center gap-4 w-full">
-                  {/* Google — colorful G on white circle */}
+                  {/* Google — official multicolor G (inline SVG, no external file) */}
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-100 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-neutral-200 shadow-sm active:scale-95"
+                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-neutral-200 shadow-sm active:scale-95"
                     title={t('account.google')}
                     disabled={loading}
                   >
-                    <img src="/google-logo.png" alt="Google" className="w-[30px] h-[30px] object-contain" />
+                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
                   </button>
 
-                  {/* Yandex — official red circle with white Y */}
+                  {/* Yandex — red circle, white Y letter */}
                   <button
                     type="button"
                     onClick={handleYandexClick}
@@ -1023,12 +1028,12 @@ export default function AccountPage({ onAddToCart, lang }) {
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 24 24">
-                      <path d="M14.341 13.296L17.5 21h-2.634l-2.952-7.551H9.66V21H7.25V3h3.91c3.276 0 5.09 1.588 5.09 4.575 0 2.193-1.007 3.674-2.909 4.721zM9.66 5.017V11.5h1.433c1.732 0 2.658-.877 2.658-3.182 0-2.13-.92-3.301-2.664-3.301H9.66z"/>
+                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24" fill="white">
+                      <path d="M7 3 L12 11.5 L17 3 L15 3 L12 8.5 L9 3 Z M11 12 L11 21 L13 21 L13 12 Z"/>
                     </svg>
                   </button>
 
-                  {/* Telegram — blue circle with white paper plane */}
+                  {/* Telegram — blue circle, white paper plane */}
                   <button
                     type="button"
                     onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
@@ -1036,8 +1041,8 @@ export default function AccountPage({ onAddToCart, lang }) {
                     title={t('account.telegram', 'Telegram')}
                     disabled={loading}
                   >
-                    <svg className="w-[30px] h-[30px]" viewBox="0 0 48 48" fill="none">
-                      <path d="M6.5 23.5L38.5 9.5L30.5 39.5L20.5 30.5L14.5 35.5V27.5L30.5 14.5L16.5 26.5L6.5 23.5Z" fill="white"/>
+                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24" fill="none">
+                      <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
                     </svg>
                   </button>
                 </div>
