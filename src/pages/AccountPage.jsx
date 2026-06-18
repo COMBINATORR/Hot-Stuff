@@ -1004,42 +1004,40 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
 
                 <div className="flex justify-center gap-4 w-full">
-                  {/* Google */}
+                  {/* Google — colorful G on white circle */}
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black active:scale-95"
+                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-100 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-neutral-200 shadow-sm active:scale-95"
                     title={t('account.google')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 512 512">
-                      <path d="M500 261.8C500 403.3 403.1 504 260 504 122.8 504 12 393.2 12 256S122.8 8 260 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9c-88.3-85.2-252.5-21.2-252.5 118.2 0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9l-140.8 0 0-85.3 236.1 0c2.3 12.7 3.9 24.9 3.9 41.4z"/>
-                    </svg>
+                    <img src="/google-logo.png" alt="Google" className="w-[30px] h-[30px] object-contain" />
                   </button>
 
-                  {/* Yandex */}
+                  {/* Yandex — official red circle with white Y */}
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-black hover:bg-neutral-800 text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black active:scale-95"
+                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#e8381a] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 24 24">
-                      <path d="M16.376 12.644L21 2h-3.842l-4.624 10.644h3.842z M13.915 24v-3.733c0-2.822-.352-3.64-1.407-5.988L6.933 2H3l7.124 15.709V24h3.79z" />
+                    <svg className="w-[30px] h-[30px] fill-white" viewBox="0 0 24 24">
+                      <path d="M14.341 13.296L17.5 21h-2.634l-2.952-7.551H9.66V21H7.25V3h3.91c3.276 0 5.09 1.588 5.09 4.575 0 2.193-1.007 3.674-2.909 4.721zM9.66 5.017V11.5h1.433c1.732 0 2.658-.877 2.658-3.182 0-2.13-.92-3.301-2.664-3.301H9.66z"/>
                     </svg>
                   </button>
 
-                  {/* Telegram */}
+                  {/* Telegram — blue circle with white paper plane */}
                   <button
                     type="button"
                     onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
-                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] text-white rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-[#2AABEE] active:scale-95"
+                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.telegram', 'Telegram')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px] fill-white" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
+                    <svg className="w-[30px] h-[30px]" viewBox="0 0 48 48" fill="none">
+                      <path d="M6.5 23.5L38.5 9.5L30.5 39.5L20.5 30.5L14.5 35.5V27.5L30.5 14.5L16.5 26.5L6.5 23.5Z" fill="white"/>
                     </svg>
                   </button>
                 </div>
