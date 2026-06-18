@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function LegalPage() {
   const { t } = useTranslation();
@@ -33,6 +34,8 @@ export default function LegalPage() {
         <title>{t('legal.meta_title', 'Hot Stuff — Правовая информация')}</title>
         <meta name="description" content={t('legal.meta_desc', 'Правовая информация, публичная оферта, политика возврата и конфиденциальности интернет-магазина Hot Stuff.')} />
       </Helmet>
+
+      <Breadcrumbs theme="dark" />
 
       <div className="container-hs py-12 px-6 md:px-12 lg:px-16">
         {/* Title */}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
@@ -580,7 +581,9 @@ export default function AccountPage({ onAddToCart, lang }) {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center bg-background text-on-surface py-20 md:py-28 px-4 md:px-8">
+    <div className="w-full min-h-screen flex flex-col bg-background text-on-surface pt-24 pb-20 md:pb-28">
+      <Breadcrumbs theme="dark" />
+      <div className="flex-1 flex flex-col justify-center items-center px-4 md:px-8">
       
       {/* iOS-Style SMS Push Notification */}
       <AnimatePresence>
@@ -1162,6 +1165,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
         </div>
       )}
+      </div>
     </div>
   );
 }

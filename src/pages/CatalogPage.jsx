@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
+import Breadcrumbs from '../components/Breadcrumbs';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
@@ -510,6 +511,8 @@ export default function CatalogPage({ onAddToCart }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Breadcrumbs theme="light" />
 
       <div className="container-hs py-8">
         

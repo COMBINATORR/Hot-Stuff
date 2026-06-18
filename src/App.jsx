@@ -9,7 +9,6 @@ import Footer from './components/Footer.jsx';
 import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
 import CookieBanner from './components/CookieBanner.jsx';
-import Breadcrumbs from './components/Breadcrumbs.jsx';
 
 function LanguageSync() {
   const location = useLocation();
@@ -78,7 +77,6 @@ function App() {
               onAddToCart={addToCart}
             />
             <main className="min-h-screen pb-20 md:pb-0">
-              <Breadcrumbs />
               <AppRouter
                 cartItems={cartItems}
                 onAddToCart={addToCart}

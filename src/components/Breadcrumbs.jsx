@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 
-export default function Breadcrumbs() {
+export default function Breadcrumbs({ theme = 'dark' }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const pathname = location.pathname;
@@ -171,18 +171,29 @@ export default function Breadcrumbs() {
     });
   }
 
+  const isLight = theme === 'light';
+
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8 text-left">
-      <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase text-neutral-400">
+      <nav className={`flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase ${
+        isLight ? 'text-neutral-500' : 'text-neutral-400'
+      }`}>
         {breadcrumbItems.map((item, idx) => {
           const isLast = item.isLast;
           return (
             <React.Fragment key={idx}>
-              {idx > 0 && <span className="text-outline">/</span>}
+              {idx > 0 && (
+                <span className={isLight ? 'text-black/20' : 'text-white/20'}>/</span>
+              )}
               {isLast ? (
                 <span className="text-primary">{item.name}</span>
               ) : (
-                <Link to={item.link} className="hover:text-white transition-colors">
+                <Link
+                  to={item.link}
+                  className={`transition-colors ${
+                    isLight ? 'hover:text-black text-neutral-500' : 'hover:text-white text-neutral-400'
+                  }`}
+                >
                   {item.name}
                 </Link>
               )}
