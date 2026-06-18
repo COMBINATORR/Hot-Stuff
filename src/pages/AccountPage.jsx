@@ -972,6 +972,8 @@ export default function AccountPage({ onAddToCart, lang }) {
                   </label>
                   <input
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
