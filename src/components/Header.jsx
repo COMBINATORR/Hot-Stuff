@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ResponsiveImage from './ResponsiveImage';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 function CategoryLink({ category, onClick }) {
   const { t } = useTranslation();
@@ -398,7 +399,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
   const location = useLocation();
   const pathname = location.pathname;
 
-  const [session, setSession] = useState(null);
+  const session = useAuth();
 
   // Localized Ticker items computed dynamically using t()
   const tickerItems = [
@@ -440,20 +441,6 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
       navigate(getHomePath());
     }
   };
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      if (subscription) subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     async function loadCategories() {
@@ -634,13 +621,13 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_search', 'Открыть поиск')}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">search</span>
             </button>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout" initial={false}>
               {session ? (
                 <motion.div
                   key="auth-user"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className="hidden sm:flex items-center gap-3 relative"
                 >
@@ -681,10 +668,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               ) : (
                 <motion.div
                   key="guest-user"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className="hidden sm:flex"
                 >
                   <NavLink
