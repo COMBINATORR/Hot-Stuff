@@ -1,4 +1,7 @@
 ## 2024-06-19 - Timing Attack Vulnerability in Telegram Auth
 **Vulnerability:** Found a timing attack vulnerability in `/api/telegram-auth.js` due to the use of standard inequality string comparison `!==` for HMAC hash verification. Also found error leakage in the catch block returning `error.message`.
 **Learning:** Checking hashes character by character with `!==` leaks timing information that an attacker can use to forge a valid hash. Directly returning internal error messages to clients can leak sensitive internal context or stack trace info.
-**Prevention:** Always use `crypto.timingSafeEqual` for comparing secret hashes or tokens to ensure constant time comparison. Always scrub error responses to return generic, safe messages.
+**Prevention:** Always use `crypto.timingSafeEqual` for comparing secret hashes or tokens to ensure constant time comparison. Always scrub error responses to return generic, safe messages.## 2024-06-19 - Overly Permissive CORS Policy in Edge Functions
+**Vulnerability:** A Supabase edge function used a wildcard `*` for the `Access-Control-Allow-Origin` header. This allowed any third-party domain to make cross-origin requests to the API, potentially leading to unauthorized abuse or bypassing origin-based protections.
+**Learning:** Hardcoding a wildcard origin in `corsHeaders` for edge functions bypasses the Same-Origin Policy.
+**Prevention:** Instead of using `*`, dynamically check the incoming request's `Origin` header against an allowlist (e.g., `['http://localhost:3000', 'https://hotstuff.kz']`) or environment variables, and echo the valid origin or fall back to a safe default.

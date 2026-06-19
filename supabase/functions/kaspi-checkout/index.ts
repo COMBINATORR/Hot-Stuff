@@ -1,15 +1,35 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://hotstuff.kz"
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin");
+  const envAllowedOrigin = Deno.env.get("ALLOWED_ORIGIN");
+
+  let allowOrigin = "http://localhost:3000"; // Safe fallback
+
+  if (origin) {
+    if (envAllowedOrigin && origin === envAllowedOrigin) {
+      allowOrigin = origin;
+    } else if (allowedOrigins.includes(origin)) {
+      allowOrigin = origin;
+    }
+  }
+
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -28,7 +48,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Missing required fields: amount and orderId are required" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         }
       );
     }
@@ -89,7 +109,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify(responseBody), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Exception in kaspi-checkout function:", error);
@@ -97,7 +117,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       }
     );
   }
