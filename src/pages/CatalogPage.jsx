@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, memo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
 
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
@@ -711,8 +712,9 @@ export default function CatalogPage({ onAddToCart }) {
       </div>
 
       {/* Filter Sidebar Drawer */}
-      <AnimatePresence>
-        {isFilterOpen && (
+      {createPortal(
+        <AnimatePresence>
+          {isFilterOpen && (
           <>
             {/* Backdrop */}
             <motion.div 
@@ -866,7 +868,9 @@ export default function CatalogPage({ onAddToCart }) {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
       {/* Product Preview Modal */}
       <ProductPreviewModal 
