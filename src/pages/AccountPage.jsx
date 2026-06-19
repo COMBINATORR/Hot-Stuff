@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, startTransition } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -134,35 +134,37 @@ export default function AccountPage({ onAddToCart, lang }) {
     checkUrlErrors();
 
     const handleAuthSession = (session) => {
-      if (session && session.user) {
-        const email = (session.user.email || '').trim().toLowerCase();
-        console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
-        setIsLoggedIn(true);
-        setLoggedInUser(email);
-        localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-        localStorage.setItem('hs_remembered_email', email);
-        
-        // Add to registered users list safely
-        setRegisteredUsers(prev => {
-          if (prev.includes(email)) return prev;
-          console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
-          const next = [...prev, email];
-          localStorage.setItem('hs_registered_users', JSON.stringify(next));
-          return next;
-        });
+      startTransition(() => {
+        if (session && session.user) {
+          const email = (session.user.email || '').trim().toLowerCase();
+          console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
+          setIsLoggedIn(true);
+          setLoggedInUser(email);
+          localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
+          localStorage.setItem('hs_remembered_email', email);
 
-        // Add to saved accounts list if it's not a mock account
-        const emailClean = email.trim().toLowerCase();
-        if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
-          setSavedAccounts(prev => {
-            if (prev.includes(emailClean)) return prev;
-            return [...prev, emailClean];
+          // Add to registered users list safely
+          setRegisteredUsers(prev => {
+            if (prev.includes(email)) return prev;
+            console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
+            const next = [...prev, email];
+            localStorage.setItem('hs_registered_users', JSON.stringify(next));
+            return next;
           });
+
+          // Add to saved accounts list if it's not a mock account
+          const emailClean = email.trim().toLowerCase();
+          if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
+            setSavedAccounts(prev => {
+              if (prev.includes(emailClean)) return prev;
+              return [...prev, emailClean];
+            });
+          }
         }
-      }
-      if (active) {
-        setIsSessionLoading(false);
-      }
+        if (active) {
+          setIsSessionLoading(false);
+        }
+      });
     };
 
     console.log('[AccountPage] Checking current active Supabase session...');
@@ -180,22 +182,24 @@ export default function AccountPage({ onAddToCart, lang }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log('[AccountPage] onAuthStateChange event:', _event, 'User email:', session?.user?.email);
-      if (session && session.user) {
-        handleAuthSession(session);
-      } else if (_event === 'SIGNED_OUT') {
-        console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
-        setIsLoggedIn(false);
-        setLoggedInUser(null);
-        localStorage.removeItem('hs_user');
-        if (active) {
-          setIsSessionLoading(false);
+      startTransition(() => {
+        if (session && session.user) {
+          handleAuthSession(session);
+        } else if (_event === 'SIGNED_OUT') {
+          console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
+          setIsLoggedIn(false);
+          setLoggedInUser(null);
+          localStorage.removeItem('hs_user');
+          if (active) {
+            setIsSessionLoading(false);
+          }
+        } else {
+          // If there are OAuth/callback params in the URL, wait for getSession() to exchange code/tokens instead of stopping early
+          if (active && !hasAuthParams()) {
+            setIsSessionLoading(false);
+          }
         }
-      } else {
-        // If there are OAuth/callback params in the URL, wait for getSession() to exchange code/tokens instead of stopping early
-        if (active && !hasAuthParams()) {
-          setIsSessionLoading(false);
-        }
-      }
+      });
     });
 
     return () => {
@@ -467,7 +471,9 @@ export default function AccountPage({ onAddToCart, lang }) {
   };
 
   const handleLogout = async () => {
-    setLoading(true);
+    startTransition(() => {
+      setLoading(true);
+    });
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -481,14 +487,16 @@ export default function AccountPage({ onAddToCart, lang }) {
       navigate(targetPath);
 
       setTimeout(() => {
-        setIsLoggedIn(false);
-        setLoggedInUser(null);
-        setStep(1);
-        setIdentifier(localStorage.getItem('hs_remembered_email') || '');
-        setPassword('');
-        setCode(['', '', '', '', '', '']);
-        setError('');
-        setLoading(false);
+        startTransition(() => {
+          setIsLoggedIn(false);
+          setLoggedInUser(null);
+          setStep(1);
+          setIdentifier(localStorage.getItem('hs_remembered_email') || '');
+          setPassword('');
+          setCode(['', '', '', '', '', '']);
+          setError('');
+          setLoading(false);
+        });
       }, 500);
     }
   };
@@ -848,7 +856,11 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
+                      disabled={loading}
                       onClick={async () => {
+                        startTransition(() => {
+                          setLoading(true);
+                        });
                         try {
                           const { error } = await supabase.auth.signOut({ scope: 'others' });
                           if (error) throw error;
@@ -856,11 +868,24 @@ export default function AccountPage({ onAddToCart, lang }) {
                         } catch (err) {
                           console.error(err);
                           alert(t('common.error', 'Ошибка') + ': ' + err.message);
+                        } finally {
+                          startTransition(() => {
+                            setLoading(false);
+                          });
                         }
                       }}
-                      className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
+                      className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t('account.logout_others', 'Выйти на других устройствах')}
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                          {t('account.loading', 'Загрузка...')}
+                        </span>
+                      ) : (
+                        t('account.logout_others', 'Выйти на других устройствах')
+                      )}
                     </button>
                     <button
                       type="button"
