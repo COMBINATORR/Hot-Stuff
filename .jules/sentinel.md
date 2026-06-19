@@ -3,6 +3,11 @@
 **Learning:** Checking hashes character by character with `!==` leaks timing information that an attacker can use to forge a valid hash. Directly returning internal error messages to clients can leak sensitive internal context or stack trace info.
 **Prevention:** Always use `crypto.timingSafeEqual` for comparing secret hashes or tokens to ensure constant time comparison. Always scrub error responses to return generic, safe messages.
 
+## 2024-06-19 - Overly Permissive CORS Policy in Edge Functions
+**Vulnerability:** A Supabase edge function used a wildcard `*` for the `Access-Control-Allow-Origin` header. This allowed any third-party domain to make cross-origin requests to the API, potentially leading to unauthorized abuse or bypassing origin-based protections.
+**Learning:** Hardcoding a wildcard origin in `corsHeaders` for edge functions bypasses the Same-Origin Policy.
+**Prevention:** Instead of using `*`, dynamically check the incoming request's `Origin` header against an allowlist (e.g., `['http://localhost:3000', 'https://hotstuff.kz']`) or environment variables, and echo the valid origin or fall back to a safe default.
+
 ## 2024-06-19 - Hardcoded Authentication Bypass
 **Vulnerability:** A backdoor conditional check allowed any user to log in bypassing actual OTP verification by entering a static fallback code ('123456') or a client-generated mock OTP.
 **Learning:** Local debug fallback code must never be present in production code, especially concerning authentication flows.
