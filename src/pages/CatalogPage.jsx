@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +38,7 @@ const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
 // ProductCard Component to manage hover and color swatch state
-function ProductCard({ product, setSelectedPreviewProduct }) {
+const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProduct }) {
   const { t } = useTranslation();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -210,7 +210,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
 
     </div>
   );
-}
+});
 
 export default function CatalogPage({ onAddToCart }) {
   const { t } = useTranslation();
