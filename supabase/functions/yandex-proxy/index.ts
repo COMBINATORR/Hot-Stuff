@@ -50,16 +50,14 @@ async function addLog(message: string, detail?: any) {
     logs.pop();
   }
 
-  // Also send to RequestCatcher for robust retrieval
-  try {
-    await fetch("https://hotstuff-yandex.requestcatcher.com/log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(logEntry),
-    });
-  } catch (e) {
+  // Also send to RequestCatcher for robust retrieval (unawaited to avoid blocking)
+  fetch("https://hotstuff-yandex.requestcatcher.com/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(logEntry),
+  }).catch(() => {
     // Fail silently for webhook logger
-  }
+  });
 }
 
 Deno.serve(async (req) => {
