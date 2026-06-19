@@ -25,7 +25,7 @@ function CategoryLink({ category, onClick }) {
             </span>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white hover:text-primary transition-colors p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 rounded-[2px]"
+              className="text-white hover:text-primary transition-colors p-1 focus:outline-none focus-visible:text-primary active:scale-90 rounded-[2px]"
             >
               <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
                 expand_more
@@ -183,7 +183,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
         {/* Header */}
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">{t('header.cart_title', 'ВАША КОРЗИНА')}</h2>
-          <button className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2px]" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
+          <button className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:text-primary" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
@@ -556,7 +556,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
     <>
       {/* Promo Ticker Bar */}
       <div className="w-full bg-black py-2 md:py-3 border-b border-white/5 flex items-center justify-between px-2 md:px-6 text-xs text-white z-50 relative h-12 global-promo-ticker">
-        <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2px] z-10 flex-none" aria-label={t('header.prev_promo', 'Предыдущая акция')}>
+        <button onClick={handlePrevTicker} className="hover:text-primary transition-colors focus:outline-none focus-visible:text-primary z-10 flex-none" aria-label={t('header.prev_promo', 'Предыдущая акция')}>
           <span className="material-symbols-outlined text-[16px] align-middle" aria-hidden="true">chevron_left</span>
         </button>
         
@@ -583,7 +583,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           </AnimatePresence>
         </div>
 
-        <button onClick={handleNextTicker} className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2px] z-10 flex-none" aria-label={t('header.next_promo', 'Следующая акция')}>
+        <button onClick={handleNextTicker} className="hover:text-primary transition-colors focus:outline-none focus-visible:text-primary z-10 flex-none" aria-label={t('header.next_promo', 'Следующая акция')}>
           <span className="material-symbols-outlined text-[16px] align-middle" aria-hidden="true">chevron_right</span>
         </button>
       </div>
@@ -598,12 +598,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
             {/* Sandwich for Desktop */}
-            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 transition-all group h-[24px]`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`} aria-label={t('header.open_menu', 'Открыть меню')}>
               <div className="flex flex-col justify-between items-start w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
+                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
               </div>
-              <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary transition-colors flex items-center mt-[1px]`}>
+              <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary group-focus-visible:text-primary transition-colors flex items-center mt-[1px]`}>
                 {t('header.menu', 'МЕНЮ')}
               </span>
             </button>
@@ -631,7 +631,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_search', 'Открыть поиск')}>
+            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_search', 'Открыть поиск')}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">search</span>
             </button>
             <AnimatePresence mode="wait">
@@ -690,7 +690,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                   <NavLink
                     to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                     onClick={handleAccountClick}
-                    className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`}
+                    className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
                     title={t('header.login_register', 'Вход / Регистрация')}
                   >
                     <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
@@ -698,7 +698,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 </motion.div>
               )}
             </AnimatePresence>
-            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
+            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
@@ -708,10 +708,10 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             </button>
 
             {/* Sandwich for Mobile */}
-            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all group`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`} aria-label={t('header.open_menu', 'Открыть меню')}>
               <div className="flex flex-col justify-between items-end w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary transition-colors`}></span>
+                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
               </div>
             </button>
           </div>
@@ -739,12 +739,12 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
               <div className="flex justify-between items-center p-8 pb-6">
                 <div className="flex items-center gap-4">
                   <button
-                    className="w-8 h-8 border border-white/40 flex flex-col justify-center items-center gap-[4px] cursor-pointer hover:border-primary transition-colors group rounded-[2px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary bg-transparent"
+                    className="w-8 h-8 border border-white/40 flex flex-col justify-center items-center gap-[4px] cursor-pointer hover:border-primary transition-colors group rounded-[2px] focus:outline-none focus-visible:border-primary bg-transparent"
                     onClick={() => setNavOpen(false)}
                     aria-label={t('header.close_menu', 'Закрыть меню')}
                   >
-                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors" aria-hidden="true"></span>
-                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary transition-colors" aria-hidden="true"></span>
+                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors" aria-hidden="true"></span>
+                    <span className="w-4 h-[1px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors" aria-hidden="true"></span>
                   </button>
                   <span className="font-bold text-[11px] tracking-[0.2em] uppercase text-white">{t('header.menu', 'МЕНЮ')}</span>
                 </div>
@@ -925,7 +925,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     }
                   }}
                 />
-                <button onClick={() => setSearchOpen(false)} className="text-white hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2px] bg-transparent border-none" aria-label={t('header.close_search', 'Закрыть поиск')}>
+                <button onClick={() => setSearchOpen(false)} className="text-white hover:text-primary transition-colors focus:outline-none focus-visible:text-primary bg-transparent border-none" aria-label={t('header.close_search', 'Закрыть поиск')}>
                   <span className="material-symbols-outlined text-3xl font-light" aria-hidden="true">close</span>
                 </button>
               </div>
