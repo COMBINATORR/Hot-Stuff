@@ -1034,7 +1034,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     </svg>
                   </button>
 
-                  {/* Yandex — red circle, white Y letter */}
+                  {/* Yandex — red circle, official thick Y */}
                   <button
                     type="button"
                     onClick={handleYandexClick}
@@ -1042,8 +1042,13 @@ export default function AccountPage({ onAddToCart, lang }) {
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24" fill="white">
-                      <path d="M7 3 L12 11.5 L17 3 L15 3 L12 8.5 L9 3 Z M11 12 L11 21 L13 21 L13 12 Z"/>
+                    <svg className="w-[30px] h-[34px]" viewBox="0 0 100 120" fill="none">
+                      {/* Left arm — thick diagonal from top-left to center */}
+                      <polygon points="5,0 32,0 55,65 28,65" fill="white"/>
+                      {/* Right arm — shorter, angled, with inner notch */}
+                      <polygon points="95,0 70,0 52,42 72,42 55,65 80,65 100,20 80,20 95,0" fill="white"/>
+                      {/* Stem */}
+                      <rect x="28" y="65" width="27" height="55" fill="white"/>
                     </svg>
                   </button>
 
