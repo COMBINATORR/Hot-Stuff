@@ -18,7 +18,7 @@ import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductGrid from '../components/ProductGrid';
 import { supabase } from '../lib/supabase';
-import { ALL_PRODUCTS as DATA_PRODUCTS } from '../data/products';
+import { ALL_PRODUCTS } from '../data/products';
 
 const HERO = {
   headline: 'в погоне за наслаждением',
@@ -52,67 +52,6 @@ const POPULAR_CATEGORIES = [
   }
 ];
 
-const ALL_PRODUCTS = [
-  { 
-    id: 7, 
-    name: 'HUGO™ 2 REMOTE', 
-    price: 166440, 
-    oldPrice: 219000,
-    category: 'massagers', 
-    categoryLabel: 'МАССАЖЕРЫ ПРОСТАТЫ',
-    image: logoGoldBoots,
-    gallery: [logoGoldBoots, logoNoirDress, logoEtherealWrap],
-    colors: ['#111111', '#004d40'],
-    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения для тех, кто хочет разжечь в себе искру любви. Благодаря технологии SenseMotion™ беспроводной пульт обеспечивает непревзойденное удобство.',
-    socialProof: '🔥 48 куплено сегодня'
-  },
-  { 
-    id: 1, 
-    name: 'NOIR SILHOUETTE DRESS', 
-    price: 210000, 
-    oldPrice: 280000,
-    category: 'vibrators', 
-    categoryLabel: 'ВЕЧЕРНИЕ ПЛАТЬЯ',
-    image: logoNoirDress, 
-    gallery: [logoNoirDress, logoGoldBoots],
-    colors: ['#4A4A4A', '#2D5E87', '#B8860B'],
-    description: 'Премиальное шелковое платье NOIR SILHOUETTE DRESS, создающее идеальный силуэт. Роскошная ткань, тонкая проработка швов и чувственный крой.',
-    socialProof: '🌟 Топ-выбор покупателей'
-  },
-  { 
-    id: 2, 
-    name: 'ETHEREAL SILK WRAP', 
-    price: 92500, 
-    oldPrice: 135000,
-    category: 'vibrators', 
-    categoryLabel: 'ШЕЛКОВЫЕ НАКИДКИ',
-    image: logoEtherealWrap, 
-    gallery: [logoEtherealWrap, logoNoirDress],
-    colors: ['#FFFFFF', '#FFD700'],
-    description: 'Легкая шелковая накидка ETHEREAL SILK WRAP для создания чувственной атмосферы дома или на отдыхе. Натуральный шелк высочайшего класса.',
-    socialProof: '🔥 19 человек добавили в корзину'
-  },
-  { 
-    id: 3, 
-    name: 'GOLD-TRIMMED BOOTS', 
-    price: 280000, 
-    oldPrice: 380000,
-    category: 'vibrators', 
-    categoryLabel: 'ОБУВЬ И АКСЕССУАРЫ',
-    image: logoGoldBoots, 
-    gallery: [logoGoldBoots, logoEtherealWrap],
-    colors: ['#FFD700', '#4A4A4A'],
-    description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.',
-    socialProof: '⭐ 99% рекомендаций'
-  },
-].map(p => {
-  const dataProd = DATA_PRODUCTS.find(dp => dp.id === p.id);
-  return {
-    ...p,
-    price: dataProd ? dataProd.price : (Math.floor(Math.random() * 101) + 100),
-    oldPrice: null
-  };
-});
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
