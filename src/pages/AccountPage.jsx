@@ -1030,7 +1030,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-neutral-200 shadow-sm active:scale-95"
+                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-[20px] flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black shadow-sm active:scale-95"
                     title={t('account.google')}
                     disabled={loading}
                   >
@@ -1046,7 +1046,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#e8381a] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
+                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#e8381a] rounded-[20px] border border-black flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
@@ -1059,7 +1059,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <button
                     type="button"
                     onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
-                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
+                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] rounded-[20px] border border-black flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.telegram', 'Telegram')}
                     disabled={loading}
                   >
