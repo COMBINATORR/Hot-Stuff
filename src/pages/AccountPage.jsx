@@ -304,13 +304,10 @@ export default function AccountPage({ onAddToCart, lang }) {
     setError('');
     setLoading(true);
     try {
-      const langPrefix = lang && lang !== 'ru' ? `/${lang}` : '';
-      const redirectUrl = `${window.location.origin}${langPrefix}/account`;
-      console.log('[Yandex OAuth] Redirecting to:', redirectUrl);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'custom:yandex',
+        provider: 'yandex',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: window.location.origin + window.location.pathname,
           queryParams: {
             force_confirm: 'yes'
           }
@@ -321,7 +318,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       console.error('[Yandex OAuth Error]', err);
       let errMsg = err.message || t('account.auth_error_yandex', 'Ошибка авторизации через Яндекс');
       if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
-        errMsg = t('account.yandex_provider_error', 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте кастомный провайдер (custom:yandex) в Supabase Dashboard.');
+        errMsg = t('account.yandex_provider_error', 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте провайдер Yandex в Supabase Dashboard.');
       }
       setError(errMsg);
       setLoading(false);
