@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
@@ -10,6 +10,19 @@ export default function Breadcrumbs({ theme = 'dark' }) {
 
   // Слушатель для обновления хлебных крошек при изменении категории в кэше
   const [categories, setCategories] = useState([]);
+
+  // Предварительно вычисляем Map для быстрого поиска подкатегорий (O(1) вместо O(N*M))
+  const { subcategoriesBySlug, subcategoriesByName } = useMemo(() => {
+    const bySlug = new Map();
+    const byName = new Map();
+    for (const c of categories) {
+      for (const sub of (c.subcategories || [])) {
+        if (sub.slug) bySlug.set(sub.slug, { parent: c, sub });
+        if (sub.name) byName.set(sub.name.toLowerCase(), { parent: c, sub });
+      }
+    }
+    return { subcategoriesBySlug: bySlug, subcategoriesByName: byName };
+  }, [categories]);
 
   useEffect(() => {
     const cached = localStorage.getItem('hs_categories');
@@ -69,22 +82,20 @@ export default function Breadcrumbs({ theme = 'dark' }) {
           isLast: true
         });
       } else {
-        // Ищем подкатегорию
-        for (const c of categories) {
-          const sub = (c.subcategories || []).find(s => s.slug === catSlug);
-          if (sub) {
-            breadcrumbItems.push({
-              name: t('menu.' + c.name.toLowerCase(), c.name),
-              link: `${langPrefix}/catalog?cat=${c.slug}`,
-              isLast: false
-            });
-            breadcrumbItems.push({
-              name: t('menu.' + sub.name.toLowerCase(), sub.name),
-              link: `${langPrefix}/catalog?cat=${sub.slug}`,
-              isLast: true
-            });
-            break;
-          }
+        // Ищем подкатегорию за O(1)
+        const match = subcategoriesBySlug.get(catSlug);
+        if (match) {
+          const { parent: c, sub } = match;
+          breadcrumbItems.push({
+            name: t('menu.' + c.name.toLowerCase(), c.name),
+            link: `${langPrefix}/catalog?cat=${c.slug}`,
+            isLast: false
+          });
+          breadcrumbItems.push({
+            name: t('menu.' + sub.name.toLowerCase(), sub.name),
+            link: `${langPrefix}/catalog?cat=${sub.slug}`,
+            isLast: true
+          });
         }
       }
     }
@@ -121,17 +132,15 @@ export default function Breadcrumbs({ theme = 'dark' }) {
       });
 
       // Определяем подкатегорию
-      if (categories.length > 0) {
-        for (const c of categories) {
-          const sub = (c.subcategories || []).find(s => s.name.toLowerCase() === product.categoryLabel.toLowerCase());
-          if (sub) {
-            breadcrumbItems.push({
-              name: t('menu.' + sub.name.toLowerCase(), sub.name),
-              link: `${langPrefix}/catalog?cat=${sub.slug}`,
-              isLast: false
-            });
-            break;
-          }
+      if (categories.length > 0 && product.categoryLabel) {
+        const match = subcategoriesByName.get(product.categoryLabel.toLowerCase());
+        if (match) {
+          const { sub } = match;
+          breadcrumbItems.push({
+            name: t('menu.' + sub.name.toLowerCase(), sub.name),
+            link: `${langPrefix}/catalog?cat=${sub.slug}`,
+            isLast: false
+          });
         }
       }
 

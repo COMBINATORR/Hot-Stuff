@@ -402,15 +402,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       return;
     }
 
-    // 1. Check local debug fallback code first (either the generated random OTP or 123456 as standard fallback)
-    if (enteredCode === generatedOtp || enteredCode === '123456') {
-      console.log('[Auth] Local debug OTP verified successfully');
-      loginSuccess(identifier);
-      setLoading(false);
-      return;
-    }
-
-    // 2. Otherwise verify via real Supabase
+    // Verify via real Supabase
     try {
       let { data, error: verifyError } = await supabase.auth.verifyOtp({
         email: identifier.trim().toLowerCase(),
