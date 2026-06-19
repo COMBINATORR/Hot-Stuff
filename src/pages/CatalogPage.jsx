@@ -340,76 +340,84 @@ export default function CatalogPage({ onAddToCart }) {
 
   // Filter and sort products based on selected parameters
   const filtered = useMemo(() => {
-    let result = ALL_PRODUCTS;
-
-    // 1. Search Query
     const searchVal = params.get('search') || '';
-    if (searchVal) {
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(searchVal.toLowerCase()) || 
-        p.categoryLabel.toLowerCase().includes(searchVal.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchVal.toLowerCase())
-      );
-    }
+    const searchValLower = searchVal.toLowerCase();
+    const filterFn = categorySlugMap[activeCat];
 
-    // 1.5 Sidebar Category (Only if not searching, or if cat matches)
-    if (activeCat !== 'all' && activeCat !== 'popular') {
-      if (activeCat === 'new') {
-        result = result.filter(p => p.isNew);
-      } else {
-        const filterFn = categorySlugMap[activeCat];
-        if (filterFn) {
-          result = result.filter(filterFn);
-        } else {
-          // Fallback to match by category property or categoryLabel
-          result = result.filter(p => 
-            p.category === activeCat || 
-            p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
-          );
+    let result = [];
+
+    for (let i = 0; i < ALL_PRODUCTS.length; i++) {
+      const p = ALL_PRODUCTS[i];
+
+      // 1. Search Query
+      if (searchValLower) {
+        if (!(p.name.toLowerCase().includes(searchValLower) ||
+            p.categoryLabel.toLowerCase().includes(searchValLower) ||
+            p.description.toLowerCase().includes(searchValLower))) {
+          continue;
         }
       }
-    }
 
-    // 2. Stimulation Zone
-    if (selectedStimulations.length > 0) {
-      result = result.filter(p => 
-        p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s))
-      );
-    }
+      // 1.5 Sidebar Category (Only if not searching, or if cat matches)
+      if (activeCat !== 'all' && activeCat !== 'popular') {
+        if (activeCat === 'new') {
+          if (!p.isNew) continue;
+        } else {
+          if (filterFn) {
+            if (!filterFn(p)) continue;
+          } else {
+            if (!(p.category === activeCat ||
+                p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
+              continue;
+            }
+          }
+        }
+      }
 
-    // 3. Price range
-    if (selectedPriceRanges.length > 0) {
-      result = result.filter(p => {
-        return selectedPriceRanges.some(range => {
+      // 2. Stimulation Zone
+      if (selectedStimulations.length > 0) {
+        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
+          continue;
+        }
+      }
+
+      // 3. Price range
+      if (selectedPriceRanges.length > 0) {
+        const matchRange = selectedPriceRanges.some(range => {
           if (range === 'low') return p.price < 80000;
           if (range === 'mid') return p.price >= 80000 && p.price <= 120000;
           if (range === 'high') return p.price > 120000;
           return true;
         });
-      });
-    }
+        if (!matchRange) continue;
+      }
 
-    // 4. Specials (Discount only)
-    if (onlyDiscounted) {
-      result = result.filter(p => p.oldPrice && p.oldPrice > p.price);
-    }
+      // 4. Specials (Discount only)
+      if (onlyDiscounted) {
+        if (!(p.oldPrice && p.oldPrice > p.price)) {
+          continue;
+        }
+      }
 
-    // 5. Features / Technologies
-    if (selectedFeatures.length > 0) {
-      result = result.filter(p => 
-        p.features && p.features.some(f => selectedFeatures.includes(f))
-      );
+      // 5. Features / Technologies
+      if (selectedFeatures.length > 0) {
+        if (!(p.features && p.features.some(f => selectedFeatures.includes(f)))) {
+          continue;
+        }
+      }
+
+      result.push(p);
     }
 
     // 6. Sorting
     if (sortBy === 'price-asc') {
-      result = [...result].sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
-      result = [...result].sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.price - a.price);
     }
 
     return result;
-  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy]);
+  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy, params]);
 
   const toggleSidebarCat = (key) => {
     setExpandedSidebarCats(prev => ({
