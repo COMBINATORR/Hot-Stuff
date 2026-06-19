@@ -47,8 +47,14 @@ export default async function handler(req, res) {
   const hmac = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
 
   // Check if hash matches
-  if (hmac !== hash) {
-    return res.status(401).json({ error: 'Data integrity check failed. Hash mismatch.' });
+  try {
+    const hmacBuffer = Buffer.from(hmac, 'hex');
+    const hashBuffer = Buffer.from(hash, 'hex');
+    if (hmacBuffer.length !== hashBuffer.length || !crypto.timingSafeEqual(hmacBuffer, hashBuffer)) {
+      return res.status(401).json({ error: 'Data integrity check failed. Hash mismatch.' });
+    }
+  } catch (err) {
+    return res.status(401).json({ error: 'Data integrity check failed. Hash format invalid.' });
   }
 
   // Check if authentication date is too old (expired in 24 hours)
@@ -133,6 +139,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('[Telegram Auth API Error]', error);
-    return res.status(500).json({ error: error.message || 'Internal server error during authentication' });
+    // 🛡️ Sentinel: Do not leak internal error details or stack traces to the client
+    return res.status(500).json({ error: 'Internal server error during authentication' });
   }
 }
