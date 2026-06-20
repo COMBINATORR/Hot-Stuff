@@ -49,7 +49,6 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         if (session && session.user) {
           const email = (session.user.email || '').trim().toLowerCase();
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-          localStorage.setItem('hs_remembered_email', email);
           
           // Update registered users list
           const saved = localStorage.getItem('hs_registered_users');
@@ -72,7 +71,6 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         const email = (session.user.email || '').trim().toLowerCase();
         // Save user state in localStorage to login immediately on all pages
         localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-        localStorage.setItem('hs_remembered_email', email);
 
         // Update registered users list in localStorage
         const saved = localStorage.getItem('hs_registered_users');
