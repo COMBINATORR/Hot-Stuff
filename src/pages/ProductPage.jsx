@@ -363,13 +363,15 @@ export default function ProductPage({ onAddToCart }) {
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <div className="flex items-center border border-white/10 h-[52px]">
                 <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold"
+                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                   onClick={() => setQty(q => Math.max(1, q - 1))}
+                  aria-label={t('common.decrease', 'Уменьшить')}
                 >−</button>
                 <span className="px-5 text-xs font-bold text-center min-w-[2.5rem] select-none">{qty}</span>
                 <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold"
+                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                   onClick={() => setQty(q => q + 1)}
+                  aria-label={t('common.increase', 'Увеличить')}
                 >+</button>
               </div>
               

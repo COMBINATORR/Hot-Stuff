@@ -239,13 +239,15 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center justify-between">
                         <div className="flex items-center border border-white/10">
                           <button 
-                            className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                            className="px-3 py-1 text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                             onClick={() => onUpdateQty(item.id, item.variant, Math.max(1, item.qty - 1))}
+                            aria-label={t('common.decrease', 'Уменьшить')}
                           >-</button>
                           <span className="px-3 py-1 font-body-md">{item.qty}</span>
                           <button 
-                            className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                            className="px-3 py-1 text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                             onClick={() => onUpdateQty(item.id, item.variant, item.qty + 1)}
+                            aria-label={t('common.increase', 'Увеличить')}
                           >+</button>
                         </div>
                         <button 
