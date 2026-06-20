@@ -300,7 +300,7 @@ export default function AccountPage({ onAddToCart, lang }) {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'yandex',
+        provider: 'custom:yandex',
         options: {
           redirectTo: window.location.origin + window.location.pathname,
           queryParams: {
@@ -326,10 +326,7 @@ export default function AccountPage({ onAddToCart, lang }) {
     
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: emailVal,
-        options: {
-          emailRedirectTo: window.location.origin + window.location.pathname
-        }
+        email: emailVal
       });
 
       if (otpError) {

@@ -53,7 +53,7 @@ export const signInWithApple = authGuard(() =>
 
 /** Войти через Yandex (Custom OIDC — настраивается в Supabase Dashboard) */
 export const signInWithYandex = authGuard(() =>
-  supabase.auth.signInWithOAuth({ provider: 'yandex' })
+  supabase.auth.signInWithOAuth({ provider: 'custom:yandex' })
 );
 
 /** Выход */
