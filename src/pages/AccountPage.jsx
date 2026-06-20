@@ -8,9 +8,7 @@ import { supabase } from '../lib/supabase';
 
 export default function AccountPage({ onAddToCart, lang }) {
   const { t, i18n } = useTranslation();
-  const [identifier, setIdentifier] = useState(() => {
-    return localStorage.getItem('hs_remembered_email') || '';
-  });
+  const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
   const [password, setPassword] = useState('');
@@ -36,9 +34,7 @@ export default function AccountPage({ onAddToCart, lang }) {
   });
 
   // SMS OTP verification states
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [showSmsPush, setShowSmsPush] = useState(false);
   const [isPrivate, setIsPrivate] = useState(() => {
     return localStorage.getItem('hs_private_mode') === 'true';
   });
@@ -141,7 +137,6 @@ export default function AccountPage({ onAddToCart, lang }) {
           setIsLoggedIn(true);
           setLoggedInUser(email);
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-          localStorage.setItem('hs_remembered_email', email);
 
           // Add to registered users list safely
           setRegisteredUsers(prev => {
@@ -329,10 +324,6 @@ export default function AccountPage({ onAddToCart, lang }) {
     setError('');
     setLoading(true);
     
-    // Generate a mock 6-digit OTP code for local debugging/testing
-    const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(mockCode);
-    
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: emailVal,
@@ -342,21 +333,17 @@ export default function AccountPage({ onAddToCart, lang }) {
       });
 
       if (otpError) {
-        console.warn('[Supabase OTP Send Error - Using Local Fallback]', otpError);
+        console.warn('[Supabase OTP Send Error]', otpError);
       }
 
       setCountdown(60);
       setCode(['', '', '', '', '', '']); // Reset 6 digit code
       setStep(2);
-      setShowSmsPush(true); // Always display the iOS-style SMS notification for testing
-      
-      console.log(`[Supabase OTP] OTP sent. Local debug code: ${mockCode}`);
     } catch (err) {
-      console.warn('[Supabase OTP Send Exception - Using Local Fallback]', err);
+      console.warn('[Supabase OTP Send Exception]', err);
       setCountdown(60);
       setCode(['', '', '', '', '', '']);
       setStep(2);
-      setShowSmsPush(true);
     } finally {
       setLoading(false);
     }
@@ -443,7 +430,6 @@ export default function AccountPage({ onAddToCart, lang }) {
     setIsLoggedIn(true);
     setLoggedInUser(normalizedUser);
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
-    localStorage.setItem('hs_remembered_email', normalizedUser); // Save remembered email
 
     if (!registeredUsers.includes(normalizedUser)) {
       const updatedList = [...registeredUsers, normalizedUser];
@@ -480,7 +466,7 @@ export default function AccountPage({ onAddToCart, lang }) {
           setIsLoggedIn(false);
           setLoggedInUser(null);
           setStep(1);
-          setIdentifier(localStorage.getItem('hs_remembered_email') || '');
+          setIdentifier('');
           setPassword('');
           setCode(['', '', '', '', '', '']);
           setError('');
@@ -582,37 +568,6 @@ export default function AccountPage({ onAddToCart, lang }) {
       <Breadcrumbs theme="dark" />
       <div className="flex-1 flex flex-col justify-center items-center px-4 md:px-8">
       
-      {/* iOS-Style SMS Push Notification */}
-      <AnimatePresence>
-        {showSmsPush && (
-          <motion.div
-            initial={{ opacity: 0, y: -100, x: '-50%', scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
-            exit={{ opacity: 0, y: -100, x: '-50%', scale: 0.95 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 120 }}
-            onClick={() => setShowSmsPush(false)}
-            className="fixed top-6 left-1/2 w-[90%] max-w-[360px] bg-white/90 dark:bg-[#1c1c1e]/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl p-4 flex gap-3 z-[9999] cursor-pointer select-none font-sans text-left"
-          >
-            {/* App Icon / Message Badge */}
-            <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-              <span className="material-symbols-outlined text-[20px] font-bold">chat</span>
-            </div>
-            
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">{t('account.messages', 'Сообщения')}</span>
-                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">{t('account.now', 'сейчас')}</span>
-              </div>
-              <h4 className="text-xs font-black text-black dark:text-white mb-0.5 uppercase tracking-wide">Hot Stuff</h4>
-              <p className="text-[11.5px] text-black/70 dark:text-white/70 leading-relaxed font-normal">
-                {t('account.otp_label', 'Код подтверждения')}: <span className="font-bold text-black dark:text-white font-mono bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-xs select-all">{generatedOtp}</span>. {t('account.otp_sec_warn', 'Не сообщайте его никому.')}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Share Wishlist Push Notification */}
       <AnimatePresence>
         {showSharePush && (
