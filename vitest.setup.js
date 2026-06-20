@@ -18,6 +18,12 @@ vi.mock('framer-motion', async () => {
       button: ({ children, initial, animate, transition, ...props }) => {
         return React.createElement('button', props, children);
       },
+      div: ({ children, initial, animate, exit, transition, ...props }) => {
+        return React.createElement('div', props, children);
+      }
     },
+    AnimatePresence: ({ children }) => {
+      return React.createElement(React.Fragment, null, children);
+    }
   };
 });
