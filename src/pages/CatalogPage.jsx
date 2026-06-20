@@ -722,7 +722,7 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFilterOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]"
             />
             {/* Filter Drawer */}
             <motion.div
@@ -730,10 +730,10 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[151] shadow-2xl flex flex-col font-sans"
+              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[999] shadow-2xl flex flex-col font-sans"
             >
               {/* Header */}
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+              <div className="p-8 border-b border-gray-100 flex justify-between items-center relative z-[1000]">
                 <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">{t('catalog.filters_upper')}</h2>
                 <button 
                   onClick={() => setIsFilterOpen(false)}

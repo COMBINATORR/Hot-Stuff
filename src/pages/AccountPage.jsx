@@ -1038,18 +1038,11 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#e8381a] rounded-[20px] border border-black flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
+                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-[20px] border border-black shadow-sm flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-[30px] h-[34px]" viewBox="0 0 100 120" fill="none">
-                      {/* Left arm — thick diagonal from top-left to center */}
-                      <polygon points="5,0 32,0 55,65 28,65" fill="white"/>
-                      {/* Right arm — shorter, angled, with inner notch */}
-                      <polygon points="95,0 70,0 52,42 72,42 55,65 80,65 100,20 80,20 95,0" fill="white"/>
-                      {/* Stem */}
-                      <rect x="28" y="65" width="27" height="55" fill="white"/>
-                    </svg>
+                    <img src="/yandex-logo.png" alt="Yandex" className="w-[32px] h-[32px] object-contain" />
                   </button>
 
                   {/* Telegram — blue circle, white paper plane */}
