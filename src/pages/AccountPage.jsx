@@ -303,6 +303,7 @@ export default function AccountPage({ onAddToCart, lang }) {
         provider: 'custom:yandex',
         options: {
           redirectTo: window.location.origin + window.location.pathname,
+          scopes: 'login:email login:info login:avatar',
           queryParams: {
             force_confirm: 'yes'
           }
