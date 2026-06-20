@@ -236,16 +236,16 @@ Deno.serve(async (req) => {
       normalizedData.phone_number = normalizedData.default_phone.number; 
     }
 
-    // 4. Map name (real_name -> name)
-    if (!normalizedData.name && normalizedData.real_name) {
-      normalizedData.name = normalizedData.real_name;
-    } else if (!normalizedData.name && normalizedData.display_name) {
-      normalizedData.name = normalizedData.display_name;
+    // 4. Map Name
+    if (normalizedData.real_name || normalizedData.display_name) {
+      normalizedData.name = normalizedData.real_name || normalizedData.display_name;
+      normalizedData.full_name = normalizedData.name;
     }
 
-    // 5. Map avatar (default_avatar_id -> picture)
+    // 5. Map Avatar Picture
     if (normalizedData.default_avatar_id) {
       normalizedData.picture = `https://avatars.yandex.net/get-yapic/${normalizedData.default_avatar_id}/islands-200`;
+      normalizedData.avatar_url = normalizedData.picture;
     }
 
     await addLog("Normalized profile response data", normalizedData);
