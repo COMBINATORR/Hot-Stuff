@@ -981,7 +981,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     title={t('account.google')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24">
+                    <svg className="w-[24px] h-[24px]" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -989,15 +989,17 @@ export default function AccountPage({ onAddToCart, lang }) {
                     </svg>
                   </button>
 
-                  {/* Yandex — red circle, official thick Y */}
+                  {/* Yandex — official red background, white Y */}
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-[20px] border border-black shadow-sm flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
+                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#E03517] rounded-[20px] border border-black shadow-sm flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <img src="/yandex-logo.png" alt="Yandex" className="w-[32px] h-[32px] object-contain" />
+                    <svg className="w-[24px] h-[24px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14.654 20.893H16.892L16.892 3.107H11.517C6.732 3.107 4.298 6.302 4.298 9.947C4.298 13.593 6.732 16.666 11.517 16.666H14.153L14.153 14.288H11.664C8.423 14.288 6.643 12.277 6.643 9.947C6.643 7.618 8.423 5.485 11.664 5.485H14.153V10.153L9.695 20.893H12.01L14.654 13.974V20.893Z" fill="white"/>
+                    </svg>
                   </button>
 
                   {/* Telegram — blue circle, white paper plane */}
@@ -1008,7 +1010,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     title={t('account.telegram', 'Telegram')}
                     disabled={loading}
                   >
-                    <svg className="w-[28px] h-[28px]" viewBox="0 0 24 24" fill="none">
+                    <svg className="w-[24px] h-[24px]" viewBox="0 0 24 24" fill="none">
                       <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
                     </svg>
                   </button>
