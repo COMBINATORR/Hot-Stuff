@@ -263,15 +263,14 @@ export default function AccountPage({ onAddToCart, lang }) {
     console.log('[Telegram Auth] Received user from Telegram widget:', user);
     
     try {
-      // Invoke our serverless API function
-      const response = await fetch('/api/telegram-auth', {
+      // Invoke our deployed Edge Function
+      const response = await fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          telegramData: user,
-          redirectTo: window.location.origin + window.location.pathname
+          telegramData: user
         })
       });
 
@@ -280,10 +279,13 @@ export default function AccountPage({ onAddToCart, lang }) {
         throw new Error(result.error || t('account.err_telegram_verify', 'Ошибка проверки данных Telegram на сервере'));
       }
 
-      if (result.success && result.action_link) {
-        console.log('[Telegram Auth] Verification success. Redirecting to magiclink:', result.action_link);
-        // Redirect browser to magiclink, which will sign the user in via Supabase
-        window.location.href = result.action_link;
+      if (result.session && result.session.access_token && result.session.refresh_token) {
+        console.log('[Telegram Auth] Verification success. Injecting session...');
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
+        });
+        if (sessionError) throw sessionError;
       } else {
         throw new Error(t('account.err_invalid_response', 'Неверный формат ответа от сервера авторизации'));
       }
@@ -1018,7 +1020,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                 {!isLocalHost() && (
                   <div id="tg-widget-trigger" className="hidden">
                     <TelegramWidgetContainer
-                      botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStoreBot'}
+                      botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStore_bot'}
                       onAuth={handleTelegramLoginSuccess}
                     />
                   </div>
