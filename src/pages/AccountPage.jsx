@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 import { supabase } from '../lib/supabase';
+import TelegramLoginWidget from '../components/TelegramLoginWidget';
+
 
 export default function AccountPage({ onAddToCart, lang }) {
   const { t, i18n } = useTranslation();
@@ -38,6 +40,18 @@ export default function AccountPage({ onAddToCart, lang }) {
   const [isPrivate, setIsPrivate] = useState(() => {
     return localStorage.getItem('hs_private_mode') === 'true';
   });
+
+  // Dynamic backend integration states (Zero State by default)
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [loyaltyData, setLoyaltyData] = useState({
+    discount: 0,
+    tier: 'HOT STUFF START',
+    toNextLevel: 50000
+  });
+  const [sessionUser, setSessionUser] = useState(null);
+
 
 
   const navigate = useNavigate();
@@ -74,10 +88,7 @@ export default function AccountPage({ onAddToCart, lang }) {
   }, [countdown]);
 
 
-  // Filter products for the Wishlist (Sona, Soraya Wave)
-  const wishlistProducts = useMemo(() => {
-    return ALL_PRODUCTS.filter(p => p.id === 4 || p.id === 8);
-  }, []);
+
 
   // Validation
   const validateEmail = (val) => {
@@ -136,6 +147,7 @@ export default function AccountPage({ onAddToCart, lang }) {
           console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
           setIsLoggedIn(true);
           setLoggedInUser(email);
+          setSessionUser(session.user);
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
 
           // Add to registered users list safely
@@ -155,6 +167,8 @@ export default function AccountPage({ onAddToCart, lang }) {
               return [...prev, emailClean];
             });
           }
+        } else {
+          setSessionUser(null);
         }
         if (active) {
           setIsSessionLoading(false);
@@ -184,7 +198,9 @@ export default function AccountPage({ onAddToCart, lang }) {
           console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
           setIsLoggedIn(false);
           setLoggedInUser(null);
+          setSessionUser(null);
           localStorage.removeItem('hs_user');
+
           if (active) {
             setIsSessionLoading(false);
           }
@@ -429,6 +445,16 @@ export default function AccountPage({ onAddToCart, lang }) {
     const normalizedUser = userVal.trim().toLowerCase();
     setIsLoggedIn(true);
     setLoggedInUser(normalizedUser);
+    
+    // Set a simulated sessionUser for mock login flow
+    setSessionUser({
+      email: normalizedUser,
+      user_metadata: {
+        full_name: normalizedUser === 'admin@hotstuff.kz' ? 'Администратор' : 'Тестовый Пользователь',
+        avatar_url: null
+      }
+    });
+
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
 
     if (!registeredUsers.includes(normalizedUser)) {
@@ -465,6 +491,7 @@ export default function AccountPage({ onAddToCart, lang }) {
         startTransition(() => {
           setIsLoggedIn(false);
           setLoggedInUser(null);
+          setSessionUser(null);
           setStep(1);
           setIdentifier('');
           setPassword('');
@@ -475,6 +502,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       }, 500);
     }
   };
+
 
   const handleTogglePrivate = () => {
     setIsPrivate(prev => {
@@ -504,7 +532,7 @@ export default function AccountPage({ onAddToCart, lang }) {
   const [showSharePush, setShowSharePush] = useState(false);
 
   const handleShareWishlist = () => {
-    const productIds = wishlistProducts.map(p => p.id);
+    const productIds = favorites.map(p => p.id);
     const langPrefix = lang && lang !== 'ru' ? `/${lang}` : '';
     const shareUrl = `${window.location.origin}${langPrefix}/catalog?gift=${productIds.join(',')}&ref=anonymous`;
     
@@ -610,10 +638,22 @@ export default function AccountPage({ onAddToCart, lang }) {
             {/* Dashboard Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-black/5">
               <div className="flex items-center gap-4">
-                <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
+                {sessionUser?.user_metadata?.avatar_url || sessionUser?.user_metadata?.picture ? (
+                  <img
+                    src={sessionUser.user_metadata.avatar_url || sessionUser.user_metadata.picture}
+                    alt="User Avatar"
+                    className="w-12 h-12 rounded-full object-cover border border-black/10 shadow-sm"
+                  />
+                ) : (
+                  <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
+                )}
                 <div>
-                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">{t('account.title', 'Личный кабинет')}</h1>
-                  <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">{loggedInUser}</p>
+                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
+                    {sessionUser?.user_metadata?.full_name || sessionUser?.user_metadata?.name || t('account.title', 'Личный кабинет')}
+                  </h1>
+                  <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">
+                    {sessionUser?.email || loggedInUser}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-4 md:gap-6 self-start md:self-auto">
@@ -653,23 +693,44 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.privileges', 'Клуб Привилегий')}</h3>
                     <span className="bg-primary/15 text-[#b28b10] text-[8px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase">
-                      HOT STUFF GOLD
+                      {loyaltyData.tier}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-black leading-none">12%</span>
+                    <span className="text-4xl font-black text-black leading-none">{loyaltyData.discount}%</span>
                     <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wide">{t('account.personal_discount', 'Ваша персональная скидка')}</span>
                   </div>
                 </div>
-                <div className="space-y-2 mt-4">
-                  <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
-                    <span>{t('account.to_vip', 'До скидки 15% (VIP уровень) осталось:')}</span>
-                    <span className="text-black">45 000 ₸</span>
+
+                {loyaltyData.discount === 0 ? (
+                  <div className="mt-4 p-4 bg-white/60 rounded-xl border border-black/5">
+                    <p className="text-xs text-neutral-600 leading-relaxed font-normal">
+                      {t('account.loyalty_intro', 'Совершите вашу первую покупку, чтобы стать участником клуба привилегий и начать копить персональную скидку!')}
+                    </p>
                   </div>
-                  <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: '60%' }} />
+                ) : (
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                      <span>{t('account.to_next_level', 'До следующего уровня осталось:')}</span>
+                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: `${Math.max(10, Math.min(100, (50000 - loyaltyData.toNextLevel) / 500))}%` }} />
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {loyaltyData.discount === 0 && (
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                      <span>{t('account.to_first_discount', 'До первой скидки осталось:')}</span>
+                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '0%' }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 2. Anonymous Active Delivery (Bento: 1 col) */}
@@ -679,10 +740,24 @@ export default function AccountPage({ onAddToCart, lang }) {
                     <span className="material-symbols-outlined text-[20px] font-light">local_shipping</span>
                     <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.current_delivery', 'Текущая Доставка')}</h3>
                   </div>
-                  <div className="border-l-2 border-primary pl-4 py-1 space-y-2">
-                    <p className="text-xs font-black text-black">{t('account.delivery_order', 'Заказ №10492 — Доставляется курьером сегодня')}</p>
-                    <p className="text-[10px] text-neutral-500">{t('account.delivery_interval', 'Интервал: 18:00 – 22:00. Курьер свяжется за 30 минут.')}</p>
-                  </div>
+                  {activeOrders.length === 0 ? (
+                    <div className="py-4">
+                      <p className="text-xs text-neutral-500 font-medium">
+                        {t('account.no_active_orders', 'У вас пока нет активных заказов.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activeOrders.map(order => (
+                        <div key={order.id} className="border-l-2 border-primary pl-4 py-1 space-y-2">
+                          <p className="text-xs font-black text-black">
+                            {t('account.delivery_order_num', { num: order.number })} — {order.status}
+                          </p>
+                          <p className="text-[10px] text-neutral-500">{order.details}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Anti-Anxiety Privacy Banner */}
@@ -701,40 +776,49 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2">
                 <h3 className="text-xs font-black tracking-wider text-black uppercase mb-2">{t('account.history', 'История Покупок')}</h3>
                 
-                <div className="divide-y divide-black/5 text-xs font-sans">
-                  <div className="py-4 flex justify-between items-center gap-4">
-                    <div>
-                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 9810, date: '14.05.2026' })}</p>
-                      <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'LELO Sona™ 3 Cruise x1'} — {t('account.completed', 'Выполнен')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-neutral-900">38 900 ₸</p>
-                      <button 
-                        onClick={() => {
-                          const prod = ALL_PRODUCTS.find(p => p.id === 4);
-                          if (prod) handleAddWishlistItem(prod);
-                        }}
-                        className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
-                      >
-                        {t('account.repeat', 'Повторить в 1 клик')}
-                      </button>
-                    </div>
+                {orderHistory.length === 0 ? (
+                  <div className="py-8 flex flex-col items-center justify-center text-center gap-4">
+                    <p className="text-xs text-neutral-500 font-medium">
+                      {t('account.no_orders_yet', 'Вы еще ничего не заказывали.')}
+                    </p>
+                    <Link
+                      to={lang && lang !== 'ru' ? `/${lang}/catalog` : '/catalog'}
+                      className="border border-black hover:bg-black hover:text-white text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-all rounded-none cursor-pointer"
+                    >
+                      {t('account.go_to_catalog', 'Перейти в каталог')}
+                    </Link>
                   </div>
-                  <div className="py-4 flex justify-between items-center gap-4">
-                    <div>
-                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 8520, date: '02.04.2026' })}</p>
-                      <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'Personal Moisturizer x1'} — {t('account.completed', 'Выполнен')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-neutral-900">12 500 ₸</p>
-                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
-                    </div>
+                ) : (
+                  <div className="divide-y divide-black/5 text-xs font-sans">
+                    {orderHistory.map(order => (
+                      <div key={order.id} className="py-4 flex justify-between items-center gap-4">
+                        <div>
+                          <p className="font-bold text-black uppercase">{t('account.order_completed', { num: order.number, date: order.date })}</p>
+                          <p className="text-[10px] text-neutral-500 mt-1">
+                            {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : `${order.itemsSummary}`} — {order.status}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-neutral-900">{order.totalPrice.toLocaleString('ru-KZ')} ₸</p>
+                          {order.canRepeat && (
+                            <button 
+                              onClick={() => {
+                                const prod = ALL_PRODUCTS.find(p => p.id === order.productId);
+                                if (prod) handleAddWishlistItem(prod);
+                              }}
+                              className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
+                            >
+                              {t('account.repeat', 'Повторить в 1 клик')}
+                            </button>
+                          )}
+                          {!order.canRepeat && (
+                            <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
 
               {/* 4. Wishlist (Избранное) (Bento: 1 col) */}
@@ -742,39 +826,47 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="space-y-6">
                   <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.favorites', 'Избранные Товары')}</h3>
                   
-                  <div className="space-y-5">
-                    {wishlistProducts.map(product => (
-                      <div key={product.id} className="flex gap-4 p-3 bg-white border border-black/5 rounded-lg">
-                        <div className="w-16 h-16 bg-neutral-50 rounded-[4px] overflow-hidden flex items-center justify-center flex-none relative">
-                          {isPrivate ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
-                              <span className="material-symbols-outlined text-[18px]">visibility_off</span>
-                              <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
-                            </div>
-                          ) : (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
-                          )}
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between">
-                          <div>
-                            <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
-                              {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
-                            </h4>
-                            <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
+                  {favorites.length === 0 ? (
+                    <div className="py-8">
+                      <p className="text-xs text-neutral-500 font-medium text-center">
+                        {t('account.favorites_empty', 'Ваш список желаний пуст.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-5">
+                      {favorites.map(product => (
+                        <div key={product.id} className="flex gap-4 p-3 bg-white border border-black/5 rounded-lg">
+                          <div className="w-16 h-16 bg-neutral-50 rounded-[4px] overflow-hidden flex items-center justify-center flex-none relative">
+                            {isPrivate ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
+                                <span className="material-symbols-outlined text-[18px]">visibility_off</span>
+                                <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
+                              </div>
+                            ) : (
+                              <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
+                            )}
                           </div>
-                          <button
-                            onClick={() => handleAddWishlistItem(product)}
-                            className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
-                          >
-                            {t('account.to_cart', 'В КОРЗИНУ')}
-                          </button>
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
+                                {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
+                              </h4>
+                              <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
+                            </div>
+                            <button
+                              onClick={() => handleAddWishlistItem(product)}
+                              className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
+                            >
+                              {t('account.to_cart', 'В КОРЗИНУ')}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {wishlistProducts.length > 0 && (
+                {favorites.length > 0 && (
                   <button
                     onClick={handleShareWishlist}
                     className="w-full bg-black hover:bg-neutral-800 text-white font-sans font-bold text-[9px] tracking-[0.2em] py-3.5 px-4 rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer mt-4"
@@ -784,6 +876,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                   </button>
                 )}
               </div>
+
 
               {/* 5. Session Security & Devices (Bento: 3 cols) */}
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-3">
@@ -969,7 +1062,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
               </div>
 
-              {/* Social Buttons — Google · Yandex · Telegram in one row */}
+              {/* Social Buttons — Google · Yandex · Telegram */}
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
 
                 <div className="flex justify-center gap-4 w-full">
@@ -1001,30 +1094,30 @@ export default function AccountPage({ onAddToCart, lang }) {
                       <path d="M14.654 20.893H16.892L16.892 3.107H11.517C6.732 3.107 4.298 6.302 4.298 9.947C4.298 13.593 6.732 16.666 11.517 16.666H14.153L14.153 14.288H11.664C8.423 14.288 6.643 12.277 6.643 9.947C6.643 7.618 8.423 5.485 11.664 5.485H14.153V10.153L9.695 20.893H12.01L14.654 13.974V20.893Z" fill="white"/>
                     </svg>
                   </button>
-
-                  {/* Telegram — blue circle, white paper plane */}
-                  <button
-                    type="button"
-                    onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
-                    className="w-[58px] h-[58px] bg-[#2AABEE] hover:bg-[#229ED9] rounded-[20px] border border-black flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
-                    title={t('account.telegram', 'Telegram')}
-                    disabled={loading}
-                  >
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-                      <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
-                    </svg>
-                  </button>
                 </div>
 
-                {/* Hidden official Telegram widget — production only, triggered by our styled button above */}
-                {!isLocalHost() && (
-                  <div id="tg-widget-trigger" className="hidden">
-                    <TelegramWidgetContainer
+                {/* Telegram Widget Area */}
+                <div className="w-full flex justify-center mt-2 border-t border-neutral-100 pt-4">
+                  {isLocalHost() ? (
+                    <button
+                      type="button"
+                      onClick={handleLocalTelegramLogin}
+                      className="w-full max-w-[220px] h-[40px] bg-[#2AABEE] hover:bg-[#229ED9] text-white font-sans font-bold text-[11px] uppercase tracking-wider rounded-[20px] transition-all cursor-pointer flex items-center justify-center gap-2 border border-black shadow-sm"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                      </svg>
+                      <span>Войти (Локально)</span>
+                    </button>
+                  ) : (
+                    <TelegramLoginWidget
                       botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStore_bot'}
                       onAuth={handleTelegramLoginSuccess}
+                      size="large"
+                      radius="20"
                     />
-                  </div>
-                )}
+                  )}
+                </div>
 
               </div>
             </div>
@@ -1130,32 +1223,3 @@ export default function AccountPage({ onAddToCart, lang }) {
   );
 }
 
-function TelegramWidgetContainer({ botName, onAuth }) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-radius', '20');
-    script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', 'false');
-    
-    window.onTelegramAuth = (user) => {
-      onAuth(user);
-    };
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.async = true;
-
-    if (containerRef.current) {
-      containerRef.current.appendChild(script);
-    }
-  }, [botName, onAuth]);
-
-  return <div ref={containerRef} className="flex justify-center items-center h-10" />;
-}
