@@ -27,7 +27,7 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
-export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove }) {
+export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove, favorites, setFavorites, onSelectQuickView }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -118,7 +118,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Маршруты без префикса (русский по умолчанию) */}
-        <Route path="/"             element={<PageWrapper><HomePage onAddToCart={onAddToCart} /></PageWrapper>} />
+        <Route path="/"             element={<PageWrapper><HomePage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
         <Route path="/catalog"      element={<PageWrapper><CatalogPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/product/:id"  element={<PageWrapper><ProductPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/cart"         element={<PageWrapper><CartPage cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
@@ -130,7 +130,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         {/* Маршруты с языковыми префиксами /kz/... /en/... /ru/... */}
         {LANGS.map((lang) => (
           <React.Fragment key={lang}>
-            <Route path={`/${lang}`}             element={<PageWrapper><HomePage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
+            <Route path={`/${lang}`}             element={<PageWrapper><HomePage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
             <Route path={`/${lang}/catalog`}     element={<PageWrapper><CatalogPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/product/:id`} element={<PageWrapper><ProductPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/cart`}         element={<PageWrapper><CartPage lang={lang} cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />

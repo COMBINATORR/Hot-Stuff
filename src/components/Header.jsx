@@ -387,7 +387,15 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
   );
 }
 
-export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToCart }) {
+export default function Header({ 
+  cartItems = [], 
+  onUpdateQty, 
+  onRemove, 
+  onAddToCart,
+  favoritesCount = 0,
+  onOpenCart,
+  onOpenFavorites
+}) {
   const { t, i18n } = useTranslation();
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
@@ -687,7 +695,15 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 </motion.div>
               )}
             </AnimatePresence>
-            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
+            <button onClick={onOpenFavorites} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label="Открыть избранное">
+              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">favorite</span>
+              {favoritesCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
+                  {favoritesCount}
+                </span>
+              )}
+            </button>
+            <button onClick={onOpenCart || (() => setCartOpen(true))} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">

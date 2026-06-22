@@ -17,6 +17,7 @@ import logoNewsletterBg from '../assets/images/newsletter_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductGrid from '../components/ProductGrid';
+import HotspotsLookbook from '../components/HotspotsLookbook';
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
 
@@ -797,15 +798,18 @@ export default function HomePage({ onAddToCart }) {
                        >
                          {t('product.preview')}
                        </button>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             ))}
-           </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
          </div>
        </section>
  
+       {/* ═══ HOTSPOTS LOOKBOOK ═══ */}
+       <HotspotsLookbook onAddToCart={onAddToCart} onSelectQuickView={setSelectedPreviewProduct} />
+
        {/* ═══ INA THRUST PROMO BANNER ═══════════════ */}
        <section className="relative w-full aspect-[21/9] min-h-[350px] md:min-h-[500px] flex items-center overflow-hidden">
          <ResponsiveImage 

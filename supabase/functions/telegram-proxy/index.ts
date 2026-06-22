@@ -1,6 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
-import crypto from "node:crypto";
 
 function getCorsHeaders(reqOrigin: string | null) {
   const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
@@ -64,11 +63,32 @@ Deno.serve(async (req) => {
       .map((key) => `${key}=${data[key]}`)
       .join("\n");
 
-    // Compute secret key as SHA256 of bot token
-    const secretKey = crypto.createHash("sha256").update(botToken).digest();
+    // Compute secret key as SHA256 of bot token using Web Crypto API
+    const tokenBytes = new TextEncoder().encode(botToken);
+    const secretKeyBuffer = await crypto.subtle.digest("SHA-256", tokenBytes);
 
-    // Compute HMAC-SHA256 of checkString using secretKey
-    const hmac = crypto.createHmac("sha256", secretKey).update(checkString).digest("hex");
+    // Import the secret key for HMAC
+    const key = await crypto.subtle.importKey(
+      "raw",
+      secretKeyBuffer,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    // Compute HMAC-SHA256 of checkString
+    const checkStringBytes = new TextEncoder().encode(checkString);
+    const signatureBuffer = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      checkStringBytes
+    );
+
+    // Convert signature to hex string
+    const signatureArray = new Uint8Array(signatureBuffer);
+    const hmac = Array.from(signatureArray)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     if (hmac !== hash) {
       console.warn("Telegram authentication signature check failed. Hash mismatch.");
