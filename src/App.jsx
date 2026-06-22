@@ -5,7 +5,7 @@ import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './i18n.js';
 import AppRouter from './router.jsx';
 import Header from './components/Header.jsx';
-import Footer from './components/Footer.jsx';
+import Footer from './components/Footer.tsx';
 import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
 import CookieBanner from './components/CookieBanner.jsx';
