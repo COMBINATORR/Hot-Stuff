@@ -40,10 +40,6 @@ function LanguageSync() {
 }
 
 function ConditionalFooter() {
-  const location = useLocation();
-  const isHome = location.pathname === '/' || location.pathname === '/ru' || location.pathname === '/kz' || location.pathname === '/en' || location.pathname === '/ru/' || location.pathname === '/kz/' || location.pathname === '/en/';
-  
-  if (isHome) return null;
   return <Footer />;
 }
 
