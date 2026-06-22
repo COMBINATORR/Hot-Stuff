@@ -270,12 +270,12 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🧴</span>
                         <div>
-                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">Personal Moisturizer</p>
+                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">{t('product.crosssell.moisturizer_name', 'Personal Moisturizer')}</p>
                           <p className="font-sans text-[11px] text-primary">12 500 ₸</p>
                         </div>
                       </div>
                       <button 
-                        onClick={() => onAddToCart({ id: 101, name: 'Personal Moisturizer', price: 12500, emoji: '🧴', variant: 'Default', qty: 1 })}
+                        onClick={() => onAddToCart({ id: 101, name: t('product.crosssell.moisturizer_name', 'Personal Moisturizer'), price: 12500, emoji: '🧴', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
                         + {t('header.add_btn', 'ДОБАВИТЬ')}
@@ -288,12 +288,12 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🧼</span>
                         <div>
-                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">Cleaning Spray</p>
+                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">{t('product.crosssell.spray_name', 'Cleaning Spray')}</p>
                           <p className="font-sans text-[11px] text-primary">8 900 ₸</p>
                         </div>
                       </div>
                       <button 
-                        onClick={() => onAddToCart({ id: 102, name: 'Cleaning Spray', price: 8900, emoji: '🧼', variant: 'Default', qty: 1 })}
+                        onClick={() => onAddToCart({ id: 102, name: t('product.crosssell.spray_name', 'Cleaning Spray'), price: 8900, emoji: '🧼', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
                         + {t('header.add_btn', 'ДОБАВИТЬ')}
@@ -695,7 +695,7 @@ export default function Header({
                 </motion.div>
               )}
             </AnimatePresence>
-            <button onClick={onOpenFavorites} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label="Открыть избранное">
+            <button onClick={onOpenFavorites} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_favorites', 'Открыть избранное')}>
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">favorite</span>
               {favoritesCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">

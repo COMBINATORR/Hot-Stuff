@@ -52,6 +52,10 @@ const resources = {
         checkout_btn: 'ОФОРМИТЬ ЗАКАЗ',
         processing: 'Обработка...',
         pay_kaspi: 'Оплатить через Kaspi Pay',
+        kaspi_invoice: 'Счет на Kaspi.kz',
+        go_to_checkout: 'Оформить заказ',
+        close_cart: 'Закрыть корзину',
+        remove_item: 'Удалить товар',
         test_banner: 'ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты',
         menu: 'МЕНЮ',
         cabinet: 'кабинет',
@@ -66,7 +70,14 @@ const resources = {
         search: 'Поиск',
         cart: 'Корзина',
         panic: 'Паника',
-        buy: 'КУПИТЬ'
+        buy: 'КУПИТЬ',
+        view_all: 'посмотреть все',
+        open_favorites: 'Открыть избранное',
+        query_vibrators: 'Вибраторы',
+        query_couples: 'Для пар',
+        query_massagers: 'Массажеры',
+        query_new: 'Новинки',
+        query_soraya: 'Soraya'
       },
       panic: {
         title: 'Быстрый выход (Клавиша ESC)',
@@ -77,7 +88,8 @@ const resources = {
         yes: 'Да',
         no: 'Нет',
         ok: 'ОК',
-        error: 'Ошибка'
+        error: 'Ошибка',
+        close: 'Закрыть'
       },
       home: {
         hero: 'в погоне за наслаждением',
@@ -213,9 +225,14 @@ const resources = {
         spec_modes: 'Режимы стимуляции',
         spec_dimensions: 'Размеры',
         complete_ritual: 'ДОПОЛНИТЕ СВОЙ РИТУАЛ',
+        add_to_favorites: 'В избранное',
+        magic_quote: '"Ближе всего к волшебству."',
         crosssell: {
+          moisturizer_name: 'Увлажняющий лубрикант',
           moisturizer_desc: 'Премиальный водный лубрикант для максимального скольжения и комфорта.',
+          spray_name: 'Очищающий спрей',
           spray_desc: 'Бесспиртовой антибактериальный спрей для безопасного ухода за игрушками.',
+          candle_name: 'Ароматическая свеча',
           candle_desc: 'Парфюмированная свеча с теплыми нотами амбры, ванили и черного дерева.'
         },
         reviews_title: 'ОТЗЫВЫ ПОКУПАТЕЛЕЙ',
@@ -436,7 +453,8 @@ const resources = {
         err_email_invalid: 'Неверный формат почты. Пример: test@mail.ru',
         err_otp_digits: 'Пожалуйста, введите все 6 цифр кода',
         err_others_success: 'Все сессии на других устройствах успешно завершены!',
-        err_history_cleared: 'История входов на этом устройстве очищена!'
+        err_history_cleared: 'История входов на этом устройстве очищена!',
+        local_login: 'Войти (Локально)'
       },
       legal: {
         title: 'ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ',
@@ -476,7 +494,8 @@ const resources = {
         delivery: 'Быстрая и надежная доставка по всему миру.',
         package: 'Сохраняйте инкогнито: коробка без логотипов и надписей.',
         bundle_title: 'КУПИ НАБОР И СЭКОНОМЬ',
-        save_eur: 'сохранить {{amount}} EUR'
+        save_eur: 'сохранить {{amount}} EUR',
+        description_toggle: 'Переключатель описания'
       },
       error: {
         wrong: 'Что-то пошло не так',
@@ -553,6 +572,10 @@ const resources = {
         checkout_btn: 'CHECKOUT',
         processing: 'Processing...',
         pay_kaspi: 'Pay via Kaspi Pay',
+        kaspi_invoice: 'Invoice via Kaspi.kz',
+        go_to_checkout: 'Proceed to Checkout',
+        close_cart: 'Close cart',
+        remove_item: 'Remove item',
         test_banner: 'TEST MODE: Prices reduced for checkout testing',
         menu: 'MENU',
         cabinet: 'cabinet',
@@ -567,7 +590,14 @@ const resources = {
         search: 'Search',
         cart: 'Cart',
         panic: 'Panic',
-        buy: 'BUY'
+        buy: 'BUY',
+        view_all: 'view all',
+        open_favorites: 'Open Favorites',
+        query_vibrators: 'Vibrators',
+        query_couples: 'For Couples',
+        query_massagers: 'Massagers',
+        query_new: 'New Arrivals',
+        query_soraya: 'Soraya'
       },
       panic: {
         title: 'Quick Exit (ESC Key)',
@@ -578,7 +608,8 @@ const resources = {
         yes: 'Yes',
         no: 'No',
         ok: 'OK',
-        error: 'Error'
+        error: 'Error',
+        close: 'Close'
       },
       home: {
         hero: 'in pursuit of pleasure',
@@ -714,9 +745,14 @@ const resources = {
         spec_modes: 'Vibration modes',
         spec_dimensions: 'Dimensions',
         complete_ritual: 'COMPLETE YOUR RITUAL',
+        add_to_favorites: 'Add to Favorites',
+        magic_quote: '"The closest you can get to magic."',
         crosssell: {
+          moisturizer_name: 'Personal Moisturizer',
           moisturizer_desc: 'Premium water-based lubricant for maximum glide and comfort.',
+          spray_name: 'Cleaning Spray',
           spray_desc: 'Alcohol-free antibacterial spray for safe toy care.',
+          candle_name: 'Scented Candle',
           candle_desc: 'Scented candle with warm notes of amber, vanilla, and ebony.'
         },
         reviews_title: 'CUSTOMER REVIEWS',
@@ -937,7 +973,8 @@ const resources = {
         err_email_invalid: 'Invalid email format. Example: test@mail.ru',
         err_otp_digits: 'Please enter all 6 digits of the code',
         err_others_success: 'All sessions on other devices have been successfully ended!',
-        err_history_cleared: 'Login history on this device has been cleared!'
+        err_history_cleared: 'Login history on this device has been cleared!',
+        local_login: 'Log in (Locally)'
       },
       legal: {
         title: 'LEGAL INFORMATION',
@@ -977,7 +1014,8 @@ const resources = {
         delivery: 'Fast and reliable worldwide shipping.',
         package: 'Keep it private: box without logos or inscriptions.',
         bundle_title: 'BUY BUNDLE & SAVE',
-        save_eur: 'save {{amount}} EUR'
+        save_eur: 'save {{amount}} EUR',
+        description_toggle: 'Description toggle'
       },
       error: {
         wrong: 'Something went wrong',
@@ -1086,6 +1124,10 @@ const resources = {
         checkout_btn: 'ТАПСЫРЫСТЫ РӘСІМДЕУ',
         processing: 'Өңделуде...',
         pay_kaspi: 'Pay via Kaspi Pay',
+        kaspi_invoice: 'Kaspi.kz шоты',
+        go_to_checkout: 'Тапсырысты рәсімдеу',
+        close_cart: 'Себетті жабу',
+        remove_item: 'Тауарды жою',
         test_banner: 'ТЕСТТІК РЕЖИМ: Төлемді тексеру үшін бағалар төмендетілген',
         menu: 'МӘЗІР',
         cabinet: 'кабинет',
@@ -1100,7 +1142,14 @@ const resources = {
         search: 'Іздеу',
         cart: 'Себет',
         panic: 'Дүрбелең',
-        buy: 'САТЫП АЛУ'
+        buy: 'САТЫП АЛУ',
+        view_all: 'барлығын қарау',
+        open_favorites: 'Таңдаулыларды ашу',
+        query_vibrators: 'Вибраторлар',
+        query_couples: 'Жұптарға арналған',
+        query_massagers: 'Массажерлер',
+        query_new: 'Жаңалықтар',
+        query_soraya: 'Soraya'
       },
       panic: {
         title: 'Жылдам шығу (ESC пернесі)',
@@ -1111,7 +1160,8 @@ const resources = {
         yes: 'Иә',
         no: 'Жоқ',
         ok: 'ОК',
-        error: 'Қате'
+        error: 'Қате',
+        close: 'Жабу'
       },
       home: {
         hero: 'ләззат алу жолында',
@@ -1247,9 +1297,14 @@ const resources = {
         spec_modes: 'Ынталандыру режимдері',
         spec_dimensions: 'Өлшемдері',
         complete_ritual: 'РИТУАЛЫҢЫЗДЫ ТОЛЫҚТЫРЫҢЫЗ',
+        add_to_favorites: 'Таңдаулыларға қосу',
+        magic_quote: '"Сиқырға ең жақын нәрсе."',
         crosssell: {
+          moisturizer_name: 'Ылғалдандырғыш лубрикант',
           moisturizer_desc: 'Максималды сырғу мен жайлылыққа арналған премиум су негізіндегі лубрикант.',
+          spray_name: 'Тазартқыш спрей',
           spray_desc: 'Ойыншықтарды қауіпсіз күтуге арналған спиртсіз бактерияға қарсы спрей.',
+          candle_name: 'Хош иісті шам',
           candle_desc: 'Амбра, ваниль және қара ағаштың жылы ноталары бар хош иісті шам.'
         },
         reviews_title: 'САТЫП АЛУШЫЛАРДЫҢ ПІКІРЛЕРІ',
@@ -1470,7 +1525,8 @@ const resources = {
         err_email_invalid: 'Пошта форматы қате. Мысалы: test@mail.ru',
         err_otp_digits: 'Кодтың барлық 6 санын енгізіңіз',
         err_others_success: 'Басқа құрылғылардағы барлық сессиялар сәтті аяқталды!',
-        err_history_cleared: 'Осы құрылғыдағы кіру тарихы тазартылды!'
+        err_history_cleared: 'Осы құрылғыдағы кіру тарихы тазартылды!',
+        local_login: 'Кіру (Жергілікті)'
       },
       legal: {
         title: 'ҚҰҚЫҚТЫҚ АҚПАРАТ',
@@ -1510,7 +1566,8 @@ const resources = {
         delivery: 'Бүкіл әлем бойынша жылдам және сенімді жеткізу.',
         package: 'Анонимділікті сақтаңыз: логотипсіз және жазусыз қорап.',
         bundle_title: 'ЖИНАҚТЫ САТЫП АЛЫП ҮНЕМДЕНІЗ',
-        save_eur: '{{amount}} EUR үнемдеңіз'
+        save_eur: '{{amount}} EUR үнемдеңіз',
+        description_toggle: 'Сипаттама ауыстырғышы'
       },
       error: {
         wrong: 'Бірдеңе дұрыс болмады',

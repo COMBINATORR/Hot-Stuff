@@ -74,7 +74,11 @@ export default function ProductPage({ onAddToCart }) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    return `${String(h).padStart(2, '0')}ч ${String(m).padStart(2, '0')}м ${String(s).padStart(2, '0')}с`;
+    const lang = i18n.language;
+    const hUnit = lang === 'en' ? 'h' : lang === 'kk' ? 'сағ' : 'ч';
+    const mUnit = lang === 'en' ? 'm' : lang === 'kk' ? 'мин' : 'м';
+    const sUnit = lang === 'en' ? 's' : lang === 'kk' ? 'сек' : 'с';
+    return `${String(h).padStart(2, '0')}${hUnit} ${String(m).padStart(2, '0')}${mUnit} ${String(s).padStart(2, '0')}${sUnit}`;
   };
 
   // Reset states when active product changes
@@ -150,13 +154,13 @@ export default function ProductPage({ onAddToCart }) {
     }
   };
 
-  const handleCrossSellAdd = (name, price) => {
+  const handleCrossSellAdd = (key, defaultName, price) => {
     if (onAddToCart) {
       onAddToCart({
-        id: name === 'Personal Moisturizer' ? 101 : name === 'Cleaning Spray' ? 102 : 103,
-        name: name,
+        id: key === 'moisturizer' ? 101 : key === 'spray' ? 102 : 103,
+        name: t(`product.crosssell.${key}_name`, defaultName),
         price: price,
-        emoji: name === 'Personal Moisturizer' ? '🧴' : name === 'Cleaning Spray' ? '🧼' : '🕯️',
+        emoji: key === 'moisturizer' ? '🧴' : key === 'spray' ? '🧼' : '🕯️',
         variant: 'Default',
         qty: 1
       });
@@ -311,7 +315,7 @@ export default function ProductPage({ onAddToCart }) {
         <section className="min-h-[700px] md:min-h-[850px] flex flex-col md:flex-row max-w-container-max mx-auto relative mt-4">
           <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 md:py-20 z-10 text-left">
             {product.isNew && (
-              <span className="text-[10px] font-black tracking-[0.25em] text-primary uppercase mb-3">NEW ARRIVAL</span>
+              <span className="text-[10px] font-black tracking-[0.25em] text-primary uppercase mb-3">{t('product.new_arrival', 'NEW ARRIVAL')}</span>
             )}
             <h1 className="font-sans font-black text-[36px] md:text-[56px] lg:text-[64px] text-white leading-tight uppercase tracking-tight mb-4">
               {product.name}
@@ -605,7 +609,7 @@ export default function ProductPage({ onAddToCart }) {
           />
           <div className="z-20 text-center px-6">
             <p className="font-sans font-black text-[32px] sm:text-[48px] md:text-[56px] text-white italic max-w-4xl mx-auto drop-shadow-2xl">
-              "The closest you can get to magic."
+              {t('product.magic_quote', '"The closest you can get to magic."')}
             </p>
           </div>
         </section>
@@ -628,11 +632,11 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Personal Moisturizer</h3>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.moisturizer_name', 'Personal Moisturizer')}</h3>
                 <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.moisturizer_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">12 500 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Personal Moisturizer', 12500)}
+                  onClick={() => handleCrossSellAdd('moisturizer', 'Personal Moisturizer', 12500)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
                   {t('product.add_to_cart')}
@@ -650,11 +654,11 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Cleaning Spray</h3>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.spray_name', 'Cleaning Spray')}</h3>
                 <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.spray_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">8 900 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Cleaning Spray', 8900)}
+                  onClick={() => handleCrossSellAdd('spray', 'Cleaning Spray', 8900)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
                   {t('product.add_to_cart')}
@@ -672,11 +676,11 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Scented Candle</h3>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.candle_name', 'Scented Candle')}</h3>
                 <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.candle_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">15 200 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Scented Candle', 15200)}
+                  onClick={() => handleCrossSellAdd('candle', 'Scented Candle', 15200)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
                   {t('product.add_to_cart')}

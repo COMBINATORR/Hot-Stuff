@@ -205,7 +205,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 <button 
                   onClick={() => setIsFavorited(!isFavorited)}
                   className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all"
-                  aria-label="В избранное"
+                  aria-label={t('product.add_to_favorites', 'В избранное')}
                 >
                   <span className={`material-symbols-outlined text-[18px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                     {isFavorited ? 'favorite' : 'favorite_border'}
@@ -214,7 +214,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 <button 
                   onClick={onClose}
                   className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all"
-                  aria-label="Закрыть"
+                  aria-label={t('common.close', 'Закрыть')}
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
@@ -495,7 +495,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       <button 
                         onClick={() => setIsFavorited(!isFavorited)}
                         className="flex items-center justify-center w-12 h-12 bg-white text-black hover:text-primary transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:text-primary active:scale-90"
-                        aria-label="В избранное"
+                        aria-label={t('product.add_to_favorites', 'В избранное')}
                       >
                         <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
                           {isFavorited ? 'favorite' : 'favorite_border'}
@@ -504,7 +504,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       <button 
                         onClick={onClose}
                         className="flex items-center justify-center w-12 h-12 bg-white text-black hover:bg-black hover:text-white transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:bg-black focus-visible:text-white active:scale-90"
-                        aria-label="Закрыть"
+                        aria-label={t('common.close', 'Закрыть')}
                       >
                         <span className="material-symbols-outlined text-[20px]">close</span>
                       </button>

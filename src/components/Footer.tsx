@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 const LogoIcon = () => (
   <div className="w-8 h-8 bg-[#31A8FF] rounded-[8px] flex items-center justify-center shadow-[0_0_15px_rgba(49,168,255,0.3)]">
@@ -16,6 +17,8 @@ const handlePanic = () => {
 };
 
 const FooterCard = () => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -40,7 +43,7 @@ const FooterCard = () => {
             </span>
           </div>
           <p className="text-[#64748B] leading-relaxed text-[15px] font-normal max-w-[320px]">
-            Мы гарантируем 100% анонимность доставки. Все заказы отправляются в плотных непрозрачных сейф-пакетах без каких-либо логотипов или названия магазина. Курьер не знает о содержимом посылки.
+            {t('footer.anon_desc')}
           </p>
           
           {/* Socials Group */}
@@ -59,20 +62,20 @@ const FooterCard = () => {
 
         {/* Product Column */}
         <div className="space-y-6 text-left">
-          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">ПОКУПАТЕЛЯМ</h4>
+          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">{t('footer.buyers')}</h4>
           <ul className="space-y-4">
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">ТАБЛИЦА РАЗМЕРОВ</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">FAQ</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">ПРАВИЛА ВОЗВРАТА</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">СЛУЖБА ПОДДЕРЖКИ</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.size_guide')}</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.faq', 'FAQ')}</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.returns')}</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.support')}</Link></li>
           </ul>
         </div>
 
         {/* Science Column */}
         <div className="space-y-6 text-left">
-          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">ОПЛАТА И ЛОГИСТИКА</h4>
+          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">{t('footer.delivery_title')}</h4>
           <p className="text-neutral-400 text-[13px] leading-relaxed max-w-[200px]">
-            Бережная и оперативная доставка по Казахстану. Удобная оплата при получении.
+            {t('footer.delivery_desc')}
           </p>
           <div className="flex flex-wrap gap-2 pt-2 max-w-[200px]">
             <span className="bg-yellow-400 text-black text-[10px] font-extrabold px-2.5 py-1 rounded-[6px] tracking-wider uppercase">KASPI PAY</span>
@@ -83,14 +86,14 @@ const FooterCard = () => {
 
         {/* Company Column */}
         <div className="space-y-6 text-left">
-          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">ПРАВОВАЯ ИНФОРМАЦИЯ</h4>
+          <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">{t('footer.legal_title')}</h4>
           <ul className="space-y-4">
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">ПУБЛИЧНАЯ ОФЕРТА</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.privacy')}</Link></li>
+            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.offer')}</Link></li>
           </ul>
           <div className="flex gap-3 items-start mt-6 pt-6 border-t border-zinc-900">
             <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-yellow-400 text-black text-xs font-black rounded-[6px]">18+</div>
-            <p className="text-neutral-500 text-[11px] leading-snug">Сайт содержит контент для взрослых. Доступ только от 18 лет.</p>
+            <p className="text-neutral-500 text-[11px] leading-snug">{t('footer.warning')}</p>
           </div>
         </div>
 
@@ -99,16 +102,16 @@ const FooterCard = () => {
       {/* Bottom Legal Bar */}
       <div className="px-6 sm:px-12 md:px-16 lg:px-20 py-6 flex flex-col md:flex-row justify-between items-center gap-6 text-[15px] border-t border-zinc-900 bg-[#141414]">
         <div className="flex items-center gap-4">
-          <p className="text-[#64748B] font-medium text-[14px]">© 2026 Hot Stuff. All rights reserved.</p>
+          <p className="text-[#64748B] font-medium text-[14px]">{t('footer.copyright')}</p>
         </div>
         
         <div className="flex row gap-6 sm:gap-8 text-[#64748B] font-medium items-center">
           <button onClick={handlePanic} className="flex items-center gap-2 hover:text-white transition-colors text-[12px] sm:text-[13px] uppercase tracking-wider bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800 hover:border-zinc-700">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-            БЫСТРЫЙ ВЫХОД [ESC]
+            {t('panic.btn')}
           </button>
           <div className="hidden sm:block w-[1px] h-4 bg-zinc-800" />
-          <span className="hidden sm:inline text-[12px] uppercase tracking-[0.2em] text-[#94A3B8]">100% АНОНИМНОСТЬ</span>
+          <span className="hidden sm:inline text-[12px] uppercase tracking-[0.2em] text-[#94A3B8]">{t('footer.anon_guaranteed').toUpperCase()}</span>
         </div>
       </div>
     </div>

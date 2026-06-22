@@ -120,7 +120,7 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
               <button 
                 onClick={onClose}
                 className="text-stone-400 hover:text-white transition-colors focus:outline-none"
-                aria-label="Close cart"
+                aria-label={t('header.close_cart', 'Закрыть корзину')}
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -132,7 +132,7 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
                 <div className="text-[9px] font-bold tracking-wider text-stone-400 uppercase flex justify-between">
                   {subtotal < FREE_SHIPPING_THRESHOLD ? (
                     <>
-                      <span>{t('header.free_shipping_hint', `до бесплатной доставки осталось ${ (FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ru-KZ') } ₸`)}</span>
+                      <span>{t('header.free_shipping_hint', { defaultValue: 'до бесплатной доставки осталось {{amount}} ₸', amount: (FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ru-KZ') })}</span>
                       <span className="text-primary">{Math.round(progressPercent)}%</span>
                     </>
                   ) : (
@@ -193,7 +193,7 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
                           <button 
                             onClick={() => handleRemove(item.id, item.variant)}
                             className="text-stone-500 hover:text-red-400 transition-colors"
-                            aria-label="Remove item"
+                            aria-label={t('header.remove_item', 'Удалить товар')}
                           >
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
@@ -221,13 +221,13 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
                     onClick={handleApplyPromo}
                     className="border border-white hover:bg-white hover:text-black text-white px-4 text-[10px] tracking-widest uppercase font-bold rounded-none transition-all"
                   >
-                    {t('header.apply_promo', 'ок')}
+                    {t('header.promo_btn', 'ок')}
                   </button>
                 </div>
 
                 {appliedPromo && (
                   <div className="flex justify-between text-[10px] tracking-wider text-green-400 uppercase">
-                    <span>{t('header.promo_applied', 'скидка 15% примененa')}:</span>
+                    <span>{t('header.promo_applied', { code: appliedPromo, defaultValue: 'скидка 15% примененa' })}:</span>
                     <span>-{discountAmount.toLocaleString('ru-KZ')} ₸</span>
                   </div>
                 )}
