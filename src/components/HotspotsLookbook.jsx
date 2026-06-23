@@ -15,6 +15,8 @@ import lookbookLingerie8 from '../assets/images/lookbook_lingerie_8.png';
 import lookbookLingerie9 from '../assets/images/lookbook_lingerie_9.png';
 import lookbookLingerie10 from '../assets/images/lookbook_lingerie_10.png';
 
+const PRODUCTS_MAP = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 const SCENES = [
   {
     id: 1,
@@ -191,7 +193,7 @@ export default function HotspotsLookbook({ onSelectQuickView, onAddToCart }) {
           {/* Hotspots for Current Scene */}
           <AnimatePresence>
             {currentScene.hotspots.map((hotspot, idx) => {
-              const product = ALL_PRODUCTS.find(p => p.id === hotspot.productId);
+              const product = PRODUCTS_MAP.get(hotspot.productId);
               if (!product) return null;
 
               const isActive = activeHotspot === idx;
