@@ -26,9 +26,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing Telegram data or hash' });
   }
 
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN environment variable not set on server' });
+  const botToken = process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.trim() : '';
+  if (!botToken || !/^[0-9]+:[a-zA-Z0-9_-]+$/.test(botToken)) {
+    console.error('[Telegram Auth] Invalid or missing TELEGRAM_BOT_TOKEN.');
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
   // 1. Verify Telegram hash
