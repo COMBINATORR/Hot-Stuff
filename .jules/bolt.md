@@ -4,3 +4,6 @@
 ## 2024-06-21 - React.memo Pitfall with Inline Functions
 **Learning:** Wrapping a component in `React.memo` to prevent re-renders is completely ineffective if the parent component passes inline arrow functions as props (e.g., `onQtyChange={(qty) => onUpdateQty(item.id, qty)}`), because the function reference changes on every parent render, breaking the shallow equality check.
 **Action:** When implementing `React.memo` optimizations, always audit the parent component passing the props to ensure function references are stable. Use `React.useCallback` for handler functions or pass the raw function down alongside the `id` so the child can handle the invocation.
+## 2024-07-25 - O(N) lookup inside loop
+**Learning:** Performing a `.find()` on an array inside a `.forEach()` loop over another array results in O(N*M) time complexity. By pre-computing a `Map` from the array we want to search (O(N) operation), we reduce the inner loop lookup to O(1), achieving O(N+M) time complexity overall, which is much faster.
+**Action:** Audit array searches inside loops. If an array is searched multiple times using a unique key, use a `Map` to optimize the lookup.
