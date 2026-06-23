@@ -17,3 +17,7 @@ fix-cors-vulnerability-6020402471100718811
 **Vulnerability:** `vitest.setup.js` lacked a mock for `AnimatePresence` and `motion.div` in `framer-motion`, causing tests that render `<CookieBanner />` (which relies on `AnimatePresence`) to throw an "Element type is invalid" error because the imported component structure changed or wasn't mocked properly.
 **Learning:** When mocking `framer-motion` to bypass animations in Vitest, ensure `AnimatePresence` is mocked to render its children (e.g., using `React.Fragment`), and `motion.div` is mocked to return a standard `div` element, not just `motion.button`.
 **Prevention:** Include comprehensive mocks for commonly used framer-motion components (`div`, `button`, `AnimatePresence`) in global test setup files.
+## 2024-06-23 - Information Leakage via Unauthenticated /logs Endpoint in Supabase Edge Function
+**Vulnerability:** The `/logs` endpoint in the `yandex-proxy` edge function was completely unauthenticated, allowing any external user to fetch potentially sensitive internal application logs.
+**Learning:** Even internal debugging endpoints need strict authorization in edge environments.
+**Prevention:** Always secure internal or debug endpoints in Supabase Edge Functions by requiring an `Authorization` header and validating it against securely stored environment variables like `SUPABASE_SERVICE_ROLE_KEY`.
