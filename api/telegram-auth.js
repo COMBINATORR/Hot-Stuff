@@ -2,9 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
+  // Get allowed origins
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:3000', 'https://hotstuff.kz'];
+
+  const origin = req.headers.origin;
+  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -26,9 +34,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing Telegram data or hash' });
   }
 
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN environment variable not set on server' });
+  const botToken = process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.trim() : '';
+  if (!botToken || !/^[0-9]+:[a-zA-Z0-9_-]+$/.test(botToken)) {
+    console.error('[Telegram Auth] Invalid or missing TELEGRAM_BOT_TOKEN.');
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
   // 1. Verify Telegram hash
@@ -51,10 +60,10 @@ export default async function handler(req, res) {
     const hmacBuffer = Buffer.from(hmac, 'hex');
     const hashBuffer = Buffer.from(hash, 'hex');
     if (hmacBuffer.length !== hashBuffer.length || !crypto.timingSafeEqual(hmacBuffer, hashBuffer)) {
-      return res.status(401).json({ error: 'Data integrity check failed. Hash mismatch.' });
+      return res.status(401).json({ error: 'Data integrity check failed.' });
     }
   } catch (err) {
-    return res.status(401).json({ error: 'Data integrity check failed. Hash format invalid.' });
+    return res.status(401).json({ error: 'Data integrity check failed.' });
   }
 
   // Check if authentication date is too old (expired in 24 hours)

@@ -35,6 +35,8 @@ const categorySlugMap = {
   'lubricants-cosmetics': (p) => false
 };
 
+const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
@@ -277,7 +279,7 @@ export default function CatalogPage({ onAddToCart }) {
       const addedList = [];
 
       productIds.forEach(id => {
-        const product = ALL_PRODUCTS.find(p => p.id === id);
+        const product = productsMap.get(id);
         if (product) {
           addedList.push(product);
           if (onAddToCart) {
