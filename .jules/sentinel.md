@@ -17,3 +17,8 @@ fix-cors-vulnerability-6020402471100718811
 **Vulnerability:** `vitest.setup.js` lacked a mock for `AnimatePresence` and `motion.div` in `framer-motion`, causing tests that render `<CookieBanner />` (which relies on `AnimatePresence`) to throw an "Element type is invalid" error because the imported component structure changed or wasn't mocked properly.
 **Learning:** When mocking `framer-motion` to bypass animations in Vitest, ensure `AnimatePresence` is mocked to render its children (e.g., using `React.Fragment`), and `motion.div` is mocked to return a standard `div` element, not just `motion.button`.
 **Prevention:** Include comprehensive mocks for commonly used framer-motion components (`div`, `button`, `AnimatePresence`) in global test setup files.
+
+## 2024-06-23 - Overly Permissive CORS with Credentials in Telegram Auth
+**Vulnerability:** The `/api/telegram-auth.js` API endpoint configured `Access-Control-Allow-Origin: '*'` simultaneously with `Access-Control-Allow-Credentials: true`. This exposes the API to Cross-Origin Resource Sharing (CORS) attacks from any malicious domain, allowing them to read sensitive data or execute actions with the user's credentials.
+**Learning:** `Access-Control-Allow-Origin: '*'` should never be used alongside `Access-Control-Allow-Credentials: true` as it violates CORS security models. Wildcards are only acceptable for completely public, non-credentialed APIs.
+**Prevention:** Dynamically validate the incoming `Origin` header against an explicitly allowed list (e.g., using `process.env.ALLOWED_ORIGINS` combined with known safe domains like `http://localhost:3000` and the production domain).
