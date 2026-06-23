@@ -52,7 +52,49 @@ export default function AccountPage({ onAddToCart, lang }) {
   });
   const [sessionUser, setSessionUser] = useState(null);
 
+  const getDisplayAvatar = () => {
+    if (!sessionUser) return null;
+    const meta = sessionUser.user_metadata || {};
+    if (meta.avatar_url) return meta.avatar_url;
+    if (meta.picture) return meta.picture;
+    if (meta.default_avatar_id) {
+      return `https://avatars.yandex.net/get-yapic/${meta.default_avatar_id}/islands-200`;
+    }
+    if (meta.avatar_id) {
+      return `https://avatars.yandex.net/get-yapic/${meta.avatar_id}/islands-200`;
+    }
+    return null;
+  };
 
+  const getDisplayName = () => {
+    if (!sessionUser) return t('account.title', 'Личный кабинет');
+    const meta = sessionUser.user_metadata || {};
+    return (
+      meta.real_name ||
+      meta.display_name ||
+      meta.full_name ||
+      meta.name ||
+      (meta.first_name || meta.last_name 
+        ? `${meta.first_name || ''} ${meta.last_name || ''}`.trim() 
+        : '') ||
+      meta.login ||
+      meta.username ||
+      t('account.title', 'Личный кабинет')
+    );
+  };
+
+  const getDisplayEmailOrPhone = () => {
+    if (!sessionUser) return loggedInUser || '';
+    return (
+      sessionUser.email ||
+      sessionUser.user_metadata?.email ||
+      sessionUser.user_metadata?.default_email ||
+      sessionUser.user_metadata?.login ||
+      sessionUser.user_metadata?.username ||
+      loggedInUser ||
+      ''
+    );
+  };
 
   const navigate = useNavigate();
 
@@ -143,7 +185,15 @@ export default function AccountPage({ onAddToCart, lang }) {
     const handleAuthSession = (session) => {
       startTransition(() => {
         if (session && session.user) {
-          const email = (session.user.email || '').trim().toLowerCase();
+          const email = (
+            session.user.email || 
+            session.user.user_metadata?.email || 
+            session.user.user_metadata?.default_email || 
+            session.user.user_metadata?.login || 
+            session.user.user_metadata?.username || 
+            ''
+          ).trim().toLowerCase();
+          
           console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
           setIsLoggedIn(true);
           setLoggedInUser(email);
@@ -152,7 +202,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           // Add to registered users list safely
           setRegisteredUsers(prev => {
-            if (prev.includes(email)) return prev;
+            if (!email || prev.includes(email)) return prev;
             console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
             const next = [...prev, email];
             localStorage.setItem('hs_registered_users', JSON.stringify(next));
@@ -161,7 +211,7 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           // Add to saved accounts list if it's not a mock account
           const emailClean = email.trim().toLowerCase();
-          if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
+          if (emailClean && !['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
             setSavedAccounts(prev => {
               if (prev.includes(emailClean)) return prev;
               return [...prev, emailClean];
@@ -638,9 +688,9 @@ export default function AccountPage({ onAddToCart, lang }) {
             {/* Dashboard Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-black/5">
               <div className="flex items-center gap-4">
-                {sessionUser?.user_metadata?.avatar_url || sessionUser?.user_metadata?.picture ? (
+                {getDisplayAvatar() ? (
                   <img
-                    src={sessionUser.user_metadata.avatar_url || sessionUser.user_metadata.picture}
+                    src={getDisplayAvatar()}
                     alt="User Avatar"
                     className="w-12 h-12 rounded-full object-cover border border-black/10 shadow-sm"
                   />
@@ -649,10 +699,10 @@ export default function AccountPage({ onAddToCart, lang }) {
                 )}
                 <div>
                   <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
-                    {sessionUser?.user_metadata?.full_name || sessionUser?.user_metadata?.name || t('account.title', 'Личный кабинет')}
+                    {getDisplayName()}
                   </h1>
                   <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">
-                    {sessionUser?.email || loggedInUser}
+                    {getDisplayEmailOrPhone()}
                   </p>
                 </div>
               </div>
