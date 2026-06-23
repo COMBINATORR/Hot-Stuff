@@ -6,6 +6,10 @@ import React from 'react';
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key) => key,
+    i18n: {
+      language: 'en',
+      changeLanguage: vi.fn(),
+    }
   }),
 }));
 
