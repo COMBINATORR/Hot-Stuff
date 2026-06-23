@@ -123,21 +123,21 @@ export default function CheckoutPage({ cartItems = [] }) {
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.first_name')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder={t('checkout.first_name_placeholder')}
                     />
                   </div>
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.last_name')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder={t('checkout.last_name_placeholder')}
                     />
                   </div>
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.phone')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       type="tel"
                       placeholder="+7 (777) 777-77-77"
                     />
@@ -145,7 +145,7 @@ export default function CheckoutPage({ cartItems = [] }) {
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Email</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       type="email"
                       placeholder="email@example.com"
                     />
@@ -194,21 +194,21 @@ export default function CheckoutPage({ cartItems = [] }) {
                   <div className="sm:col-span-2">
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.address')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder={t('checkout.address_placeholder')}
                     />
                   </div>
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.city')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder={t('checkout.city_placeholder')}
                     />
                   </div>
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.zip')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder="060000"
                     />
                   </div>

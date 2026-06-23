@@ -243,7 +243,7 @@ export default function SorayaMockupPage() {
               <button 
                 onClick={() => toggleAccordion('desc')}
                 className="text-gray-400 hover:text-black flex-none"
-                aria-label="Переключатель описания"
+                aria-label={t('mockup.description_toggle', 'Переключатель описания')}
               >
                 <span className="material-symbols-outlined text-[18px]">
                   {expandedAccordions.desc ? 'expand_less' : 'expand_more'}
