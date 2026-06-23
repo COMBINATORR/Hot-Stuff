@@ -60,10 +60,10 @@ export default async function handler(req, res) {
     const hmacBuffer = Buffer.from(hmac, 'hex');
     const hashBuffer = Buffer.from(hash, 'hex');
     if (hmacBuffer.length !== hashBuffer.length || !crypto.timingSafeEqual(hmacBuffer, hashBuffer)) {
-      return res.status(401).json({ error: 'Data integrity check failed. Hash mismatch.' });
+      return res.status(401).json({ error: 'Data integrity check failed.' });
     }
   } catch (err) {
-    return res.status(401).json({ error: 'Data integrity check failed. Hash format invalid.' });
+    return res.status(401).json({ error: 'Data integrity check failed.' });
   }
 
   // Check if authentication date is too old (expired in 24 hours)

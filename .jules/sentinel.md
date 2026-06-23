@@ -17,6 +17,12 @@
 **Vulnerability:** `vitest.setup.js` lacked a mock for `AnimatePresence` and `motion.div` in `framer-motion`, causing tests that render `<CookieBanner />` (which relies on `AnimatePresence`) to throw an "Element type is invalid" error because the imported component structure changed or wasn't mocked properly.
 **Learning:** When mocking `framer-motion` to bypass animations in Vitest, ensure `AnimatePresence` is mocked to render its children (e.g., using `React.Fragment`), and `motion.div` is mocked to return a standard `div` element, not just `motion.button`.
 **Prevention:** Include comprehensive mocks for commonly used framer-motion components (`div`, `button`, `AnimatePresence`) in global test setup files.
+
+## 2024-05-27 - [Information Leakage in Telegram Auth API]
+**Vulnerability:** Detailed error messages ("Hash mismatch" vs "Hash format invalid") were exposed in the HTTP response of `api/telegram-auth.js` when data integrity checks failed.
+**Learning:** Returning specific error messages about the reason for cryptographic verification failures can lead to information leakage. This slight difference in responses could potentially be exploited in timing or oracle attacks to deduce information about the hashing process or expected format.
+**Prevention:** Always use generic error messages (e.g., "Data integrity check failed.") for any cryptographic verification or authentication failures to avoid leaking internal implementation details to the client.
+
 ## 2024-06-23 - Information Leakage via Unauthenticated /logs Endpoint in Supabase Edge Function
 **Vulnerability:** The `/logs` endpoint in the `yandex-proxy` edge function was completely unauthenticated, allowing any external user to fetch potentially sensitive internal application logs.
 **Learning:** Even internal debugging endpoints need strict authorization in edge environments.
