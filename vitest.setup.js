@@ -25,3 +25,12 @@ vi.mock('framer-motion', async () => {
     AnimatePresence: ({ children }) => children,
   };
 });
+
+vi.stubEnv('VITE_SUPABASE_URL', 'http://localhost:54321');
+vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+
+// Also stub import.meta just in case
+globalThis.importMetaEnv = {
+  VITE_SUPABASE_URL: 'http://localhost:54321',
+  VITE_SUPABASE_ANON_KEY: 'test-anon-key'
+};
