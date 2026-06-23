@@ -4,3 +4,7 @@
 ## 2023-10-27 - AnimatePresence rapid mount freeze
 **Learning:** Framer Motion's AnimatePresence with `mode="wait"` can freeze and refuse to enter the new component if a rapid mount/unmount cycle occurs during page load (such as during OAuth redirect loops).
 **Action:** When animating conditional UI states like auth headers, use `mode="popLayout"` with `initial={false}` or avoid `mode="wait"` to prevent the UI from getting permanently stuck in an exiting state.
+
+## 2024-10-XX - Quantity Stepper Accessibility
+**Learning:** Icon-only or text-symbol-only (+/-) buttons for quantity steppers (often used in carts and product pages) need explicit `aria-label`s for screen readers to understand their function. Relying solely on the visual symbol (+ or -) is insufficient and provides a poor experience for assistive technology users.
+**Action:** Always ensure quantity adjustment buttons have descriptive `aria-label`s like "Increase quantity" and "Decrease quantity", utilizing the translation system (e.g., `aria-label={t('common.increase')}`).

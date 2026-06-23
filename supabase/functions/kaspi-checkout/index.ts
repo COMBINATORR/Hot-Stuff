@@ -1,35 +1,30 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://hotstuff.kz"
-];
-
-function getCorsHeaders(req: Request) {
-  const origin = req.headers.get("origin");
-  const envAllowedOrigin = Deno.env.get("ALLOWED_ORIGIN");
-
-  let allowOrigin = "http://localhost:3000"; // Safe fallback
-
-  if (origin) {
-    if (envAllowedOrigin && origin === envAllowedOrigin) {
-      allowOrigin = origin;
-    } else if (allowedOrigins.includes(origin)) {
-      allowOrigin = origin;
-    }
+function getCorsHeaders(reqOrigin: string | null) {
+  const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
+  const allowedOrigins = ["http://localhost:3000"];
+  if (envOrigins) {
+    allowedOrigins.push(...envOrigins.split(",").map((o) => o.trim()));
   }
 
+  const isAllowed = reqOrigin && allowedOrigins.includes(reqOrigin);
   return {
-    "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Origin": isAllowed
+      ? reqOrigin
+      : "http://localhost:3000",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 }
 
 Deno.serve(async (req) => {
+  const reqOrigin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(reqOrigin);
+
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: getCorsHeaders(req) });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
@@ -45,21 +40,25 @@ Deno.serve(async (req) => {
 
     if (!amount || !orderId) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: amount and orderId are required" }),
+        JSON.stringify({
+          error: "Missing required fields: amount and orderId are required",
+        }),
         {
           status: 400,
-          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
-    console.log(`Processing checkout for Order: ${orderId}, Amount: ${amount}, Phone: ${phone || "N/A"}`);
+    console.log(
+      `Processing checkout for Order: ${orderId}, Amount: ${amount}, Phone: ${phone || "N/A"}`,
+    );
 
     // 3. Integrate with Kaspi API
     // In a real production setup, you would call Kaspi's Merchant API or a 3rd party gateway like ApiPay
     let paymentUrl = "";
     let invoiceNumber = "";
-    
+
     if (apiKey && apiKey !== "placeholder" && !apiKey.startsWith("mock")) {
       try {
         // Real API Call template (e.g. to ApiPay or similar integration partner)
@@ -67,7 +66,7 @@ Deno.serve(async (req) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
+            Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
             amount: Number(amount),
@@ -93,10 +92,10 @@ Deno.serve(async (req) => {
     if (!paymentUrl) {
       // Simulate invoice creation
       invoiceNumber = `INV-${orderId}-${Math.floor(1000 + Math.random() * 9000)}`;
-      
+
       // Kaspi Pay custom deep link mock format
       // In production, this would open the Kaspi app directly
-      paymentUrl = 'https://pay.kaspi.kz/pay/oqg3hrij';
+      paymentUrl = "https://pay.kaspi.kz/pay/oqg3hrij";
     }
 
     const responseBody = {
@@ -109,16 +108,13 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify(responseBody), {
       status: 200,
-      headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Exception in kaspi-checkout function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
