@@ -23,16 +23,38 @@ const logs: any[] = [];
 
 function maskSensitiveData(data: any): any {
   if (typeof data === "string") {
-    return data.replace(/(client_secret=)([^&]+)/g, "$1******");
+    let masked = data;
+    const sensitiveKeys = [
+      'client_secret', 'access_token', 'refresh_token', 'id_token', 'token', 'code'
+    ];
+    for (const key of sensitiveKeys) {
+      const regex = new RegExp(`(${key}=)([^&]+)`, 'gi');
+      masked = masked.replace(regex, "$1******");
+    }
+    return masked;
+  }
+  if (Array.isArray(data)) {
+    return data.map(item => maskSensitiveData(item));
   }
   if (typeof data === "object" && data !== null) {
     const cloned = { ...data };
-    if (cloned.client_secret) cloned.client_secret = "******";
-    if (cloned.clientSecret) cloned.clientSecret = "******";
-    if (cloned.Authorization)
-      cloned.Authorization = cloned.Authorization.substring(0, 15) + "...";
-    if (cloned.authorization)
-      cloned.authorization = cloned.authorization.substring(0, 15) + "...";
+    const exactKeysToMask = [
+      'client_secret', 'clientSecret',
+      'access_token', 'accessToken',
+      'refresh_token', 'refreshToken',
+      'id_token', 'idToken',
+      'token', 'code'
+    ];
+    for (const key in cloned) {
+      if (exactKeysToMask.includes(key) && cloned[key]) {
+        cloned[key] = "******";
+      } else if (key.toLowerCase() === "authorization" && typeof cloned[key] === "string") {
+        const match = cloned[key].match(/^(Bearer|OAuth|Basic)\s+(.*)$/i);
+        cloned[key] = match ? `${match[1]} ******` : "******";
+      } else if (typeof cloned[key] === "object" && cloned[key] !== null) {
+        cloned[key] = maskSensitiveData(cloned[key]);
+      }
+    }
     return cloned;
   }
   return data;
