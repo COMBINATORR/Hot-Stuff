@@ -194,7 +194,6 @@ export default function AccountPage({ onAddToCart, lang }) {
             ''
           ).trim().toLowerCase();
           
-          console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
           setIsLoggedIn(true);
           setLoggedInUser(email);
           setSessionUser(session.user);
@@ -203,7 +202,6 @@ export default function AccountPage({ onAddToCart, lang }) {
           // Add to registered users list safely
           setRegisteredUsers(prev => {
             if (!email || prev.includes(email)) return prev;
-            console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
             const next = [...prev, email];
             localStorage.setItem('hs_registered_users', JSON.stringify(next));
             return next;
@@ -226,9 +224,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       });
     };
 
-    console.log('[AccountPage] Checking current active Supabase session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[AccountPage] getSession result:', session?.user?.email ? 'Active session found' : 'No active session');
       if (active) {
         handleAuthSession(session);
       }
@@ -240,12 +236,10 @@ export default function AccountPage({ onAddToCart, lang }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('[AccountPage] onAuthStateChange event:', _event, 'User email:', session?.user?.email);
       startTransition(() => {
         if (session && session.user) {
           handleAuthSession(session);
         } else if (_event === 'SIGNED_OUT') {
-          console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
           setIsLoggedIn(false);
           setLoggedInUser(null);
           setSessionUser(null);
@@ -301,7 +295,6 @@ export default function AccountPage({ onAddToCart, lang }) {
   const handleLocalTelegramLogin = () => {
     setError('');
     setLoading(true);
-    console.log('[Telegram Auth] Emulating success on localhost');
     
     // Mock Telegram user data
     const mockUser = {
@@ -326,7 +319,6 @@ export default function AccountPage({ onAddToCart, lang }) {
   const handleTelegramLoginSuccess = async (user) => {
     setError('');
     setLoading(true);
-    console.log('[Telegram Auth] Received user from Telegram widget:', user);
     
     try {
       // Invoke our deployed Edge Function
@@ -346,7 +338,6 @@ export default function AccountPage({ onAddToCart, lang }) {
       }
 
       if (result.session && result.session.access_token && result.session.refresh_token) {
-        console.log('[Telegram Auth] Verification success. Injecting session...');
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: result.session.access_token,
           refresh_token: result.session.refresh_token
