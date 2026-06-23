@@ -21,6 +21,7 @@ function getCorsHeaders(reqOrigin: string | null) {
 Deno.serve(async (req) => {
   const reqOrigin = req.headers.get("Origin");
   const corsHeaders = getCorsHeaders(reqOrigin);
+
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
