@@ -63,7 +63,7 @@ describe('supabaseClient helpers', () => {
       expect(mockSignInWithOAuth).toHaveBeenCalledWith({
         provider: 'custom:yandex',
         options: {
-          scopes: 'login:email login:info login:avatar'
+          scopes: 'login:email login:info login:avatar login:birthday login:default_phone'
         }
       });
       expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);

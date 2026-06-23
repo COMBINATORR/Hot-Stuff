@@ -56,7 +56,7 @@ export const signInWithYandex = authGuard(() =>
   supabase.auth.signInWithOAuth({
     provider: 'custom:yandex',
     options: {
-      scopes: 'login:email login:info login:avatar'
+      scopes: 'login:email login:info login:avatar login:birthday login:default_phone'
     }
   })
 );
