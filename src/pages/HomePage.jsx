@@ -172,8 +172,9 @@ export default function HomePage({ onAddToCart }) {
         
         if (error) throw error;
         if (data && data.length > 0) {
+          const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
           const mutated = data.map(p => {
-            const localProduct = ALL_PRODUCTS.find(lp => lp.id === p.id);
+            const localProduct = productsMap.get(p.id);
             return {
               ...p,
               price: localProduct ? localProduct.price : (Math.floor(Math.random() * 101) + 100),
