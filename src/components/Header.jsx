@@ -448,6 +448,8 @@ export default function Header({
       alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
     } finally {
       localStorage.removeItem('hs_user');
+      localStorage.removeItem('hs_auth_session');
+      window.dispatchEvent(new Event('hs_auth_change'));
       navigate(getHomePath());
     }
   };

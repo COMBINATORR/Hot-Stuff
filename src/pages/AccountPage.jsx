@@ -497,15 +497,18 @@ export default function AccountPage({ onAddToCart, lang }) {
     setLoggedInUser(normalizedUser);
     
     // Set a simulated sessionUser for mock login flow
-    setSessionUser({
+    const mockSessionUser = {
       email: normalizedUser,
       user_metadata: {
         full_name: normalizedUser === 'admin@hotstuff.kz' ? 'Администратор' : 'Тестовый Пользователь',
         avatar_url: null
       }
-    });
+    };
+    setSessionUser(mockSessionUser);
 
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
+    localStorage.setItem('hs_auth_session', JSON.stringify({ user: mockSessionUser }));
+    window.dispatchEvent(new Event('hs_auth_change'));
 
     if (!registeredUsers.includes(normalizedUser)) {
       const updatedList = [...registeredUsers, normalizedUser];
@@ -533,6 +536,8 @@ export default function AccountPage({ onAddToCart, lang }) {
       alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
     } finally {
       localStorage.removeItem('hs_user');
+      localStorage.removeItem('hs_auth_session');
+      window.dispatchEvent(new Event('hs_auth_change'));
 
       const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
       navigate(targetPath);
