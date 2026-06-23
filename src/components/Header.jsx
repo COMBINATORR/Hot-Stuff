@@ -595,15 +595,36 @@ export default function Header({
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
             {/* Sandwich for Desktop */}
-            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <motion.button 
+              whileHover="hover"
+              initial="rest"
+              animate="rest"
+              onClick={() => setNavOpen(true)} 
+              className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`} 
+              aria-label={t('header.open_menu', 'Открыть меню')}
+            >
               <div className="flex flex-col justify-between items-start w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <motion.span 
+                  variants={{
+                    rest: { width: 24, x: 0 },
+                    hover: { width: 16, x: 8 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
+                <motion.span 
+                  variants={{
+                    rest: { width: 16 },
+                    hover: { width: 24 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
               </div>
               <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary group-focus-visible:text-primary transition-colors flex items-center mt-[1px]`}>
                 {t('header.menu', 'МЕНЮ')}
               </span>
-            </button>
+            </motion.button>
 
             {/* Logo for Mobile */}
             <div className="flex md:hidden flex-col items-start justify-center select-none">
@@ -628,9 +649,15 @@ export default function Header({
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_search', 'Открыть поиск')}>
+            <motion.button 
+              whileHover={{ scale: 1.15, rotate: 15 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              onClick={() => setSearchOpen(true)} 
+              className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_search', 'Открыть поиск')}
+            >
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">search</span>
-            </button>
+            </motion.button>
             <AnimatePresence mode="popLayout" initial={false}>
               {session ? (
                 <motion.div
@@ -643,15 +670,21 @@ export default function Header({
                 >
                   <Link to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`} className="flex items-center focus:outline-none transition-transform hover:scale-105 duration-200">
                     {session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
-                      <img
+                      <motion.img
+                        whileHover={{ scale: 1.15, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                         src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
                         alt="Avatar"
                         className="w-[28px] h-[28px] rounded-full object-cover border border-white/20 hover:border-primary transition-all duration-300"
                       />
                     ) : (
-                      <div className="w-[28px] h-[28px] rounded-full bg-primary text-black flex items-center justify-center text-[12px] font-bold font-mono hover:bg-[#ffe088] transition-all duration-300">
+                      <motion.div
+                        whileHover={{ scale: 1.15, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        className="w-[28px] h-[28px] rounded-full bg-primary text-black flex items-center justify-center text-[12px] font-bold font-mono hover:bg-[#ffe088] transition-all duration-300"
+                      >
                         {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
-                      </div>
+                      </motion.div>
                     )}
                   </Link>
                   <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase font-sans">
@@ -690,35 +723,86 @@ export default function Header({
                     className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
                     title={t('header.login_register', 'Вход / Регистрация')}
                   >
-                    <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
+                    <motion.span 
+                      whileHover={{ scale: 1.15, y: -2 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      className="material-symbols-outlined text-[22px] font-light leading-none block"
+                    >
+                      person
+                    </motion.span>
                   </NavLink>
                 </motion.div>
               )}
             </AnimatePresence>
-            <button onClick={onOpenFavorites} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_favorites', 'Открыть избранное')}>
+            <motion.button 
+              whileHover={{ 
+                scale: [1, 1.2, 1.05, 1.2, 1],
+              }}
+              transition={{
+                duration: 0.6,
+                ease: "easeInOut",
+                times: [0, 0.25, 0.45, 0.7, 1]
+              }}
+              onClick={onOpenFavorites} 
+              className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_favorites', 'Открыть избранное')}
+            >
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">favorite</span>
               {favoritesCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {favoritesCount}
                 </span>
               )}
-            </button>
-            <button onClick={onOpenCart || (() => setCartOpen(true))} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
+            </motion.button>
+            <motion.button 
+              whileHover={{ 
+                scale: 1.15,
+                rotate: [0, -10, 8, -5, 3, 0]
+              }}
+              transition={{
+                duration: 0.5,
+                ease: "easeInOut"
+              }}
+              onClick={onOpenCart || (() => setCartOpen(true))} 
+              className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_cart', 'Открыть корзину')}
+            >
               <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">shopping_bag</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {cartCount}
                 </span>
               )}
-            </button>
+            </motion.button>
 
             {/* Sandwich for Mobile */}
-            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <motion.button 
+              whileHover="hover"
+              initial="rest"
+              animate="rest"
+              onClick={() => setNavOpen(true)} 
+              className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`} 
+              aria-label={t('header.open_menu', 'Открыть меню')}
+            >
               <div className="flex flex-col justify-between items-end w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <motion.span 
+                  variants={{
+                    rest: { width: 24, x: 0 },
+                    hover: { width: 16, x: 8 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
+                <motion.span 
+                  variants={{
+                    rest: { width: 16 },
+                    hover: { width: 24 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
               </div>
-            </button>
+            </motion.button>
           </div>
         </div>
       </header>
