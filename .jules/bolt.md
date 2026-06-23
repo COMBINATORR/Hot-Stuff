@@ -17,3 +17,7 @@
 ## 2024-05-14 - Optimize linear search inside loop
 **Learning:** Performing a linear array search (`Array.prototype.find`) inside a `map` or loop inside a React render can cause performance issues, especially when the array is large.
 **Action:** Pre-compute a lookup `Map` (or object dictionary) outside the component or memoize it using `useMemo` so that the inner loop lookup changes from O(n) to O(1) complexity.
+
+## 2024-10-25 - O(N) array search replaced with O(1) Map lookup globally
+**Learning:** When a constant list of objects (`ALL_PRODUCTS`) is queried repeatedly by ID across multiple components (`Breadcrumbs.jsx`, `ProductPage.jsx`, `AccountPage.jsx`), calling `Array.find()` each time forces an O(N) linear search. Although N may be small, this wastes execution cycles.
+**Action:** Export a pre-computed `Map` (e.g., `PRODUCTS_MAP`) in the data definition file alongside the raw array. Consume `PRODUCTS_MAP.get(id)` globally for instant O(1) lookups, simplifying component logic and improving performance.

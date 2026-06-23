@@ -194,7 +194,6 @@ export default function AccountPage({ onAddToCart, lang }) {
             ''
           ).trim().toLowerCase();
           
-          console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
           setIsLoggedIn(true);
           setLoggedInUser(email);
           setSessionUser(session.user);
@@ -203,7 +202,6 @@ export default function AccountPage({ onAddToCart, lang }) {
           // Add to registered users list safely
           setRegisteredUsers(prev => {
             if (!email || prev.includes(email)) return prev;
-            console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
             const next = [...prev, email];
             localStorage.setItem('hs_registered_users', JSON.stringify(next));
             return next;
@@ -226,9 +224,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       });
     };
 
-    console.log('[AccountPage] Checking current active Supabase session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[AccountPage] getSession result:', session?.user?.email ? 'Active session found' : 'No active session');
       if (active) {
         handleAuthSession(session);
       }
@@ -240,12 +236,10 @@ export default function AccountPage({ onAddToCart, lang }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('[AccountPage] onAuthStateChange event:', _event, 'User email:', session?.user?.email);
       startTransition(() => {
         if (session && session.user) {
           handleAuthSession(session);
         } else if (_event === 'SIGNED_OUT') {
-          console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
           setIsLoggedIn(false);
           setLoggedInUser(null);
           setSessionUser(null);
@@ -301,7 +295,6 @@ export default function AccountPage({ onAddToCart, lang }) {
   const handleLocalTelegramLogin = () => {
     setError('');
     setLoading(true);
-    console.log('[Telegram Auth] Emulating success on localhost');
     
     // Mock Telegram user data
     const mockUser = {
@@ -326,7 +319,6 @@ export default function AccountPage({ onAddToCart, lang }) {
   const handleTelegramLoginSuccess = async (user) => {
     setError('');
     setLoading(true);
-    console.log('[Telegram Auth] Received user from Telegram widget:', user);
     
     try {
       // Invoke our deployed Edge Function
@@ -346,7 +338,6 @@ export default function AccountPage({ onAddToCart, lang }) {
       }
 
       if (result.session && result.session.access_token && result.session.refresh_token) {
-        console.log('[Telegram Auth] Verification success. Injecting session...');
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: result.session.access_token,
           refresh_token: result.session.refresh_token
@@ -1120,34 +1111,50 @@ export default function AccountPage({ onAddToCart, lang }) {
               {/* Social Buttons — Google · Yandex · Telegram */}
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
 
-                <div className="flex justify-center gap-4 w-full">
-                  {/* Google — official multicolor G (inline SVG, no external file) */}
+                <div className="flex flex-col gap-3 w-full">
+                  {/* Google */}
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="w-[58px] h-[58px] bg-white hover:bg-neutral-50 rounded-[20px] flex items-center justify-center transition-all duration-300 cursor-pointer flex-none border border-black shadow-sm active:scale-95"
+                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
                     title={t('account.google')}
                     disabled={loading}
                   >
-                    <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
+                    <span className="text-neutral-800 font-medium text-sm">{t('account.google', 'Google')}</span>
                   </button>
 
-                  {/* Yandex — official red background, white Y */}
+                  {/* Yandex */}
                   <button
                     type="button"
                     onClick={handleYandexClick}
-                    className="w-[58px] h-[58px] bg-[#FC3F1D] hover:bg-[#E03517] rounded-[20px] border border-black shadow-sm flex items-center justify-center transition-all duration-300 cursor-pointer flex-none active:scale-95"
+                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
                     title={t('account.yandex')}
                     disabled={loading}
                   >
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M14.654 20.893H16.892L16.892 3.107H11.517C6.732 3.107 4.298 6.302 4.298 9.947C4.298 13.593 6.732 16.666 11.517 16.666H14.153L14.153 14.288H11.664C8.423 14.288 6.643 12.277 6.643 9.947C6.643 7.618 8.423 5.485 11.664 5.485H14.153V10.153L9.695 20.893H12.01L14.654 13.974V20.893Z" fill="white"/>
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#FC3F1D">
+                      <path d="M7 3 L12 11.5 L17 3 L15 3 L12 8.5 L9 3 Z M11 12 L11 21 L13 21 L13 12 Z"/>
                     </svg>
+                    <span className="text-neutral-800 font-medium text-sm">{t('account.yandex', 'Yandex')}</span>
+                  </button>
+
+                  {/* Telegram */}
+                  <button
+                    type="button"
+                    onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
+                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
+                    title={t('account.telegram', 'Telegram')}
+                    disabled={loading}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <path fill="#2AABEE" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                    </svg>
+                    <span className="text-neutral-800 font-medium text-sm">{t('account.telegram', 'Telegram')}</span>
                   </button>
                 </div>
 

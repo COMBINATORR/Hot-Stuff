@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider, useTranslation } from 'react-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import i18n from './i18n.js';
 import AppRouter from './router.jsx';
 import Header from './components/Header.jsx';
@@ -139,6 +140,7 @@ function App() {
             </main>
             <ConditionalFooter />
             <CookieBanner />
+            <Analytics />
 
             {/* Standalone Drawers and Modal */}
             <CartDrawer 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from '../components/ResponsiveImage';
 import { useTranslation } from 'react-i18next';
