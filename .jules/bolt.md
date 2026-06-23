@@ -21,3 +21,7 @@
 ## 2024-10-25 - O(N) array search replaced with O(1) Map lookup globally
 **Learning:** When a constant list of objects (`ALL_PRODUCTS`) is queried repeatedly by ID across multiple components (`Breadcrumbs.jsx`, `ProductPage.jsx`, `AccountPage.jsx`), calling `Array.find()` each time forces an O(N) linear search. Although N may be small, this wastes execution cycles.
 **Action:** Export a pre-computed `Map` (e.g., `PRODUCTS_MAP`) in the data definition file alongside the raw array. Consume `PRODUCTS_MAP.get(id)` globally for instant O(1) lookups, simplifying component logic and improving performance.
+## 2024-06-23 - Map Lookup Optimization in React Render
+
+**Learning:** Array `.find()` operations inside deeply nested React render cycles (like breadcrumbs generation) can become a performance bottleneck when dealing with larger state arrays (e.g., categories).
+**Action:** When computing derived state via `useMemo` that will be repeatedly queried by a unique key (like a slug or ID), pre-compute a `Map` and use `map.get(key)` for O(1) lookups instead of relying solely on arrays and O(N) linear search.

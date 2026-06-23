@@ -12,16 +12,18 @@ export default function Breadcrumbs({ theme = 'dark' }) {
   const [categories, setCategories] = useState([]);
 
   // Предварительно вычисляем Map для быстрого поиска подкатегорий (O(1) вместо O(N*M))
-  const { subcategoriesBySlug, subcategoriesByName } = useMemo(() => {
+  const { categoriesBySlug, subcategoriesBySlug, subcategoriesByName } = useMemo(() => {
+    const catBySlug = new Map();
     const bySlug = new Map();
     const byName = new Map();
     for (const c of categories) {
+      if (c.slug) catBySlug.set(c.slug, c);
       for (const sub of (c.subcategories || [])) {
         if (sub.slug) bySlug.set(sub.slug, { parent: c, sub });
         if (sub.name) byName.set(sub.name.toLowerCase(), { parent: c, sub });
       }
     }
-    return { subcategoriesBySlug: bySlug, subcategoriesByName: byName };
+    return { categoriesBySlug: catBySlug, subcategoriesBySlug: bySlug, subcategoriesByName: byName };
   }, [categories]);
 
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function Breadcrumbs({ theme = 'dark' }) {
 
     if (catSlug && categories.length > 0) {
       // Ищем родительскую категорию
-      const parentCat = categories.find(c => c.slug === catSlug);
+      const parentCat = categoriesBySlug.get(catSlug);
       if (parentCat) {
         breadcrumbItems.push({
           name: t('menu.' + parentCat.name.toLowerCase(), parentCat.name),
