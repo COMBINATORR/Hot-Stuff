@@ -650,7 +650,7 @@ export default function Header({
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
             <motion.button 
-              whileHover={{ scale: 1.15, rotate: 15 }}
+              whileHover={{ scale: 1.15, y: -2, rotate: 12 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={() => setSearchOpen(true)} 
               className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
@@ -735,14 +735,8 @@ export default function Header({
               )}
             </AnimatePresence>
             <motion.button 
-              whileHover={{ 
-                scale: [1, 1.2, 1.05, 1.2, 1],
-              }}
-              transition={{
-                duration: 0.6,
-                ease: "easeInOut",
-                times: [0, 0.25, 0.45, 0.7, 1]
-              }}
+              whileHover={{ scale: 1.2, y: -2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={onOpenFavorites} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
               aria-label={t('header.open_favorites', 'Открыть избранное')}
@@ -755,14 +749,8 @@ export default function Header({
               )}
             </motion.button>
             <motion.button 
-              whileHover={{ 
-                scale: 1.15,
-                rotate: [0, -10, 8, -5, 3, 0]
-              }}
-              transition={{
-                duration: 0.5,
-                ease: "easeInOut"
-              }}
+              whileHover={{ scale: 1.15, y: -2, rotate: -8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={onOpenCart || (() => setCartOpen(true))} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
               aria-label={t('header.open_cart', 'Открыть корзину')}
