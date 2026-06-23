@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, memo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
 
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
@@ -33,6 +34,8 @@ const categorySlugMap = {
   'bdsm-fetish': (p) => false,
   'lubricants-cosmetics': (p) => false
 };
+
+const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
@@ -146,7 +149,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
             </div>
             
             {/* Color dots swatches (Interactive!) */}
-            <div className="flex gap-1 mt-0.5 flex-none z-20">
+            <div className="flex gap-2.5 mt-0.5 flex-none z-20">
               {colors.map((c, idx) => (
                 <button 
                   key={c.name} 
@@ -156,7 +159,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
                     e.stopPropagation();
                     setSelectedColorIndex(idx);
                   }}
-                  className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                  className={`relative w-2.5 h-2.5 rounded-full border transition-all after:absolute after:-inset-3 after:content-[''] ${
                     selectedColorIndex === idx 
                       ? 'border-black scale-110 ring-1 ring-black/20' 
                       : 'border-black/10 hover:border-black/30'
@@ -276,7 +279,7 @@ export default function CatalogPage({ onAddToCart }) {
       const addedList = [];
 
       productIds.forEach(id => {
-        const product = ALL_PRODUCTS.find(p => p.id === id);
+        const product = productsMap.get(id);
         if (product) {
           addedList.push(product);
           if (onAddToCart) {
@@ -340,76 +343,84 @@ export default function CatalogPage({ onAddToCart }) {
 
   // Filter and sort products based on selected parameters
   const filtered = useMemo(() => {
-    let result = ALL_PRODUCTS;
-
-    // 1. Search Query
     const searchVal = params.get('search') || '';
-    if (searchVal) {
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(searchVal.toLowerCase()) || 
-        p.categoryLabel.toLowerCase().includes(searchVal.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchVal.toLowerCase())
-      );
-    }
+    const searchValLower = searchVal.toLowerCase();
+    const filterFn = categorySlugMap[activeCat];
 
-    // 1.5 Sidebar Category (Only if not searching, or if cat matches)
-    if (activeCat !== 'all' && activeCat !== 'popular') {
-      if (activeCat === 'new') {
-        result = result.filter(p => p.isNew);
-      } else {
-        const filterFn = categorySlugMap[activeCat];
-        if (filterFn) {
-          result = result.filter(filterFn);
-        } else {
-          // Fallback to match by category property or categoryLabel
-          result = result.filter(p => 
-            p.category === activeCat || 
-            p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
-          );
+    let result = [];
+
+    for (let i = 0; i < ALL_PRODUCTS.length; i++) {
+      const p = ALL_PRODUCTS[i];
+
+      // 1. Search Query
+      if (searchValLower) {
+        if (!(p.name.toLowerCase().includes(searchValLower) ||
+            p.categoryLabel.toLowerCase().includes(searchValLower) ||
+            p.description.toLowerCase().includes(searchValLower))) {
+          continue;
         }
       }
-    }
 
-    // 2. Stimulation Zone
-    if (selectedStimulations.length > 0) {
-      result = result.filter(p => 
-        p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s))
-      );
-    }
+      // 1.5 Sidebar Category (Only if not searching, or if cat matches)
+      if (activeCat !== 'all' && activeCat !== 'popular') {
+        if (activeCat === 'new') {
+          if (!p.isNew) continue;
+        } else {
+          if (filterFn) {
+            if (!filterFn(p)) continue;
+          } else {
+            if (!(p.category === activeCat ||
+                p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
+              continue;
+            }
+          }
+        }
+      }
 
-    // 3. Price range
-    if (selectedPriceRanges.length > 0) {
-      result = result.filter(p => {
-        return selectedPriceRanges.some(range => {
+      // 2. Stimulation Zone
+      if (selectedStimulations.length > 0) {
+        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
+          continue;
+        }
+      }
+
+      // 3. Price range
+      if (selectedPriceRanges.length > 0) {
+        const matchRange = selectedPriceRanges.some(range => {
           if (range === 'low') return p.price < 80000;
           if (range === 'mid') return p.price >= 80000 && p.price <= 120000;
           if (range === 'high') return p.price > 120000;
           return true;
         });
-      });
-    }
+        if (!matchRange) continue;
+      }
 
-    // 4. Specials (Discount only)
-    if (onlyDiscounted) {
-      result = result.filter(p => p.oldPrice && p.oldPrice > p.price);
-    }
+      // 4. Specials (Discount only)
+      if (onlyDiscounted) {
+        if (!(p.oldPrice && p.oldPrice > p.price)) {
+          continue;
+        }
+      }
 
-    // 5. Features / Technologies
-    if (selectedFeatures.length > 0) {
-      result = result.filter(p => 
-        p.features && p.features.some(f => selectedFeatures.includes(f))
-      );
+      // 5. Features / Technologies
+      if (selectedFeatures.length > 0) {
+        if (!(p.features && p.features.some(f => selectedFeatures.includes(f)))) {
+          continue;
+        }
+      }
+
+      result.push(p);
     }
 
     // 6. Sorting
     if (sortBy === 'price-asc') {
-      result = [...result].sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
-      result = [...result].sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.price - a.price);
     }
 
     return result;
-  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy]);
+  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy, params]);
 
   const toggleSidebarCat = (key) => {
     setExpandedSidebarCats(prev => ({
@@ -644,7 +655,7 @@ export default function CatalogPage({ onAddToCart }) {
             <div className="flex justify-between items-center py-3 border-b border-gray-100 mb-8 font-sans">
               <button 
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors"
+                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors py-3.5 -my-3.5 px-2 -mx-2 relative z-10"
               >
                 <span className="material-symbols-outlined text-[16px]">tune</span>
                 {t('catalog.filters')}
@@ -703,8 +714,9 @@ export default function CatalogPage({ onAddToCart }) {
       </div>
 
       {/* Filter Sidebar Drawer */}
-      <AnimatePresence>
-        {isFilterOpen && (
+      {createPortal(
+        <AnimatePresence>
+          {isFilterOpen && (
           <>
             {/* Backdrop */}
             <motion.div 
@@ -712,7 +724,7 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFilterOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]"
             />
             {/* Filter Drawer */}
             <motion.div
@@ -720,10 +732,10 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[151] shadow-2xl flex flex-col font-sans"
+              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[999] shadow-2xl flex flex-col font-sans"
             >
               {/* Header */}
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+              <div className="p-8 border-b border-gray-100 flex justify-between items-center relative z-[1000]">
                 <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">{t('catalog.filters_upper')}</h2>
                 <button 
                   onClick={() => setIsFilterOpen(false)}
@@ -858,7 +870,9 @@ export default function CatalogPage({ onAddToCart }) {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
       {/* Product Preview Modal */}
       <ProductPreviewModal 

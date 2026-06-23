@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 import { supabase } from '../lib/supabase';
+import TelegramLoginWidget from '../components/TelegramLoginWidget';
+
 
 export default function AccountPage({ onAddToCart, lang }) {
   const { t, i18n } = useTranslation();
-  const [identifier, setIdentifier] = useState(() => {
-    return localStorage.getItem('hs_remembered_email') || '';
-  });
+  const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
   const [password, setPassword] = useState('');
@@ -36,13 +36,65 @@ export default function AccountPage({ onAddToCart, lang }) {
   });
 
   // SMS OTP verification states
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [showSmsPush, setShowSmsPush] = useState(false);
   const [isPrivate, setIsPrivate] = useState(() => {
     return localStorage.getItem('hs_private_mode') === 'true';
   });
 
+  // Dynamic backend integration states (Zero State by default)
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [loyaltyData, setLoyaltyData] = useState({
+    discount: 0,
+    tier: 'HOT STUFF START',
+    toNextLevel: 50000
+  });
+  const [sessionUser, setSessionUser] = useState(null);
+
+  const getDisplayAvatar = () => {
+    if (!sessionUser) return null;
+    const meta = sessionUser.user_metadata || {};
+    if (meta.avatar_url) return meta.avatar_url;
+    if (meta.picture) return meta.picture;
+    if (meta.default_avatar_id) {
+      return `https://avatars.yandex.net/get-yapic/${meta.default_avatar_id}/islands-200`;
+    }
+    if (meta.avatar_id) {
+      return `https://avatars.yandex.net/get-yapic/${meta.avatar_id}/islands-200`;
+    }
+    return null;
+  };
+
+  const getDisplayName = () => {
+    if (!sessionUser) return t('account.title', 'Личный кабинет');
+    const meta = sessionUser.user_metadata || {};
+    return (
+      meta.real_name ||
+      meta.display_name ||
+      meta.full_name ||
+      meta.name ||
+      (meta.first_name || meta.last_name 
+        ? `${meta.first_name || ''} ${meta.last_name || ''}`.trim() 
+        : '') ||
+      meta.login ||
+      meta.username ||
+      t('account.title', 'Личный кабинет')
+    );
+  };
+
+  const getDisplayEmailOrPhone = () => {
+    if (!sessionUser) return loggedInUser || '';
+    return (
+      sessionUser.email ||
+      sessionUser.user_metadata?.email ||
+      sessionUser.user_metadata?.default_email ||
+      sessionUser.user_metadata?.login ||
+      sessionUser.user_metadata?.username ||
+      loggedInUser ||
+      ''
+    );
+  };
 
   const navigate = useNavigate();
 
@@ -78,10 +130,7 @@ export default function AccountPage({ onAddToCart, lang }) {
   }, [countdown]);
 
 
-  // Filter products for the Wishlist (Sona, Soraya Wave)
-  const wishlistProducts = useMemo(() => {
-    return ALL_PRODUCTS.filter(p => p.id === 4 || p.id === 8);
-  }, []);
+
 
   // Validation
   const validateEmail = (val) => {
@@ -136,16 +185,24 @@ export default function AccountPage({ onAddToCart, lang }) {
     const handleAuthSession = (session) => {
       startTransition(() => {
         if (session && session.user) {
-          const email = (session.user.email || '').trim().toLowerCase();
+          const email = (
+            session.user.email || 
+            session.user.user_metadata?.email || 
+            session.user.user_metadata?.default_email || 
+            session.user.user_metadata?.login || 
+            session.user.user_metadata?.username || 
+            ''
+          ).trim().toLowerCase();
+          
           console.log('[AccountPage] handleAuthSession: User authenticated successfully:', email);
           setIsLoggedIn(true);
           setLoggedInUser(email);
+          setSessionUser(session.user);
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-          localStorage.setItem('hs_remembered_email', email);
 
           // Add to registered users list safely
           setRegisteredUsers(prev => {
-            if (prev.includes(email)) return prev;
+            if (!email || prev.includes(email)) return prev;
             console.log('[AccountPage] handleAuthSession: Adding email to registered users list:', email);
             const next = [...prev, email];
             localStorage.setItem('hs_registered_users', JSON.stringify(next));
@@ -154,12 +211,14 @@ export default function AccountPage({ onAddToCart, lang }) {
 
           // Add to saved accounts list if it's not a mock account
           const emailClean = email.trim().toLowerCase();
-          if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
+          if (emailClean && !['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
             setSavedAccounts(prev => {
               if (prev.includes(emailClean)) return prev;
               return [...prev, emailClean];
             });
           }
+        } else {
+          setSessionUser(null);
         }
         if (active) {
           setIsSessionLoading(false);
@@ -189,7 +248,9 @@ export default function AccountPage({ onAddToCart, lang }) {
           console.log('[AccountPage] SIGNED_OUT detected. Clearing active login states');
           setIsLoggedIn(false);
           setLoggedInUser(null);
+          setSessionUser(null);
           localStorage.removeItem('hs_user');
+
           if (active) {
             setIsSessionLoading(false);
           }
@@ -268,15 +329,14 @@ export default function AccountPage({ onAddToCart, lang }) {
     console.log('[Telegram Auth] Received user from Telegram widget:', user);
     
     try {
-      // Invoke our serverless API function
-      const response = await fetch('/api/telegram-auth', {
+      // Invoke our deployed Edge Function
+      const response = await fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          telegramData: user,
-          redirectTo: window.location.origin + window.location.pathname
+          telegramData: user
         })
       });
 
@@ -285,10 +345,13 @@ export default function AccountPage({ onAddToCart, lang }) {
         throw new Error(result.error || t('account.err_telegram_verify', 'Ошибка проверки данных Telegram на сервере'));
       }
 
-      if (result.success && result.action_link) {
-        console.log('[Telegram Auth] Verification success. Redirecting to magiclink:', result.action_link);
-        // Redirect browser to magiclink, which will sign the user in via Supabase
-        window.location.href = result.action_link;
+      if (result.session && result.session.access_token && result.session.refresh_token) {
+        console.log('[Telegram Auth] Verification success. Injecting session...');
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
+        });
+        if (sessionError) throw sessionError;
       } else {
         throw new Error(t('account.err_invalid_response', 'Неверный формат ответа от сервера авторизации'));
       }
@@ -305,9 +368,10 @@ export default function AccountPage({ onAddToCart, lang }) {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'yandex',
+        provider: 'custom:yandex',
         options: {
           redirectTo: window.location.origin + window.location.pathname,
+          scopes: 'login:email login:info login:avatar login:birthday login:default_phone',
           queryParams: {
             force_confirm: 'yes'
           }
@@ -329,34 +393,23 @@ export default function AccountPage({ onAddToCart, lang }) {
     setError('');
     setLoading(true);
     
-    // Generate a mock 6-digit OTP code for local debugging/testing
-    const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(mockCode);
-    
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: emailVal,
-        options: {
-          emailRedirectTo: window.location.origin + window.location.pathname
-        }
+        email: emailVal
       });
 
       if (otpError) {
-        console.warn('[Supabase OTP Send Error - Using Local Fallback]', otpError);
+        console.warn('[Supabase OTP Send Error]', otpError);
       }
 
       setCountdown(60);
       setCode(['', '', '', '', '', '']); // Reset 6 digit code
       setStep(2);
-      setShowSmsPush(true); // Always display the iOS-style SMS notification for testing
-      
-      console.log(`[Supabase OTP] OTP sent. Local debug code: ${mockCode}`);
     } catch (err) {
-      console.warn('[Supabase OTP Send Exception - Using Local Fallback]', err);
+      console.warn('[Supabase OTP Send Exception]', err);
       setCountdown(60);
       setCode(['', '', '', '', '', '']);
       setStep(2);
-      setShowSmsPush(true);
     } finally {
       setLoading(false);
     }
@@ -402,15 +455,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       return;
     }
 
-    // 1. Check local debug fallback code first (either the generated random OTP or 123456 as standard fallback)
-    if (enteredCode === generatedOtp || enteredCode === '123456') {
-      console.log('[Auth] Local debug OTP verified successfully');
-      loginSuccess(identifier);
-      setLoading(false);
-      return;
-    }
-
-    // 2. Otherwise verify via real Supabase
+    // Verify via real Supabase
     try {
       let { data, error: verifyError } = await supabase.auth.verifyOtp({
         email: identifier.trim().toLowerCase(),
@@ -450,8 +495,20 @@ export default function AccountPage({ onAddToCart, lang }) {
     const normalizedUser = userVal.trim().toLowerCase();
     setIsLoggedIn(true);
     setLoggedInUser(normalizedUser);
+    
+    // Set a simulated sessionUser for mock login flow
+    const mockSessionUser = {
+      email: normalizedUser,
+      user_metadata: {
+        full_name: normalizedUser === 'admin@hotstuff.kz' ? 'Администратор' : 'Тестовый Пользователь',
+        avatar_url: null
+      }
+    };
+    setSessionUser(mockSessionUser);
+
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
-    localStorage.setItem('hs_remembered_email', normalizedUser); // Save remembered email
+    localStorage.setItem('hs_auth_session', JSON.stringify({ user: mockSessionUser }));
+    window.dispatchEvent(new Event('hs_auth_change'));
 
     if (!registeredUsers.includes(normalizedUser)) {
       const updatedList = [...registeredUsers, normalizedUser];
@@ -479,6 +536,8 @@ export default function AccountPage({ onAddToCart, lang }) {
       alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
     } finally {
       localStorage.removeItem('hs_user');
+      localStorage.removeItem('hs_auth_session');
+      window.dispatchEvent(new Event('hs_auth_change'));
 
       const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
       navigate(targetPath);
@@ -487,8 +546,9 @@ export default function AccountPage({ onAddToCart, lang }) {
         startTransition(() => {
           setIsLoggedIn(false);
           setLoggedInUser(null);
+          setSessionUser(null);
           setStep(1);
-          setIdentifier(localStorage.getItem('hs_remembered_email') || '');
+          setIdentifier('');
           setPassword('');
           setCode(['', '', '', '', '', '']);
           setError('');
@@ -497,6 +557,7 @@ export default function AccountPage({ onAddToCart, lang }) {
       }, 500);
     }
   };
+
 
   const handleTogglePrivate = () => {
     setIsPrivate(prev => {
@@ -526,7 +587,7 @@ export default function AccountPage({ onAddToCart, lang }) {
   const [showSharePush, setShowSharePush] = useState(false);
 
   const handleShareWishlist = () => {
-    const productIds = wishlistProducts.map(p => p.id);
+    const productIds = favorites.map(p => p.id);
     const langPrefix = lang && lang !== 'ru' ? `/${lang}` : '';
     const shareUrl = `${window.location.origin}${langPrefix}/catalog?gift=${productIds.join(',')}&ref=anonymous`;
     
@@ -590,37 +651,6 @@ export default function AccountPage({ onAddToCart, lang }) {
       <Breadcrumbs theme="dark" />
       <div className="flex-1 flex flex-col justify-center items-center px-4 md:px-8">
       
-      {/* iOS-Style SMS Push Notification */}
-      <AnimatePresence>
-        {showSmsPush && (
-          <motion.div
-            initial={{ opacity: 0, y: -100, x: '-50%', scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
-            exit={{ opacity: 0, y: -100, x: '-50%', scale: 0.95 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 120 }}
-            onClick={() => setShowSmsPush(false)}
-            className="fixed top-6 left-1/2 w-[90%] max-w-[360px] bg-white/90 dark:bg-[#1c1c1e]/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl p-4 flex gap-3 z-[9999] cursor-pointer select-none font-sans text-left"
-          >
-            {/* App Icon / Message Badge */}
-            <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-              <span className="material-symbols-outlined text-[20px] font-bold">chat</span>
-            </div>
-            
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[11px] font-black text-black/40 dark:text-white/40 uppercase tracking-widest font-sans">{t('account.messages', 'Сообщения')}</span>
-                <span className="text-[10px] text-black/30 dark:text-white/30 font-medium">{t('account.now', 'сейчас')}</span>
-              </div>
-              <h4 className="text-xs font-black text-black dark:text-white mb-0.5 uppercase tracking-wide">Hot Stuff</h4>
-              <p className="text-[11.5px] text-black/70 dark:text-white/70 leading-relaxed font-normal">
-                {t('account.otp_label', 'Код подтверждения')}: <span className="font-bold text-black dark:text-white font-mono bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-xs select-all">{generatedOtp}</span>. {t('account.otp_sec_warn', 'Не сообщайте его никому.')}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Share Wishlist Push Notification */}
       <AnimatePresence>
         {showSharePush && (
@@ -663,10 +693,22 @@ export default function AccountPage({ onAddToCart, lang }) {
             {/* Dashboard Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-black/5">
               <div className="flex items-center gap-4">
-                <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
+                {getDisplayAvatar() ? (
+                  <img
+                    src={getDisplayAvatar()}
+                    alt="User Avatar"
+                    className="w-12 h-12 rounded-full object-cover border border-black/10 shadow-sm"
+                  />
+                ) : (
+                  <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
+                )}
                 <div>
-                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">{t('account.title', 'Личный кабинет')}</h1>
-                  <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">{loggedInUser}</p>
+                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
+                    {getDisplayName()}
+                  </h1>
+                  <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">
+                    {getDisplayEmailOrPhone()}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-4 md:gap-6 self-start md:self-auto">
@@ -706,23 +748,44 @@ export default function AccountPage({ onAddToCart, lang }) {
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.privileges', 'Клуб Привилегий')}</h3>
                     <span className="bg-primary/15 text-[#b28b10] text-[8px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase">
-                      HOT STUFF GOLD
+                      {loyaltyData.tier}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-black leading-none">12%</span>
+                    <span className="text-4xl font-black text-black leading-none">{loyaltyData.discount}%</span>
                     <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wide">{t('account.personal_discount', 'Ваша персональная скидка')}</span>
                   </div>
                 </div>
-                <div className="space-y-2 mt-4">
-                  <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
-                    <span>{t('account.to_vip', 'До скидки 15% (VIP уровень) осталось:')}</span>
-                    <span className="text-black">45 000 ₸</span>
+
+                {loyaltyData.discount === 0 ? (
+                  <div className="mt-4 p-4 bg-white/60 rounded-xl border border-black/5">
+                    <p className="text-xs text-neutral-600 leading-relaxed font-normal">
+                      {t('account.loyalty_intro', 'Совершите вашу первую покупку, чтобы стать участником клуба привилегий и начать копить персональную скидку!')}
+                    </p>
                   </div>
-                  <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: '60%' }} />
+                ) : (
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                      <span>{t('account.to_next_level', 'До следующего уровня осталось:')}</span>
+                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: `${Math.max(10, Math.min(100, (50000 - loyaltyData.toNextLevel) / 500))}%` }} />
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {loyaltyData.discount === 0 && (
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                      <span>{t('account.to_first_discount', 'До первой скидки осталось:')}</span>
+                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '0%' }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 2. Anonymous Active Delivery (Bento: 1 col) */}
@@ -732,10 +795,24 @@ export default function AccountPage({ onAddToCart, lang }) {
                     <span className="material-symbols-outlined text-[20px] font-light">local_shipping</span>
                     <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.current_delivery', 'Текущая Доставка')}</h3>
                   </div>
-                  <div className="border-l-2 border-primary pl-4 py-1 space-y-2">
-                    <p className="text-xs font-black text-black">{t('account.delivery_order', 'Заказ №10492 — Доставляется курьером сегодня')}</p>
-                    <p className="text-[10px] text-neutral-500">{t('account.delivery_interval', 'Интервал: 18:00 – 22:00. Курьер свяжется за 30 минут.')}</p>
-                  </div>
+                  {activeOrders.length === 0 ? (
+                    <div className="py-4">
+                      <p className="text-xs text-neutral-500 font-medium">
+                        {t('account.no_active_orders', 'У вас пока нет активных заказов.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activeOrders.map(order => (
+                        <div key={order.id} className="border-l-2 border-primary pl-4 py-1 space-y-2">
+                          <p className="text-xs font-black text-black">
+                            {t('account.delivery_order_num', { num: order.number })} — {order.status}
+                          </p>
+                          <p className="text-[10px] text-neutral-500">{order.details}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Anti-Anxiety Privacy Banner */}
@@ -754,40 +831,49 @@ export default function AccountPage({ onAddToCart, lang }) {
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2">
                 <h3 className="text-xs font-black tracking-wider text-black uppercase mb-2">{t('account.history', 'История Покупок')}</h3>
                 
-                <div className="divide-y divide-black/5 text-xs font-sans">
-                  <div className="py-4 flex justify-between items-center gap-4">
-                    <div>
-                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 9810, date: '14.05.2026' })}</p>
-                      <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'LELO Sona™ 3 Cruise x1'} — {t('account.completed', 'Выполнен')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-neutral-900">38 900 ₸</p>
-                      <button 
-                        onClick={() => {
-                          const prod = ALL_PRODUCTS.find(p => p.id === 4);
-                          if (prod) handleAddWishlistItem(prod);
-                        }}
-                        className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
-                      >
-                        {t('account.repeat', 'Повторить в 1 клик')}
-                      </button>
-                    </div>
+                {orderHistory.length === 0 ? (
+                  <div className="py-8 flex flex-col items-center justify-center text-center gap-4">
+                    <p className="text-xs text-neutral-500 font-medium">
+                      {t('account.no_orders_yet', 'Вы еще ничего не заказывали.')}
+                    </p>
+                    <Link
+                      to={lang && lang !== 'ru' ? `/${lang}/catalog` : '/catalog'}
+                      className="border border-black hover:bg-black hover:text-white text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-all rounded-none cursor-pointer"
+                    >
+                      {t('account.go_to_catalog', 'Перейти в каталог')}
+                    </Link>
                   </div>
-                  <div className="py-4 flex justify-between items-center gap-4">
-                    <div>
-                      <p className="font-bold text-black uppercase">{t('account.order_completed', { num: 8520, date: '02.04.2026' })}</p>
-                      <p className="text-[10px] text-neutral-500 mt-1">
-                        {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : 'Personal Moisturizer x1'} — {t('account.completed', 'Выполнен')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-neutral-900">12 500 ₸</p>
-                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
-                    </div>
+                ) : (
+                  <div className="divide-y divide-black/5 text-xs font-sans">
+                    {orderHistory.map(order => (
+                      <div key={order.id} className="py-4 flex justify-between items-center gap-4">
+                        <div>
+                          <p className="font-bold text-black uppercase">{t('account.order_completed', { num: order.number, date: order.date })}</p>
+                          <p className="text-[10px] text-neutral-500 mt-1">
+                            {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : `${order.itemsSummary}`} — {order.status}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-neutral-900">{order.totalPrice.toLocaleString('ru-KZ')} ₸</p>
+                          {order.canRepeat && (
+                            <button 
+                              onClick={() => {
+                                const prod = ALL_PRODUCTS.find(p => p.id === order.productId);
+                                if (prod) handleAddWishlistItem(prod);
+                              }}
+                              className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
+                            >
+                              {t('account.repeat', 'Повторить в 1 клик')}
+                            </button>
+                          )}
+                          {!order.canRepeat && (
+                            <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
 
               {/* 4. Wishlist (Избранное) (Bento: 1 col) */}
@@ -795,48 +881,57 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="space-y-6">
                   <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.favorites', 'Избранные Товары')}</h3>
                   
-                  <div className="space-y-5">
-                    {wishlistProducts.map(product => (
-                      <div key={product.id} className="flex gap-4 p-3 bg-white border border-black/5 rounded-lg">
-                        <div className="w-16 h-16 bg-neutral-50 rounded-[4px] overflow-hidden flex items-center justify-center flex-none relative">
-                          {isPrivate ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
-                              <span className="material-symbols-outlined text-[18px]">visibility_off</span>
-                              <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
-                            </div>
-                          ) : (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
-                          )}
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between">
-                          <div>
-                            <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
-                              {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
-                            </h4>
-                            <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
+                  {favorites.length === 0 ? (
+                    <div className="py-8">
+                      <p className="text-xs text-neutral-500 font-medium text-center">
+                        {t('account.favorites_empty', 'Ваш список желаний пуст.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-5">
+                      {favorites.map(product => (
+                        <div key={product.id} className="flex gap-4 p-3 bg-white border border-black/5 rounded-lg">
+                          <div className="w-16 h-16 bg-neutral-50 rounded-[4px] overflow-hidden flex items-center justify-center flex-none relative">
+                            {isPrivate ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
+                                <span className="material-symbols-outlined text-[18px]">visibility_off</span>
+                                <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
+                              </div>
+                            ) : (
+                              <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
+                            )}
                           </div>
-                          <button
-                            onClick={() => handleAddWishlistItem(product)}
-                            className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
-                          >
-                            {t('account.to_cart', 'В КОРЗИНУ')}
-                          </button>
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
+                                {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
+                              </h4>
+                              <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
+                            </div>
+                            <button
+                              onClick={() => handleAddWishlistItem(product)}
+                              className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
+                            >
+                              {t('account.to_cart', 'В КОРЗИНУ')}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {wishlistProducts.length > 0 && (
+                {favorites.length > 0 && (
                   <button
                     onClick={handleShareWishlist}
                     className="w-full bg-black hover:bg-neutral-800 text-white font-sans font-bold text-[9px] tracking-[0.2em] py-3.5 px-4 rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer mt-4"
                   >
                     <span className="material-symbols-outlined text-[16px] leading-none">share</span>
-                    <span>НАМЕКНУТЬ ПАРТНЕРУ (АНОНИМНО)</span>
+                    <span>{t('account.hint', 'НАМЕКНУТЬ ПАРТНЕРУ (АНОНИМНО)')}</span>
                   </button>
                 )}
               </div>
+
 
               {/* 5. Session Security & Devices (Bento: 3 cols) */}
               <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-3">
@@ -1000,7 +1095,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={t('account.email', 'Email')}
-                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
+                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
                     disabled={loading}
                   />
                 </div>
@@ -1022,7 +1117,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                 <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
               </div>
 
-              {/* Social Buttons — Google · Yandex · Telegram in one row */}
+              {/* Social Buttons — Google · Yandex · Telegram */}
               <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
 
                 <div className="flex flex-col gap-3 w-full">
@@ -1072,15 +1167,28 @@ export default function AccountPage({ onAddToCart, lang }) {
                   </button>
                 </div>
 
-                {/* Hidden official Telegram widget — production only, triggered by our styled button above */}
-                {!isLocalHost() && (
-                  <div id="tg-widget-trigger" className="hidden">
-                    <TelegramWidgetContainer
-                      botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStoreBot'}
+                {/* Telegram Widget Area */}
+                <div className="w-full flex justify-center mt-2 border-t border-neutral-100 pt-4">
+                  {isLocalHost() ? (
+                    <button
+                      type="button"
+                      onClick={handleLocalTelegramLogin}
+                      className="w-full max-w-[220px] h-[40px] bg-[#2AABEE] hover:bg-[#229ED9] text-white font-sans font-bold text-[11px] uppercase tracking-wider rounded-[20px] transition-all cursor-pointer flex items-center justify-center gap-2 border border-black shadow-sm"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                      </svg>
+                      <span>{t('account.local_login', 'Войти (Локально)')}</span>
+                    </button>
+                  ) : (
+                    <TelegramLoginWidget
+                      botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStore_bot'}
                       onAuth={handleTelegramLoginSuccess}
+                      size="large"
+                      radius="20"
                     />
-                  </div>
-                )}
+                  )}
+                </div>
 
               </div>
             </div>
@@ -1100,7 +1208,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
+                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
                       disabled={loading}
                     />
                   </div>
@@ -1186,32 +1294,3 @@ export default function AccountPage({ onAddToCart, lang }) {
   );
 }
 
-function TelegramWidgetContainer({ botName, onAuth }) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-radius', '20');
-    script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', 'false');
-    
-    window.onTelegramAuth = (user) => {
-      onAuth(user);
-    };
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.async = true;
-
-    if (containerRef.current) {
-      containerRef.current.appendChild(script);
-    }
-  }, [botName, onAuth]);
-
-  return <div ref={containerRef} className="flex justify-center items-center h-10" />;
-}

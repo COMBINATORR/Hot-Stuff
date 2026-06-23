@@ -1,10 +1,22 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
-};
+function getCorsHeaders(reqOrigin: string | null) {
+  const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
+  const allowedOrigins = ["http://localhost:3000"];
+  if (envOrigins) {
+    allowedOrigins.push(...envOrigins.split(",").map((o) => o.trim()));
+  }
+
+  const isAllowed = reqOrigin && allowedOrigins.includes(reqOrigin);
+  return {
+    "Access-Control-Allow-Origin": isAllowed
+      ? reqOrigin
+      : "http://localhost:3000",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
+  };
+}
 
 // Global in-memory logs buffer
 const logs: any[] = [];
@@ -17,8 +29,10 @@ function maskSensitiveData(data: any): any {
     const cloned = { ...data };
     if (cloned.client_secret) cloned.client_secret = "******";
     if (cloned.clientSecret) cloned.clientSecret = "******";
-    if (cloned.Authorization) cloned.Authorization = cloned.Authorization.substring(0, 15) + "...";
-    if (cloned.authorization) cloned.authorization = cloned.authorization.substring(0, 15) + "...";
+    if (cloned.Authorization)
+      cloned.Authorization = cloned.Authorization.substring(0, 15) + "...";
+    if (cloned.authorization)
+      cloned.authorization = cloned.authorization.substring(0, 15) + "...";
     return cloned;
   }
   return data;
@@ -28,7 +42,7 @@ async function addLog(message: string, detail?: any) {
   const logEntry = {
     timestamp: new Date().toISOString(),
     message,
-    detail: maskSensitiveData(detail)
+    detail: maskSensitiveData(detail),
   };
   console.log(`${message}:`, JSON.stringify(logEntry.detail || ""));
   logs.unshift(logEntry);
@@ -36,19 +50,20 @@ async function addLog(message: string, detail?: any) {
     logs.pop();
   }
 
-  // Also send to RequestCatcher for robust retrieval
-  try {
-    await fetch("https://hotstuff-yandex.requestcatcher.com/log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(logEntry),
-    });
-  } catch (e) {
+  // Also send to RequestCatcher for robust retrieval (unawaited to avoid blocking)
+  fetch("https://hotstuff-yandex.requestcatcher.com/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(logEntry),
+  }).catch(() => {
     // Fail silently for webhook logger
-  }
+  });
 }
 
 Deno.serve(async (req) => {
+  const reqOrigin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(reqOrigin);
+
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -67,6 +82,16 @@ Deno.serve(async (req) => {
 
   // Endpoint to retrieve logs for debugging
   if (url.pathname.endsWith("/logs")) {
+    const authHeader = req.headers.get("Authorization");
+    const expectedKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== expectedKey) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(logs), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -107,13 +132,16 @@ Deno.serve(async (req) => {
 
       // Forward response back to Supabase
       const responseHeaders = new Headers(corsHeaders);
-      responseHeaders.set("Content-Type", yandexResponse.headers.get("Content-Type") || "application/json");
+      responseHeaders.set(
+        "Content-Type",
+        yandexResponse.headers.get("Content-Type") || "application/json",
+      );
 
       return new Response(responseText, {
         status: yandexResponse.status,
         headers: responseHeaders,
       });
-    } catch (error) {
+    } catch (error: any) {
       await addLog("Exception in token proxy", { error: error.message });
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
@@ -141,7 +169,7 @@ Deno.serve(async (req) => {
         {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -155,12 +183,15 @@ Deno.serve(async (req) => {
       yandexAuthHeaderMasked: yandexAuthHeader.substring(0, 15) + "...",
     });
 
-    const yandexResponse = await fetch("https://login.yandex.ru/info?format=json", {
-      headers: {
-        Authorization: yandexAuthHeader,
-        "User-Agent": "HotStuff-Ecommerce-App/1.0",
+    const yandexResponse = await fetch(
+      "https://login.yandex.ru/info?format=json",
+      {
+        headers: {
+          Authorization: yandexAuthHeader,
+          "User-Agent": "HotStuff-Ecommerce-App/1.0",
+        },
       },
-    });
+    );
 
     if (!yandexResponse.ok) {
       const errorText = await yandexResponse.text();
@@ -169,11 +200,14 @@ Deno.serve(async (req) => {
         details: errorText,
       });
       return new Response(
-        JSON.stringify({ error: "Failed to fetch user info from Yandex", details: errorText }),
+        JSON.stringify({
+          error: "Failed to fetch user info from Yandex",
+          details: errorText,
+        }),
         {
           status: yandexResponse.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -189,26 +223,39 @@ Deno.serve(async (req) => {
       normalizedData.sub = normalizedData.id;
     }
 
-    // 1. Map email (GoTrue requires 'email')
-    if (!normalizedData.email && normalizedData.default_email) {
-      normalizedData.email = normalizedData.default_email;
-    }
-    
+    // 1. Critical Email Fix (Prevents Supabase "Unverified email" rejection)
+    normalizedData.email = normalizedData.default_email;
+    normalizedData.email_verified = true;
+
     // Fallback if email is still missing but emails array is present
-    if (!normalizedData.email && normalizedData.emails && normalizedData.emails.length > 0) {
+    if (
+      !normalizedData.email &&
+      normalizedData.emails &&
+      normalizedData.emails.length > 0
+    ) {
       normalizedData.email = normalizedData.emails[0];
     }
 
-    // 2. Map name (real_name -> name)
-    if (!normalizedData.name && normalizedData.real_name) {
-      normalizedData.name = normalizedData.real_name;
-    } else if (!normalizedData.name && normalizedData.display_name) {
-      normalizedData.name = normalizedData.display_name;
+    // 2. Extract Birthday (Yandex returns 'birthday', map to OIDC standard 'birthdate')
+    if (normalizedData.birthday) {
+      normalizedData.birthdate = normalizedData.birthday; 
     }
 
-    // 3. Map avatar (default_avatar_id -> picture)
+    // 3. Extract Phone (Yandex returns nested object `default_phone: { id, number }`)
+    if (normalizedData.default_phone && normalizedData.default_phone.number) {
+      normalizedData.phone_number = normalizedData.default_phone.number; 
+    }
+
+    // 4. Map Name
+    if (normalizedData.real_name || normalizedData.display_name) {
+      normalizedData.name = normalizedData.real_name || normalizedData.display_name;
+      normalizedData.full_name = normalizedData.name;
+    }
+
+    // 5. Map Avatar Picture
     if (normalizedData.default_avatar_id) {
       normalizedData.picture = `https://avatars.yandex.net/get-yapic/${normalizedData.default_avatar_id}/islands-200`;
+      normalizedData.avatar_url = normalizedData.picture;
     }
 
     await addLog("Normalized profile response data", normalizedData);
@@ -217,14 +264,13 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
-    await addLog("Exception in yandex-proxy edge function", { error: error.message });
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+  } catch (error: any) {
+    await addLog("Exception in yandex-proxy edge function", {
+      error: error.message,
+    });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

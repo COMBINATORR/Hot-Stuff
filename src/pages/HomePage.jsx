@@ -17,8 +17,9 @@ import logoNewsletterBg from '../assets/images/newsletter_bg.png';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductGrid from '../components/ProductGrid';
+import HotspotsLookbook from '../components/HotspotsLookbook';
 import { supabase } from '../lib/supabase';
-import { ALL_PRODUCTS as DATA_PRODUCTS } from '../data/products';
+import { ALL_PRODUCTS } from '../data/products';
 
 const HERO = {
   headline: 'в погоне за наслаждением',
@@ -52,70 +53,41 @@ const POPULAR_CATEGORIES = [
   }
 ];
 
-const ALL_PRODUCTS = [
-  { 
-    id: 7, 
-    name: 'HUGO™ 2 REMOTE', 
-    price: 166440, 
-    oldPrice: 219000,
-    category: 'massagers', 
-    categoryLabel: 'МАССАЖЕРЫ ПРОСТАТЫ',
-    image: logoGoldBoots,
-    gallery: [logoGoldBoots, logoNoirDress, logoEtherealWrap],
-    colors: ['#111111', '#004d40'],
-    description: 'Вибромассажер простаты HUGO™ 2 Remote с 6 мощными режимами наслаждения для тех, кто хочет разжечь в себе искру любви. Благодаря технологии SenseMotion™ беспроводной пульт обеспечивает непревзойденное удобство.',
-    socialProof: '🔥 48 куплено сегодня'
-  },
-  { 
-    id: 1, 
-    name: 'NOIR SILHOUETTE DRESS', 
-    price: 210000, 
-    oldPrice: 280000,
-    category: 'vibrators', 
-    categoryLabel: 'ВЕЧЕРНИЕ ПЛАТЬЯ',
-    image: logoNoirDress, 
-    gallery: [logoNoirDress, logoGoldBoots],
-    colors: ['#4A4A4A', '#2D5E87', '#B8860B'],
-    description: 'Премиальное шелковое платье NOIR SILHOUETTE DRESS, создающее идеальный силуэт. Роскошная ткань, тонкая проработка швов и чувственный крой.',
-    socialProof: '🌟 Топ-выбор покупателей'
-  },
-  { 
-    id: 2, 
-    name: 'ETHEREAL SILK WRAP', 
-    price: 92500, 
-    oldPrice: 135000,
-    category: 'vibrators', 
-    categoryLabel: 'ШЕЛКОВЫЕ НАКИДКИ',
-    image: logoEtherealWrap, 
-    gallery: [logoEtherealWrap, logoNoirDress],
-    colors: ['#FFFFFF', '#FFD700'],
-    description: 'Легкая шелковая накидка ETHEREAL SILK WRAP для создания чувственной атмосферы дома или на отдыхе. Натуральный шелк высочайшего класса.',
-    socialProof: '🔥 19 человек добавили в корзину'
-  },
-  { 
-    id: 3, 
-    name: 'GOLD-TRIMMED BOOTS', 
-    price: 280000, 
-    oldPrice: 380000,
-    category: 'vibrators', 
-    categoryLabel: 'ОБУВЬ И АКСЕССУАРЫ',
-    image: logoGoldBoots, 
-    gallery: [logoGoldBoots, logoEtherealWrap],
-    colors: ['#FFD700', '#4A4A4A'],
-    description: 'Ботильоны ручной работы GOLD-TRIMMED BOOTS с золотыми деталями. Элегантность, дерзость и превосходный комфорт.',
-    socialProof: '⭐ 99% рекомендаций'
-  },
-].map(p => {
-  const dataProd = DATA_PRODUCTS.find(dp => dp.id === p.id);
-  return {
-    ...p,
-    price: dataProd ? dataProd.price : (Math.floor(Math.random() * 101) + 100),
-    oldPrice: null
-  };
-});
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
+
+function TrustCard({ icon, hoverIcon, title, desc }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div 
+      className="flex gap-4 items-start text-left group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex-none mt-0.5 h-6 w-6 flex items-center justify-center overflow-hidden">
+        <motion.span 
+          key={isHovered ? hoverIcon : icon}
+          initial={{ opacity: 0, scale: 0.7, rotate: -90 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ duration: 0.25, ease: "backOut" }}
+          className="material-symbols-outlined text-[24px] text-[#f2ca50] block"
+        >
+          {isHovered ? hoverIcon : icon}
+        </motion.span>
+      </div>
+      <div className="flex flex-col">
+        <h3 className="font-sans font-bold text-[11px] tracking-wider text-white uppercase mb-1 group-hover:text-primary transition-colors duration-300">
+          {title}
+        </h3>
+        <p className="text-[10px] text-gray-400 font-sans leading-relaxed">
+          {desc}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage({ onAddToCart }) {
   const { t } = useTranslation();
@@ -200,8 +172,9 @@ export default function HomePage({ onAddToCart }) {
         
         if (error) throw error;
         if (data && data.length > 0) {
+          const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
           const mutated = data.map(p => {
-            const localProduct = ALL_PRODUCTS.find(lp => lp.id === p.id);
+            const localProduct = productsMap.get(p.id);
             return {
               ...p,
               price: localProduct ? localProduct.price : (Math.floor(Math.random() * 101) + 100),
@@ -715,42 +688,40 @@ export default function HomePage({ onAddToCart }) {
        <section className="bg-black py-12 px-6">
          <div className="container-hs">
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-             {[
-               {
-                 icon: 'inventory_2',
-                 title: t('home.features.anon_title'),
-                 desc: t('home.features.anon_desc')
-               },
-               {
-                 icon: 'local_shipping',
-                 title: t('home.features.free_title'),
-                 desc: t('home.features.free_desc')
-               },
-               {
-                 icon: 'health_and_safety',
-                 title: t('home.features.safe_title'),
-                 desc: t('home.features.safe_desc')
-               },
-               {
-                 icon: 'verified',
-                 title: t('home.features.warranty_title'),
-                 desc: t('home.features.warranty_desc')
-               }
-             ].map((item, idx) => (
-               <div key={idx} className="flex gap-4 items-start text-left">
-                 <span className="material-symbols-outlined text-[24px] text-[#f2ca50] flex-none mt-0.5">
-                   {item.icon}
-                 </span>
-                 <div className="flex flex-col">
-                   <h3 className="font-sans font-bold text-[11px] tracking-wider text-white uppercase mb-1">
-                     {item.title}
-                   </h3>
-                   <p className="text-[10px] text-gray-400 font-sans leading-relaxed">
-                     {item.desc}
-                   </p>
-                 </div>
-               </div>
-             ))}
+              {[
+                {
+                  icon: 'inventory_2',
+                  hoverIcon: 'lock',
+                  title: t('home.features.anon_title'),
+                  desc: t('home.features.anon_desc')
+                },
+                {
+                  icon: 'local_shipping',
+                  hoverIcon: 'rocket_launch',
+                  title: t('home.features.free_title'),
+                  desc: t('home.features.free_desc')
+                },
+                {
+                  icon: 'health_and_safety',
+                  hoverIcon: 'favorite',
+                  title: t('home.features.safe_title'),
+                  desc: t('home.features.safe_desc')
+                },
+                {
+                  icon: 'verified',
+                  hoverIcon: 'workspace_premium',
+                  title: t('home.features.warranty_title'),
+                  desc: t('home.features.warranty_desc')
+                }
+              ].map((item, idx) => (
+                <TrustCard 
+                  key={idx}
+                  icon={item.icon}
+                  hoverIcon={item.hoverIcon}
+                  title={item.title}
+                  desc={item.desc}
+                />
+              ))}
            </div>
          </div>
        </section>
@@ -781,7 +752,7 @@ export default function HomePage({ onAddToCart }) {
           onMouseMove={handleMouseMove}
           className="flex overflow-x-auto gap-4 px-6 md:px-20 scrollbar-none snap-x snap-mandatory md:snap-none pb-6 cursor-grab select-none"
           onScroll={handleScroll}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {categories.map((cat) => (
             <div 
@@ -858,15 +829,18 @@ export default function HomePage({ onAddToCart }) {
                        >
                          {t('product.preview')}
                        </button>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             ))}
-           </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
          </div>
        </section>
  
+       {/* ═══ HOTSPOTS LOOKBOOK ═══ */}
+       <HotspotsLookbook onAddToCart={onAddToCart} onSelectQuickView={setSelectedPreviewProduct} />
+
        {/* ═══ INA THRUST PROMO BANNER ═══════════════ */}
        <section className="relative w-full aspect-[21/9] min-h-[350px] md:min-h-[500px] flex items-center overflow-hidden">
          <ResponsiveImage 
@@ -981,7 +955,7 @@ export default function HomePage({ onAddToCart }) {
                  type="email"
                  placeholder={t('home.newsletter.placeholder')}
                  required
-                 className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-xs sm:text-sm outline-none font-sans"
+                 className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-[16px] outline-none font-sans"
                />
                <button 
                  type="submit" 

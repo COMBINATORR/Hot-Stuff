@@ -184,7 +184,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
         {/* Header */}
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">{t('header.cart_title', 'ВАША КОРЗИНА')}</h2>
-          <button className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:text-primary" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
+          <button className="w-11 h-11 -mr-3 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:text-primary rounded-[2px]" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
@@ -239,13 +239,15 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center justify-between">
                         <div className="flex items-center border border-white/10">
                           <button 
-                            className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                            className="px-3 py-1 text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                             onClick={() => onUpdateQty(item.id, item.variant, Math.max(1, item.qty - 1))}
+                            aria-label={t('common.decrease', 'Уменьшить')}
                           >-</button>
                           <span className="px-3 py-1 font-body-md">{item.qty}</span>
                           <button 
-                            className="px-3 py-1 text-on-surface-variant hover:text-primary"
+                            className="px-3 py-1 text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                             onClick={() => onUpdateQty(item.id, item.variant, item.qty + 1)}
+                            aria-label={t('common.increase', 'Увеличить')}
                           >+</button>
                         </div>
                         <button 
@@ -268,12 +270,12 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🧴</span>
                         <div>
-                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">Personal Moisturizer</p>
+                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">{t('product.crosssell.moisturizer_name', 'Personal Moisturizer')}</p>
                           <p className="font-sans text-[11px] text-primary">12 500 ₸</p>
                         </div>
                       </div>
                       <button 
-                        onClick={() => onAddToCart({ id: 101, name: 'Personal Moisturizer', price: 12500, emoji: '🧴', variant: 'Default', qty: 1 })}
+                        onClick={() => onAddToCart({ id: 101, name: t('product.crosssell.moisturizer_name', 'Personal Moisturizer'), price: 12500, emoji: '🧴', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
                         + {t('header.add_btn', 'ДОБАВИТЬ')}
@@ -286,12 +288,12 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🧼</span>
                         <div>
-                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">Cleaning Spray</p>
+                          <p className="font-sans font-bold text-[10px] text-white uppercase tracking-wider">{t('product.crosssell.spray_name', 'Cleaning Spray')}</p>
                           <p className="font-sans text-[11px] text-primary">8 900 ₸</p>
                         </div>
                       </div>
                       <button 
-                        onClick={() => onAddToCart({ id: 102, name: 'Cleaning Spray', price: 8900, emoji: '🧼', variant: 'Default', qty: 1 })}
+                        onClick={() => onAddToCart({ id: 102, name: t('product.crosssell.spray_name', 'Cleaning Spray'), price: 8900, emoji: '🧼', variant: 'Default', qty: 1 })}
                         className="border border-primary text-primary font-sans font-bold text-[9px] tracking-widest px-3 py-1.5 uppercase hover:bg-primary hover:text-on-primary transition-all rounded-[2px]"
                       >
                         + {t('header.add_btn', 'ДОБАВИТЬ')}
@@ -312,7 +314,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                 <label className="font-label-caps text-[10px] text-on-surface-variant uppercase">{t('header.promo_label', 'ПРОМОКОД')}</label>
                 <div className="flex gap-2">
                   <input 
-                    className="flex-1 bg-background border border-white/10 px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors" 
+                    className="flex-1 bg-background border border-white/10 px-4 py-2 text-[16px] text-on-surface focus:border-primary outline-none transition-colors" 
                     placeholder={t('header.promo_placeholder', 'Введите код')} 
                     type="text"
                     value={promo}
@@ -385,7 +387,15 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
   );
 }
 
-export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToCart }) {
+export default function Header({ 
+  cartItems = [], 
+  onUpdateQty, 
+  onRemove, 
+  onAddToCart,
+  favoritesCount = 0,
+  onOpenCart,
+  onOpenFavorites
+}) {
   const { t, i18n } = useTranslation();
   const [cartOpen, setCartOpen] = useState(false);
   const [navOpen,  setNavOpen]  = useState(false);
@@ -438,6 +448,8 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
       alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
     } finally {
       localStorage.removeItem('hs_user');
+      localStorage.removeItem('hs_auth_session');
+      window.dispatchEvent(new Event('hs_auth_change'));
       navigate(getHomePath());
     }
   };
@@ -585,15 +597,36 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
           {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
           <div className="flex items-center gap-3">
             {/* Sandwich for Desktop */}
-            <button onClick={() => setNavOpen(true)} className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <motion.button 
+              whileHover="hover"
+              initial="rest"
+              animate="rest"
+              onClick={() => setNavOpen(true)} 
+              className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`} 
+              aria-label={t('header.open_menu', 'Открыть меню')}
+            >
               <div className="flex flex-col justify-between items-start w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <motion.span 
+                  variants={{
+                    rest: { width: 24, x: 0 },
+                    hover: { width: 16, x: 8 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
+                <motion.span 
+                  variants={{
+                    rest: { width: 16 },
+                    hover: { width: 24 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
               </div>
               <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary group-focus-visible:text-primary transition-colors flex items-center mt-[1px]`}>
                 {t('header.menu', 'МЕНЮ')}
               </span>
-            </button>
+            </motion.button>
 
             {/* Logo for Mobile */}
             <div className="flex md:hidden flex-col items-start justify-center select-none">
@@ -618,8 +651,19 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <button onClick={() => setSearchOpen(true)} className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_search', 'Открыть поиск')}>
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">search</span>
+            <button 
+              onClick={() => setSearchOpen(true)} 
+              className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_search', 'Открыть поиск')}
+            >
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                search
+              </motion.span>
             </button>
             <AnimatePresence mode="popLayout" initial={false}>
               {session ? (
@@ -633,15 +677,21 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                 >
                   <Link to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`} className="flex items-center focus:outline-none transition-transform hover:scale-105 duration-200">
                     {session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture ? (
-                      <img
+                      <motion.img
+                        whileHover={{ scale: 1.15, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                         src={session.user.user_metadata.avatar_url || session.user.user_metadata.picture}
                         alt="Avatar"
                         className="w-[28px] h-[28px] rounded-full object-cover border border-white/20 hover:border-primary transition-all duration-300"
                       />
                     ) : (
-                      <div className="w-[28px] h-[28px] rounded-full bg-primary text-black flex items-center justify-center text-[12px] font-bold font-mono hover:bg-[#ffe088] transition-all duration-300">
+                      <motion.div
+                        whileHover={{ scale: 1.15, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        className="w-[28px] h-[28px] rounded-full bg-primary text-black flex items-center justify-center text-[12px] font-bold font-mono hover:bg-[#ffe088] transition-all duration-300"
+                      >
                         {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
-                      </div>
+                      </motion.div>
                     )}
                   </Link>
                   <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase font-sans">
@@ -680,13 +730,49 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
                     title={t('header.login_register', 'Вход / Регистрация')}
                   >
-                    <span className="material-symbols-outlined text-[22px] font-light leading-none block">person</span>
+                    <motion.span 
+                      whileHover={{ scale: 1.15, y: -2 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      className="material-symbols-outlined text-[22px] font-light leading-none block"
+                    >
+                      person
+                    </motion.span>
                   </NavLink>
                 </motion.div>
               )}
             </AnimatePresence>
-            <button onClick={() => setCartOpen(true)} className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} aria-label={t('header.open_cart', 'Открыть корзину')}>
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">shopping_bag</span>
+            <button 
+              onClick={onOpenFavorites} 
+              className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_favorites', 'Открыть избранное')}
+            >
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                favorite
+              </motion.span>
+              {favoritesCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
+                  {favoritesCount}
+                </span>
+              )}
+            </button>
+            <button 
+              onClick={onOpenCart || (() => setCartOpen(true))} 
+              className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
+              aria-label={t('header.open_cart', 'Открыть корзину')}
+            >
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                shopping_bag
+              </motion.span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {cartCount}
@@ -695,12 +781,33 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
             </button>
 
             {/* Sandwich for Mobile */}
-            <button onClick={() => setNavOpen(true)} className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`} aria-label={t('header.open_menu', 'Открыть меню')}>
+            <motion.button 
+              whileHover="hover"
+              initial="rest"
+              animate="rest"
+              onClick={() => setNavOpen(true)} 
+              className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`} 
+              aria-label={t('header.open_menu', 'Открыть меню')}
+            >
               <div className="flex flex-col justify-between items-end w-6 h-[10px]" aria-hidden="true">
-                <span className={`w-6 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
-                <span className={`w-4 h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}></span>
+                <motion.span 
+                  variants={{
+                    rest: { width: 24, x: 0 },
+                    hover: { width: 16, x: 8 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
+                <motion.span 
+                  variants={{
+                    rest: { width: 16 },
+                    hover: { width: 24 }
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                />
               </div>
-            </button>
+            </motion.button>
           </div>
         </div>
       </header>
@@ -912,7 +1019,7 @@ export default function Header({ cartItems = [], onUpdateQty, onRemove, onAddToC
                     }
                   }}
                 />
-                <button onClick={() => setSearchOpen(false)} className="text-white hover:text-primary transition-colors focus:outline-none focus-visible:text-primary bg-transparent border-none" aria-label={t('header.close_search', 'Закрыть поиск')}>
+                <button onClick={() => setSearchOpen(false)} className="w-12 h-12 flex items-center justify-center text-white hover:text-primary transition-colors focus:outline-none focus-visible:text-primary bg-transparent border-none rounded-[2px]" aria-label={t('header.close_search', 'Закрыть поиск')}>
                   <span className="material-symbols-outlined text-3xl font-light" aria-hidden="true">close</span>
                 </button>
               </div>
