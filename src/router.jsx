@@ -27,7 +27,7 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
-export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove, favorites, setFavorites, onSelectQuickView }) {
+export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpdateQty, onRemove, favorites, setFavorites, onSelectQuickView }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -121,7 +121,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         <Route path="/catalog"      element={<PageWrapper><CatalogPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/product/:id"  element={<PageWrapper><ProductPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/cart"         element={<PageWrapper><CartPage cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
-        <Route path="/checkout"     element={<PageWrapper><CheckoutPage cartItems={cartItems} /></PageWrapper>} />
+        <Route path="/checkout"     element={<PageWrapper><CheckoutPage cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
         <Route path="/account"      element={<PageWrapper><AccountPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/legal"        element={<PageWrapper><LegalPage /></PageWrapper>} />
         <Route path="/mockup/soraya-wave" element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />
@@ -133,7 +133,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
             <Route path={`/${lang}/catalog`}     element={<PageWrapper><CatalogPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/product/:id`} element={<PageWrapper><ProductPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/cart`}         element={<PageWrapper><CartPage lang={lang} cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
-            <Route path={`/${lang}/checkout`}    element={<PageWrapper><CheckoutPage lang={lang} cartItems={cartItems} /></PageWrapper>} />
+            <Route path={`/${lang}/checkout`}    element={<PageWrapper><CheckoutPage lang={lang} cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
             <Route path={`/${lang}/account`}     element={<PageWrapper><AccountPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/legal`}        element={<PageWrapper><LegalPage /></PageWrapper>} />
             <Route path={`/${lang}/mockup/soraya-wave`} element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />

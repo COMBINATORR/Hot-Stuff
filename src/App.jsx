@@ -129,6 +129,7 @@ function App() {
             <main className="min-h-screen pb-20 md:pb-0">
               <AppRouter
                 cartItems={cartItems}
+                setCartItems={setCartItems}
                 onAddToCart={handleAddToCart}
                 onUpdateQty={updateQty}
                 onRemove={removeItem}
