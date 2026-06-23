@@ -650,7 +650,7 @@ export default function Header({
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
             <motion.button 
-              whileHover={{ scale: 1.15, y: -2, rotate: 12 }}
+              whileHover={{ scale: 1.15, y: -2 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={() => setSearchOpen(true)} 
               className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
@@ -735,7 +735,7 @@ export default function Header({
               )}
             </AnimatePresence>
             <motion.button 
-              whileHover={{ scale: 1.2, y: -2 }}
+              whileHover={{ scale: 1.15, y: -2 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={onOpenFavorites} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
@@ -749,7 +749,7 @@ export default function Header({
               )}
             </motion.button>
             <motion.button 
-              whileHover={{ scale: 1.15, y: -2, rotate: -8 }}
+              whileHover={{ scale: 1.15, y: -2 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
               onClick={onOpenCart || (() => setCartOpen(true))} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
