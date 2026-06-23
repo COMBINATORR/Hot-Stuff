@@ -1,93 +1,206 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Set environment variables for Vite/Vitest
-vi.stubEnv('VITE_SUPABASE_URL', 'http://localhost:54321');
-vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
-vi.stubGlobal('import.meta', {
-  env: {
-    VITE_SUPABASE_URL: 'http://localhost:54321',
-    VITE_SUPABASE_ANON_KEY: 'test-anon-key'
-  }
-});
-
-const mockInvoke = vi.fn();
+// We must use mock functions that can be updated or tracked easily
+const mockSignInWithOAuth = vi.fn();
+const mockSignOut = vi.fn();
+const mockFunctionsInvoke = vi.fn();
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
-    functions: {
-      invoke: mockInvoke
-    },
     auth: {
-      signInWithOAuth: vi.fn(),
-      signOut: vi.fn()
+      signInWithOAuth: mockSignInWithOAuth,
+      signOut: mockSignOut,
+    },
+    functions: {
+      invoke: mockFunctionsInvoke,
     }
   }))
 }));
 
-describe('supabaseClient edge functions', () => {
-  let calculateYandexDelivery;
-  let createKaspiPayment;
+describe('supabaseClient helpers', () => {
+  let consoleWarnMock;
+  let consoleErrorMock;
 
-  beforeEach(async () => {
-    vi.clearAllMocks();
+  beforeEach(() => {
     vi.resetModules();
-
-    // Reset the stub before importing to ensure standard behavior for other tests
-    vi.stubGlobal('import.meta', {
-      env: {
-        VITE_SUPABASE_URL: 'http://localhost:54321',
-        VITE_SUPABASE_ANON_KEY: 'test-anon-key'
-      }
-    });
-
-    const module = await import('./supabaseClient.js');
-    calculateYandexDelivery = module.calculateYandexDelivery;
-    createKaspiPayment = module.createKaspiPayment;
+    vi.clearAllMocks();
+    consoleWarnMock = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  describe('calculateYandexDelivery', () => {
-    it('should invoke the yandex-delivery edge function with the provided payload', async () => {
-      const mockData = { price: 1500, status: 'ok' };
-      mockInvoke.mockResolvedValueOnce({ data: mockData, error: null });
+  afterEach(() => {
+    consoleWarnMock.mockRestore();
+    consoleErrorMock.mockRestore();
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
 
-      const payload = { address: 'Almaty, Abay 1', weight: 2.5 };
-      const result = await calculateYandexDelivery(payload);
+  const stubEnvConfigured = () => {
+    vi.stubGlobal('import.meta', {
+      env: {
+        VITE_SUPABASE_URL: 'https://test.supabase.co',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+      }
+    });
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+  };
 
-      expect(mockInvoke).toHaveBeenCalledWith('yandex-delivery', { body: payload });
-      expect(result).toEqual(mockData);
+  const stubEnvUnconfigured = () => {
+    vi.stubGlobal('import.meta', { env: {} });
+    vi.stubEnv('VITE_SUPABASE_URL', '');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+  };
+
+  describe('signInWithYandex', () => {
+    it('calls signInWithOAuth with correct Yandex provider and options when configured', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
+
+      await supabaseClient.signInWithYandex();
+
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+        provider: 'custom:yandex',
+        options: {
+          scopes: 'login:email login:info login:avatar login:birthday login:default_phone'
+        }
+      });
+      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error if the edge function invocation fails', async () => {
-      const mockError = new Error('Yandex API Error');
-      mockInvoke.mockResolvedValueOnce({ data: null, error: mockError });
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
 
-      const payload = { address: 'Invalid Address' };
-      await expect(calculateYandexDelivery(payload)).rejects.toThrow('Yandex API Error');
+      const result = await supabaseClient.signInWithYandex();
 
-      expect(mockInvoke).toHaveBeenCalledWith('yandex-delivery', { body: payload });
+      expect(result).toEqual({ error: 'Supabase not configured' });
+      expect(consoleWarnMock).toHaveBeenCalledWith('[Auth] Supabase не инициализирован. Добавьте ключи в .env');
+    });
+  });
+
+  describe('signInWithGoogle', () => {
+    it('calls signInWithOAuth with correct Google provider', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
+
+      await supabaseClient.signInWithGoogle();
+
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google'
+      });
+      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signInWithGoogle();
+
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+  });
+
+  describe('signInWithApple', () => {
+    it('calls signInWithOAuth with correct Apple provider', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
+
+      await supabaseClient.signInWithApple();
+
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+        provider: 'apple'
+      });
+      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signInWithApple();
+
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+  });
+
+  describe('signOut', () => {
+    it('calls signOut on the supabase client', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignOut.mockResolvedValue({ error: null });
+
+      await supabaseClient.signOut();
+
+      expect(mockSignOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signOut();
+      expect(result).toEqual({ error: 'Supabase not configured' });
     });
   });
 
   describe('createKaspiPayment', () => {
-    it('should invoke the kaspi-pay edge function with the provided payload', async () => {
-      const mockData = { paymentUrl: 'https://kaspi.kz/pay/123' };
-      mockInvoke.mockResolvedValueOnce({ data: mockData, error: null });
+    it('invokes kaspi-pay edge function with payload', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: { status: 'ok' }, error: null });
 
-      const payload = { amount: 5000, orderId: 'ORDER-123' };
-      const result = await createKaspiPayment(payload);
-
-      expect(mockInvoke).toHaveBeenCalledWith('kaspi-pay', { body: payload });
-      expect(result).toEqual(mockData);
+      const result = await supabaseClient.createKaspiPayment({ amount: 100 });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('kaspi-pay', { body: { amount: 100 } });
+      expect(result).toEqual({ status: 'ok' });
     });
 
-    it('should throw an error if the edge function invocation fails', async () => {
-      const mockError = new Error('Payment gateway unavailable');
-      mockInvoke.mockResolvedValueOnce({ data: null, error: mockError });
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
 
-      const payload = { amount: 5000 };
-      await expect(createKaspiPayment(payload)).rejects.toThrow('Payment gateway unavailable');
+      const result = await supabaseClient.createKaspiPayment({ amount: 100 });
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
 
-      expect(mockInvoke).toHaveBeenCalledWith('kaspi-pay', { body: payload });
+    it('throws error if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('Network error') });
+
+      await expect(supabaseClient.createKaspiPayment({ amount: 100 })).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('calculateYandexDelivery', () => {
+    it('invokes yandex-delivery edge function with payload', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: { price: 500 }, error: null });
+
+      const result = await supabaseClient.calculateYandexDelivery({ address: 'test' });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('yandex-delivery', { body: { address: 'test' } });
+      expect(result).toEqual({ price: 500 });
+    });
+
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.calculateYandexDelivery({ address: 'test' });
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+
+    it('throws error if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('API error') });
+
+      await expect(supabaseClient.calculateYandexDelivery({ address: 'test' })).rejects.toThrow('API error');
     });
   });
 });
