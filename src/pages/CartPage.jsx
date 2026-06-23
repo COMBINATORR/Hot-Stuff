@@ -34,7 +34,9 @@ function QtyControl({ qty, onMinus, onPlus }) {
 }
 
 /* ── Cart item row ───────────────────────── */
-function CartItemRow({ item, onQtyChange, onRemove }) {
+// ⚡ Bolt: Wrapped CartItemRow in React.memo to prevent unnecessary re-renders of all cart items
+// when the quantity of a single item changes or when other cart state updates occur.
+const CartItemRow = React.memo(function CartItemRow({ item, onQtyChange, onRemove }) {
   const { t } = useTranslation();
   return (
     <motion.div
@@ -98,7 +100,7 @@ function CartItemRow({ item, onQtyChange, onRemove }) {
       </div>
     </motion.div>
   );
-}
+});
 
 export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }) {
   const { t } = useTranslation();
@@ -114,17 +116,17 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
     return '/checkout';
   })();
 
-  const handleQty = (id, variant, newQty) => {
+  const handleQty = React.useCallback((id, variant, newQty) => {
     if (newQty < 1) {
       if (onRemove) onRemove(id, variant);
     } else {
       if (onUpdateQty) onUpdateQty(id, variant, newQty);
     }
-  };
+  }, [onRemove, onUpdateQty]);
 
-  const handleRemove = (id, variant) => {
+  const handleRemove = React.useCallback((id, variant) => {
     if (onRemove) onRemove(id, variant);
-  };
+  }, [onRemove]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const delivery = subtotal >= 15000 ? 0 : 1490;

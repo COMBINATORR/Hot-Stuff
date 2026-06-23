@@ -82,6 +82,16 @@ Deno.serve(async (req) => {
 
   // Endpoint to retrieve logs for debugging
   if (url.pathname.endsWith("/logs")) {
+    const authHeader = req.headers.get("Authorization");
+    const expectedKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== expectedKey) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(logs), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -213,10 +223,9 @@ Deno.serve(async (req) => {
       normalizedData.sub = normalizedData.id;
     }
 
-    // 1. Map email (GoTrue requires 'email')
-    if (!normalizedData.email && normalizedData.default_email) {
-      normalizedData.email = normalizedData.default_email;
-    }
+    // 1. Critical Email Fix (Prevents Supabase "Unverified email" rejection)
+    normalizedData.email = normalizedData.default_email;
+    normalizedData.email_verified = true;
 
     // Fallback if email is still missing but emails array is present
     if (
@@ -227,16 +236,26 @@ Deno.serve(async (req) => {
       normalizedData.email = normalizedData.emails[0];
     }
 
-    // 2. Map name (real_name -> name)
-    if (!normalizedData.name && normalizedData.real_name) {
-      normalizedData.name = normalizedData.real_name;
-    } else if (!normalizedData.name && normalizedData.display_name) {
-      normalizedData.name = normalizedData.display_name;
+    // 2. Extract Birthday (Yandex returns 'birthday', map to OIDC standard 'birthdate')
+    if (normalizedData.birthday) {
+      normalizedData.birthdate = normalizedData.birthday; 
     }
 
-    // 3. Map avatar (default_avatar_id -> picture)
+    // 3. Extract Phone (Yandex returns nested object `default_phone: { id, number }`)
+    if (normalizedData.default_phone && normalizedData.default_phone.number) {
+      normalizedData.phone_number = normalizedData.default_phone.number; 
+    }
+
+    // 4. Map Name
+    if (normalizedData.real_name || normalizedData.display_name) {
+      normalizedData.name = normalizedData.real_name || normalizedData.display_name;
+      normalizedData.full_name = normalizedData.name;
+    }
+
+    // 5. Map Avatar Picture
     if (normalizedData.default_avatar_id) {
       normalizedData.picture = `https://avatars.yandex.net/get-yapic/${normalizedData.default_avatar_id}/islands-200`;
+      normalizedData.avatar_url = normalizedData.picture;
     }
 
     await addLog("Normalized profile response data", normalizedData);
