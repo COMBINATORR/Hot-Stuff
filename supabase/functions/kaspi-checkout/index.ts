@@ -27,16 +27,95 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Get the API Key from environment variables
+    // 1. Get credentials from environment variables
     const apiKey = Deno.env.get("KASPI_API_KEY");
-    if (!apiKey) {
-      console.warn("KASPI_API_KEY environment variable is not set");
-    }
+    const merchantId = Deno.env.get("KASPI_MERCHANT_ID") || "oqg3hrij";
 
     // 2. Parse request body
     const body = await req.json().catch(() => ({}));
-    const { amount, orderId, phone } = body;
+    const { action = "create", amount, orderId, phone, invoiceId } = body;
 
+    // Handle status check action
+    if (action === "status") {
+      if (!invoiceId) {
+        return new Response(
+          JSON.stringify({ error: "Missing required field: invoiceId is required for status checks" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      console.log(`Checking status for invoice: ${invoiceId}`);
+
+      // Handle mock invoices
+      if (invoiceId.startsWith("mock-")) {
+        return new Response(
+          JSON.stringify({ success: true, status: "paid", provider: "kaspi-direct" }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      if (!apiKey || apiKey === "placeholder" || apiKey.startsWith("mock")) {
+        return new Response(
+          JSON.stringify({ error: "KASPI_API_KEY is not configured for verifying real payments" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      try {
+        // Query ApiPay invoice status
+        const apiResponse = await fetch(`https://bpapi.bazarbay.site/api/v1/invoices/${invoiceId}`, {
+          method: "GET",
+          headers: {
+            "X-API-Key": apiKey,
+          },
+        });
+
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          return new Response(
+            JSON.stringify({
+              success: true,
+              status: apiData.status || "pending",
+              details: apiData,
+            }),
+            {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        } else {
+          const errorText = await apiResponse.text();
+          console.error("External payment gateway status check error:", errorText);
+          return new Response(
+            JSON.stringify({ error: `Gateway error: ${errorText}` }),
+            {
+              status: apiResponse.status,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+      } catch (err) {
+        console.error("Failed to connect to payment gateway for status check:", err);
+        return new Response(
+          JSON.stringify({ error: `Connection failed: ${err.message}` }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // Default action: Create Invoice
     if (!amount || !orderId) {
       return new Response(
         JSON.stringify({
@@ -50,27 +129,31 @@ Deno.serve(async (req) => {
     }
 
     console.log(
-      `Processing checkout for Order: ${orderId}, Amount: ${amount}, Phone: ${phone || "N/A"}`,
+      `Processing checkout for Order: ${orderId}, Amount: ${amount}, Phone: ${phone || "N/A"}`
     );
 
-    // 3. Integrate with Kaspi API
-    // In a real production setup, you would call Kaspi's Merchant API or a 3rd party gateway like ApiPay
     let paymentUrl = "";
     let invoiceNumber = "";
+    let provider = "kaspi-direct";
 
+    // Clean and format phone number (keep only digits)
+    const cleanedPhone = phone ? phone.replace(/\D/g, "") : "";
+
+    // If API Key is set, try to use ApiPay push-invoice
     if (apiKey && apiKey !== "placeholder" && !apiKey.startsWith("mock")) {
       try {
-        // Real API Call template (e.g. to ApiPay or similar integration partner)
-        const apiResponse = await fetch("https://api.apipay.kz/v1/invoices", {
+        console.log(`Sending API request to ApiPay for phone: ${cleanedPhone || "N/A"}`);
+        const apiResponse = await fetch("https://bpapi.bazarbay.site/api/v1/invoices", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            "X-API-Key": apiKey,
           },
           body: JSON.stringify({
             amount: Number(amount),
-            order_id: String(orderId),
-            customer_phone: phone ? String(phone) : undefined,
+            phone_number: cleanedPhone || undefined,
+            description: `Оплата заказа #${orderId} на сайте Hot Stuff`,
+            external_order_id: String(orderId),
           }),
         });
 
@@ -78,23 +161,23 @@ Deno.serve(async (req) => {
           const apiData = await apiResponse.json();
           paymentUrl = apiData.payment_url || apiData.url || "";
           invoiceNumber = apiData.invoice_id || apiData.id || "";
+          provider = "apipay";
+          console.log(`Successfully created ApiPay invoice: ${invoiceNumber}`);
         } else {
           const errorText = await apiResponse.text();
-          console.error("External payment gateway error:", errorText);
+          console.error("External payment gateway invoice creation error:", errorText);
         }
       } catch (err) {
-        console.error("Failed to connect to payment gateway:", err.message);
+        console.error("Failed to connect to payment gateway during creation:", err.message);
       }
     }
 
-    // Generate mock link if we don't have a real one from the API
+    // If ApiPay invoice creation failed or was skipped, fallback to direct deep link
     if (!paymentUrl) {
-      // Simulate invoice creation
-      invoiceNumber = `INV-${orderId}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      // Kaspi Pay custom deep link mock format
-      // In production, this would open the Kaspi app directly
-      paymentUrl = "https://pay.kaspi.kz/pay/oqg3hrij";
+      invoiceNumber = `mock-${orderId}`;
+      paymentUrl = `https://pay.kaspi.kz/pay/${merchantId}?amount=${amount}`;
+      provider = "kaspi-direct";
+      console.log(`Using fallback direct link: ${paymentUrl}`);
     }
 
     const responseBody = {
@@ -103,6 +186,7 @@ Deno.serve(async (req) => {
       amount,
       invoiceNumber,
       paymentUrl,
+      provider,
     };
 
     return new Response(JSON.stringify(responseBody), {
