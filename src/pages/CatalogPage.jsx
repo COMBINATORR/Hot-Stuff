@@ -1,9 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
 
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
+import Breadcrumbs from '../components/Breadcrumbs';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 
@@ -32,11 +35,14 @@ const categorySlugMap = {
   'lubricants-cosmetics': (p) => false
 };
 
+const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
 // ProductCard Component to manage hover and color swatch state
-function ProductCard({ product, setSelectedPreviewProduct }) {
+const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProduct }) {
+  const { t } = useTranslation();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
@@ -90,7 +96,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
         <div className="flex justify-between items-start w-full">
           <span>
             {product.isNew && (
-              <span className="text-[9px] font-bold tracking-widest text-primary uppercase">NEW</span>
+              <span className="text-[9px] font-bold tracking-widest text-primary uppercase">{t('product.is_new', 'NEW')}</span>
             )}
           </span>
           {product.discount ? (
@@ -138,12 +144,12 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
                 {product.name}
               </Link>
               <p className="text-[8px] text-gray-500 font-sans mt-0.5 truncate">
-                {product.categoryLabel}
+                {t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}
               </p>
             </div>
             
             {/* Color dots swatches (Interactive!) */}
-            <div className="flex gap-1 mt-0.5 flex-none z-20">
+            <div className="flex gap-2.5 mt-0.5 flex-none z-20">
               {colors.map((c, idx) => (
                 <button 
                   key={c.name} 
@@ -153,7 +159,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
                     e.stopPropagation();
                     setSelectedColorIndex(idx);
                   }}
-                  className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                  className={`relative w-2.5 h-2.5 rounded-full border transition-all after:absolute after:-inset-3 after:content-[''] ${
                     selectedColorIndex === idx 
                       ? 'border-black scale-110 ring-1 ring-black/20' 
                       : 'border-black/10 hover:border-black/30'
@@ -176,7 +182,7 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
                     {product.price.toLocaleString('ru-KZ')} ₸
                   </span>
                   <span className="text-gray-500 text-[8px]">
-                    сохранить {(product.oldPrice - product.price).toLocaleString('ru-KZ')} ₸
+                    {t('product.save', { amount: (product.oldPrice - product.price).toLocaleString('ru-KZ') })}
                   </span>
                 </div>
               </>
@@ -201,15 +207,16 @@ function ProductCard({ product, setSelectedPreviewProduct }) {
           }}
           className="w-full bg-black text-white text-center font-sans font-bold text-[9px] tracking-[0.2em] py-3 uppercase hover:bg-gray-800 transition-colors shadow-md border-none"
         >
-          ПРЕДПРОСМОТР
+          {t('product.preview', 'ПРЕДПРОСМОТР')}
         </button>
       </div>
 
     </div>
   );
-}
+});
 
 export default function CatalogPage({ onAddToCart }) {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const initialCat = params.get('cat') || 'toys-women';
   const [activeCat, setActiveCat] = useState(initialCat);
@@ -272,7 +279,7 @@ export default function CatalogPage({ onAddToCart }) {
       const addedList = [];
 
       productIds.forEach(id => {
-        const product = ALL_PRODUCTS.find(p => p.id === id);
+        const product = productsMap.get(id);
         if (product) {
           addedList.push(product);
           if (onAddToCart) {
@@ -336,76 +343,84 @@ export default function CatalogPage({ onAddToCart }) {
 
   // Filter and sort products based on selected parameters
   const filtered = useMemo(() => {
-    let result = ALL_PRODUCTS;
-
-    // 1. Search Query
     const searchVal = params.get('search') || '';
-    if (searchVal) {
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(searchVal.toLowerCase()) || 
-        p.categoryLabel.toLowerCase().includes(searchVal.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchVal.toLowerCase())
-      );
-    }
+    const searchValLower = searchVal.toLowerCase();
+    const filterFn = categorySlugMap[activeCat];
 
-    // 1.5 Sidebar Category (Only if not searching, or if cat matches)
-    if (activeCat !== 'all' && activeCat !== 'popular') {
-      if (activeCat === 'new') {
-        result = result.filter(p => p.isNew);
-      } else {
-        const filterFn = categorySlugMap[activeCat];
-        if (filterFn) {
-          result = result.filter(filterFn);
-        } else {
-          // Fallback to match by category property or categoryLabel
-          result = result.filter(p => 
-            p.category === activeCat || 
-            p.categoryLabel.toLowerCase() === activeCat.toLowerCase()
-          );
+    let result = [];
+
+    for (let i = 0; i < ALL_PRODUCTS.length; i++) {
+      const p = ALL_PRODUCTS[i];
+
+      // 1. Search Query
+      if (searchValLower) {
+        if (!(p.name.toLowerCase().includes(searchValLower) ||
+            p.categoryLabel.toLowerCase().includes(searchValLower) ||
+            p.description.toLowerCase().includes(searchValLower))) {
+          continue;
         }
       }
-    }
 
-    // 2. Stimulation Zone
-    if (selectedStimulations.length > 0) {
-      result = result.filter(p => 
-        p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s))
-      );
-    }
+      // 1.5 Sidebar Category (Only if not searching, or if cat matches)
+      if (activeCat !== 'all' && activeCat !== 'popular') {
+        if (activeCat === 'new') {
+          if (!p.isNew) continue;
+        } else {
+          if (filterFn) {
+            if (!filterFn(p)) continue;
+          } else {
+            if (!(p.category === activeCat ||
+                p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
+              continue;
+            }
+          }
+        }
+      }
 
-    // 3. Price range
-    if (selectedPriceRanges.length > 0) {
-      result = result.filter(p => {
-        return selectedPriceRanges.some(range => {
+      // 2. Stimulation Zone
+      if (selectedStimulations.length > 0) {
+        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
+          continue;
+        }
+      }
+
+      // 3. Price range
+      if (selectedPriceRanges.length > 0) {
+        const matchRange = selectedPriceRanges.some(range => {
           if (range === 'low') return p.price < 80000;
           if (range === 'mid') return p.price >= 80000 && p.price <= 120000;
           if (range === 'high') return p.price > 120000;
           return true;
         });
-      });
-    }
+        if (!matchRange) continue;
+      }
 
-    // 4. Specials (Discount only)
-    if (onlyDiscounted) {
-      result = result.filter(p => p.oldPrice && p.oldPrice > p.price);
-    }
+      // 4. Specials (Discount only)
+      if (onlyDiscounted) {
+        if (!(p.oldPrice && p.oldPrice > p.price)) {
+          continue;
+        }
+      }
 
-    // 5. Features / Technologies
-    if (selectedFeatures.length > 0) {
-      result = result.filter(p => 
-        p.features && p.features.some(f => selectedFeatures.includes(f))
-      );
+      // 5. Features / Technologies
+      if (selectedFeatures.length > 0) {
+        if (!(p.features && p.features.some(f => selectedFeatures.includes(f)))) {
+          continue;
+        }
+      }
+
+      result.push(p);
     }
 
     // 6. Sorting
     if (sortBy === 'price-asc') {
-      result = [...result].sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
-      result = [...result].sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.price - a.price);
     }
 
     return result;
-  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy]);
+  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy, params]);
 
   const toggleSidebarCat = (key) => {
     setExpandedSidebarCats(prev => ({
@@ -447,28 +462,28 @@ export default function CatalogPage({ onAddToCart }) {
   // Dynamically map page titles
   const pageTitle = useMemo(() => {
     const searchVal = params.get('search');
-    if (searchVal) return `Результаты поиска: "${searchVal}"`;
+    if (searchVal) return t('catalog.search_title', { query: searchVal });
 
-    if (activeCat === 'all' || activeCat === 'popular') return 'Популярные секс-игрушки';
-    if (activeCat === 'new') return 'Новинки секс-игрушек';
+    if (activeCat === 'all' || activeCat === 'popular') return t('catalog.popular');
+    if (activeCat === 'new') return t('catalog.new');
 
     // Find category or subcategory name from the loaded list
     for (const cat of categories) {
-      if (cat.slug === activeCat) return cat.name;
+      if (cat.slug === activeCat) return t('menu.' + cat.name.toLowerCase(), cat.name);
       if (cat.subcategories) {
         for (const sub of cat.subcategories) {
-          if (sub.slug === activeCat) return sub.name;
+          if (sub.slug === activeCat) return t('menu.' + sub.name.toLowerCase(), sub.name);
         }
       }
     }
 
     // Fallbacks for compatibility
-    if (activeCat === 'vibrators') return 'Секс-игрушки для женщин';
-    if (activeCat === 'massagers') return 'Секс-игрушки для мужчин';
-    if (activeCat === 'couples') return 'Секс-игрушки для пар';
+    if (activeCat === 'vibrators') return t('catalog.women');
+    if (activeCat === 'massagers') return t('catalog.men');
+    if (activeCat === 'couples') return t('catalog.couples');
 
     return activeCat;
-  }, [activeCat, params, categories]);
+  }, [activeCat, params, categories, t]);
 
   return (
     <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
@@ -488,10 +503,10 @@ export default function CatalogPage({ onAddToCart }) {
                 <span className="text-2xl flex-shrink-0">🎁</span>
                 <div>
                   <h4 className="text-xs font-black tracking-wider uppercase text-black">
-                    Ваш партнер намекает на подарок!
+                    {t('catalog.gift_title')}
                   </h4>
                   <p className="text-[11px] text-neutral-600 leading-relaxed mt-0.5 font-normal">
-                    Выбранные товары ({giftProducts.map(p => p.name).join(', ')}) добавлены в вашу корзину. Доставка будет осуществлена на защищенный анонимный адрес партнера.
+                    {t('catalog.gift_desc', { names: giftProducts.map(p => p.name).join(', ') })}
                   </p>
                 </div>
               </div>
@@ -500,13 +515,15 @@ export default function CatalogPage({ onAddToCart }) {
                   onClick={() => setShowGiftBanner(false)}
                   className="text-[9px] font-black tracking-widest text-neutral-400 hover:text-black uppercase px-4 py-2 border border-black/10 hover:border-black rounded-[2px] transition-colors cursor-pointer animate-none bg-transparent"
                 >
-                  ЗАКРЫТЬ
+                  {t('catalog.close')}
                 </button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Breadcrumbs theme="light" />
 
       <div className="container-hs py-8">
         
@@ -518,7 +535,7 @@ export default function CatalogPage({ onAddToCart }) {
             <div className="flex items-center gap-2 mb-8 select-none">
               <span className="material-symbols-outlined text-[18px] text-black font-light leading-none">favorite</span>
               <span className="font-sans font-bold text-[10px] tracking-[0.2em] text-black uppercase">
-                В ПОГОНЕ ЗА НАСЛАЖДЕНИЕМ
+                  {t('catalog.all_toys')}
               </span>
             </div>
             
@@ -532,13 +549,13 @@ export default function CatalogPage({ onAddToCart }) {
                   }`}
                 >
                   <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                  <span>ПОПУЛЯРНЫЕ СЕКС-ИГРУШКИ</span>
+                  <span>{t('catalog.popular_upper')}</span>
                 </button>
               </div>
 
               {/* Dynamic categories from DB */}
               {loading ? (
-                <div className="text-[10px] text-gray-400 font-sans py-2">Загрузка категорий...</div>
+                <div className="text-[10px] text-gray-400 font-sans py-2">{t('catalog.loading_categories')}</div>
               ) : (
                 categories.map((cat) => {
                   const subcategories = cat.subcategories || [];
@@ -558,7 +575,7 @@ export default function CatalogPage({ onAddToCart }) {
                             <span className="text-[13px] font-light w-4 flex-none text-center">
                               {isExpanded ? '–' : '+'}
                             </span>
-                            <span>{cat.name.toUpperCase()}</span>
+                            <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
                           </button>
                           
                           {isExpanded && (
@@ -570,7 +587,7 @@ export default function CatalogPage({ onAddToCart }) {
                                   activeCat === cat.slug ? 'text-primary' : 'text-gray-500 hover:text-black'
                                 }`}
                               >
-                                ПОСМОТРЕТЬ ВСЕ ПРОДУКТЫ
+                                {t('catalog.view_all')}
                               </button>
 
                               {subcategories.map((sub) => {
@@ -583,7 +600,7 @@ export default function CatalogPage({ onAddToCart }) {
                                       isActive ? 'text-primary' : 'text-gray-500 hover:text-black'
                                     }`}
                                   >
-                                    {sub.name.toUpperCase()}
+                                    {t('menu.' + sub.name.toLowerCase(), sub.name).toUpperCase()}
                                   </button>
                                 );
                               })}
@@ -598,7 +615,7 @@ export default function CatalogPage({ onAddToCart }) {
                           }`}
                         >
                           <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                          <span>{cat.name.toUpperCase()}</span>
+                          <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
                         </button>
                       )}
                     </div>
@@ -615,7 +632,7 @@ export default function CatalogPage({ onAddToCart }) {
                   }`}
                 >
                   <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                  <span>НОВИНКИ СЕКС-ИГРУШЕК</span>
+                  <span>{t('catalog.new_upper')}</span>
                 </button>
               </div>
             </nav>
@@ -623,12 +640,6 @@ export default function CatalogPage({ onAddToCart }) {
 
           {/* RIGHT GRID & DETAILS */}
           <main className="flex-1 w-full">
-            {/* Breadcrumbs */}
-            <div className="mb-2">
-              <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-gray-400 uppercase">
-                {pageTitle}
-              </span>
-            </div>
 
             {/* Title & Count Row */}
             <div className="flex justify-between items-baseline border-b border-black pb-4 mb-6">
@@ -636,7 +647,7 @@ export default function CatalogPage({ onAddToCart }) {
                 {pageTitle}
               </h1>
               <span className="text-[10px] font-sans font-bold text-gray-500 uppercase tracking-wider">
-                {filtered.length} Результаты
+                {t('catalog.results', { count: filtered.length })}
               </span>
             </div>
 
@@ -644,10 +655,10 @@ export default function CatalogPage({ onAddToCart }) {
             <div className="flex justify-between items-center py-3 border-b border-gray-100 mb-8 font-sans">
               <button 
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors"
+                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors py-3.5 -my-3.5 px-2 -mx-2 relative z-10"
               >
                 <span className="material-symbols-outlined text-[16px]">tune</span>
-                Фильтры
+                {t('catalog.filters')}
                 {(selectedStimulations.length + selectedPriceRanges.length + selectedFeatures.length + (onlyDiscounted ? 1 : 0)) > 0 && (
                   <span className="bg-primary text-on-primary text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {selectedStimulations.length + selectedPriceRanges.length + selectedFeatures.length + (onlyDiscounted ? 1 : 0)}
@@ -656,15 +667,15 @@ export default function CatalogPage({ onAddToCart }) {
               </button>
               
               <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                <span>Сортировать:</span>
+                <span>{t('catalog.sort')}</span>
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-transparent text-black font-bold focus:outline-none cursor-pointer"
                 >
-                  <option value="default">По умолчанию</option>
-                  <option value="price-asc">Сначала дешевые</option>
-                  <option value="price-desc">Сначала дорогие</option>
+                  <option value="default">{t('catalog.sort_default')}</option>
+                  <option value="price-asc">{t('catalog.sort_cheap')}</option>
+                  <option value="price-desc">{t('catalog.sort_expensive')}</option>
                 </select>
               </div>
             </div>
@@ -679,13 +690,13 @@ export default function CatalogPage({ onAddToCart }) {
                 <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
                   <span className="material-symbols-outlined text-4xl text-gray-300">search_off</span>
                   <p className="font-sans font-bold text-xs uppercase tracking-wider text-gray-500">
-                    Товары не найдены. Попробуйте сбросить фильтры.
+                    {t('catalog.not_found')}
                   </p>
                   <button 
                     onClick={handleResetFilters}
                     className="border border-black font-sans font-bold text-[10px] tracking-widest uppercase py-3 px-8 hover:bg-black hover:text-white transition-colors"
                   >
-                    Сбросить фильтры
+                    {t('catalog.reset_filters')}
                   </button>
                 </div>
               ) : (
@@ -703,8 +714,9 @@ export default function CatalogPage({ onAddToCart }) {
       </div>
 
       {/* Filter Sidebar Drawer */}
-      <AnimatePresence>
-        {isFilterOpen && (
+      {createPortal(
+        <AnimatePresence>
+          {isFilterOpen && (
           <>
             {/* Backdrop */}
             <motion.div 
@@ -712,7 +724,7 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFilterOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]"
             />
             {/* Filter Drawer */}
             <motion.div
@@ -720,11 +732,11 @@ export default function CatalogPage({ onAddToCart }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[151] shadow-2xl flex flex-col font-sans"
+              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[999] shadow-2xl flex flex-col font-sans"
             >
               {/* Header */}
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-                <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">ФИЛЬТРЫ</h2>
+              <div className="p-8 border-b border-gray-100 flex justify-between items-center relative z-[1000]">
+                <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">{t('catalog.filters_upper')}</h2>
                 <button 
                   onClick={() => setIsFilterOpen(false)}
                   className="text-black hover:text-gray-600 transition-colors flex items-center justify-center border-none bg-transparent focus:outline-none"
@@ -737,14 +749,14 @@ export default function CatalogPage({ onAddToCart }) {
               <div className="flex-1 overflow-y-auto p-8 space-y-8">
                 {/* 1. Stimulation Area */}
                 <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Зона стимуляции</h3>
+                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.stim_zone')}</h3>
                   <div className="grid grid-cols-2 gap-2.5">
                     {[
-                      { val: 'clitoris', label: 'Клитор' },
-                      { val: 'g-spot', label: 'Точка G' },
-                      { val: 'anal', label: 'Анальная стимуляция' },
-                      { val: 'prostate', label: 'Простата' },
-                      { val: 'couples', label: 'Для пар' }
+                      { val: 'clitoris', label: t('catalog.stim_clit') },
+                      { val: 'g-spot', label: t('catalog.stim_gspot') },
+                      { val: 'anal', label: t('catalog.stim_anal') },
+                      { val: 'prostate', label: t('catalog.stim_prostate') },
+                      { val: 'couples', label: t('catalog.stim_couples') }
                     ].map(opt => {
                       const selected = selectedStimulations.includes(opt.val);
                       return (
@@ -767,12 +779,12 @@ export default function CatalogPage({ onAddToCart }) {
 
                 {/* 2. Price Range */}
                 <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Цена</h3>
+                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.price_filter')}</h3>
                   <div className="grid grid-cols-2 gap-2.5">
                     {[
-                      { val: 'low', label: 'До 80 000 ₸' },
-                      { val: 'mid', label: '80 000 ₸ – 120 000 ₸' },
-                      { val: 'high', label: 'Более 120 000 ₸' }
+                      { val: 'low', label: t('catalog.price_up_to_80') },
+                      { val: 'mid', label: t('catalog.price_80_120', '80 000 ₸ – 120 000 ₸') },
+                      { val: 'high', label: t('catalog.price_over_120') }
                     ].map(opt => {
                       const selected = selectedPriceRanges.includes(opt.val);
                       return (
@@ -795,7 +807,7 @@ export default function CatalogPage({ onAddToCart }) {
 
                 {/* 3. Special Offers */}
                 <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Спецпредложения</h3>
+                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.specials')}</h3>
                   <button
                     type="button"
                     onClick={() => setOnlyDiscounted(!onlyDiscounted)}
@@ -805,19 +817,19 @@ export default function CatalogPage({ onAddToCart }) {
                         : 'bg-white text-black border-gray-200 hover:border-black'
                     }`}
                   >
-                    Только со скидкой
+                    {t('catalog.only_discount')}
                   </button>
                 </div>
 
                 {/* 4. Technologies & Features */}
                 <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">Технологии и фичи</h3>
+                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.features_filter')}</h3>
                   <div className="grid grid-cols-2 gap-2.5">
                     {[
                       { val: 'cruise_control', label: 'Cruise Control™' },
                       { val: 'wave_motion', label: 'WaveMotion™' },
                       { val: 'sense_motion', label: 'SenseMotion™' },
-                      { val: 'dual_stimulation', label: 'Двойная стимуляция' }
+                      { val: 'dual_stimulation', label: t('catalog.feat_dual') }
                     ].map(opt => {
                       const selected = selectedFeatures.includes(opt.val);
                       return (
@@ -845,20 +857,22 @@ export default function CatalogPage({ onAddToCart }) {
                   onClick={handleResetFilters}
                   className="flex-1 border border-black text-black font-sans font-bold text-xs tracking-wider py-3.5 hover:bg-black hover:text-white transition-all uppercase"
                 >
-                  Сбросить
+                  {t('catalog.reset')}
                 </button>
                 <button
                   onClick={() => setIsFilterOpen(false)}
                   className="flex-1 bg-black text-white font-sans font-bold text-xs tracking-wider py-3.5 hover:bg-gray-800 transition-colors uppercase"
                 >
-                  Применить
+                  {t('catalog.apply')}
                 </button>
               </div>
 
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
       {/* Product Preview Modal */}
       <ProductPreviewModal 

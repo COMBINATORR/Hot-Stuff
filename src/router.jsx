@@ -27,7 +27,7 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
-export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove }) {
+export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemove, favorites, setFavorites, onSelectQuickView }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,16 +40,32 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
     return '/account';
   };
 
-  // Global Auth Listener to detect Google OAuth login redirect on any page and forward the user immediately to the cabinet
   useEffect(() => {
-    // 1. Sync session on startup (Automatic login check)
+    // 1. Detect OAuth/magic link callback in URL and redirect to /account immediately
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const hasCallback = hash.includes('access_token=') || 
+                        search.includes('code=') ||
+                        hash.includes('id_token=');
+    
+    if (hasCallback) {
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/account')) {
+        const targetPath = getAccountPath(currentPath) + search + hash;
+        setTimeout(() => {
+          navigate(targetPath, { replace: true });
+        }, 0);
+        return;
+      }
+    }
+
+    // 2. Sync session on startup (Automatic login check)
     async function syncSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
           const email = (session.user.email || '').trim().toLowerCase();
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-          localStorage.setItem('hs_remembered_email', email);
           
           // Update registered users list
           const saved = localStorage.getItem('hs_registered_users');
@@ -65,14 +81,13 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
     }
     syncSession();
 
-    // 2. Listen to active auth events
+    // 3. Listen to active auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[Router] onAuthStateChange event:', event, 'Session active:', !!session);
       if (session && session.user) {
         const email = (session.user.email || '').trim().toLowerCase();
         // Save user state in localStorage to login immediately on all pages
         localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
-        localStorage.setItem('hs_remembered_email', email);
 
         // Update registered users list in localStorage
         const saved = localStorage.getItem('hs_registered_users');
@@ -80,16 +95,6 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         const normalizedList = parsed.map(u => u.trim().toLowerCase());
         if (!normalizedList.includes(email)) {
           localStorage.setItem('hs_registered_users', JSON.stringify([...normalizedList, email]));
-        }
-
-        // Check if we captured an OAuth callback flag in sessionStorage
-        const isCallback = sessionStorage.getItem('hs_oauth_callback') === 'true';
-        if (isCallback) {
-          sessionStorage.removeItem('hs_oauth_callback');
-          const targetPath = getAccountPath(window.location.pathname);
-          setTimeout(() => {
-            navigate(targetPath, { replace: true });
-          }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('hs_user');
@@ -113,7 +118,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Маршруты без префикса (русский по умолчанию) */}
-        <Route path="/"             element={<PageWrapper><HomePage onAddToCart={onAddToCart} /></PageWrapper>} />
+        <Route path="/"             element={<PageWrapper><HomePage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
         <Route path="/catalog"      element={<PageWrapper><CatalogPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/product/:id"  element={<PageWrapper><ProductPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/cart"         element={<PageWrapper><CartPage cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
@@ -125,7 +130,7 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
         {/* Маршруты с языковыми префиксами /kz/... /en/... /ru/... */}
         {LANGS.map((lang) => (
           <React.Fragment key={lang}>
-            <Route path={`/${lang}`}             element={<PageWrapper><HomePage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
+            <Route path={`/${lang}`}             element={<PageWrapper><HomePage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
             <Route path={`/${lang}/catalog`}     element={<PageWrapper><CatalogPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/product/:id`} element={<PageWrapper><ProductPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/cart`}         element={<PageWrapper><CartPage lang={lang} cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />

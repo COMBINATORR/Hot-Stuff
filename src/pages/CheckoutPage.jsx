@@ -1,30 +1,42 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
 
-const DELIVERY_OPTIONS = [
-  { id: 'atyrau',   label: 'По Атырау',       price: 0,    time: '1–2 дня' },
-  { id: 'kz',       label: 'По Казахстану',   price: 2500, time: '3–7 дней' },
-];
-
-const PAYMENT_OPTIONS = [
-  { id: 'kaspi',    label: 'Kaspi Pay',        icon: '💳', desc: 'Моментальная оплата' },
-  { id: 'card',     label: 'Банковская карта', icon: '🏦', desc: 'Visa / Mastercard' },
-  { id: 'cash',     label: 'Наличными',        icon: '💵', desc: 'При получении' },
-];
-
 export default function CheckoutPage({ cartItems = [] }) {
+  const { t, i18n } = useTranslation();
   const [delivery, setDelivery] = useState('atyrau');
   const [payment, setPayment]   = useState('kaspi');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const navigate = useNavigate();
 
+  const deliveryOptions = [
+    { 
+      id: 'atyrau',   
+      label: t('checkout.delivery_atyrau', 'По Атырау'),       
+      price: 0,    
+      time: t('checkout.delivery_time', { time: i18n.language === 'en' ? '1-2 days' : (i18n.language === 'kk' || i18n.language === 'kz' ? '1-2 күн' : '1–2 дня') }) 
+    },
+    { 
+      id: 'kz',       
+      label: t('checkout.delivery_kz', 'По Казахстану'),   
+      price: 2500, 
+      time: t('checkout.delivery_time', { time: i18n.language === 'en' ? '3-7 days' : (i18n.language === 'kk' || i18n.language === 'kz' ? '3-7 күн' : '3–7 дней') }) 
+    },
+  ];
+
+  const paymentOptions = [
+    { id: 'kaspi',    label: t('checkout.payment_kaspi', 'Kaspi Pay'),        icon: '💳', desc: t('checkout.payment_desc_kaspi', 'Моментальная оплата') },
+    { id: 'card',     label: t('checkout.payment_card', 'Банковская карта'), icon: '🏦', desc: t('checkout.payment_desc_card', 'Visa / Mastercard') },
+    { id: 'cash',     label: t('checkout.payment_cash', 'Наличными'),        icon: '💵', desc: t('checkout.payment_desc_cash', 'При получении') },
+  ];
+
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
-  const deliveryCost = DELIVERY_OPTIONS.find(d => d.id === delivery)?.price || 0;
+  const deliveryCost = deliveryOptions.find(d => d.id === delivery)?.price || 0;
   const total = subtotal + deliveryCost;
 
   const handleConfirmOrder = async () => {
@@ -46,15 +58,15 @@ export default function CheckoutPage({ cartItems = [] }) {
           console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
           window.location.href = data.paymentUrl;
         } else {
-          throw new Error('Не удалось получить ссылку на оплату от сервера');
+          throw new Error(t('header.payment_url_error', 'Не удалось получить ссылку на оплату от сервера'));
         }
       } catch (err) {
         console.error('[Kaspi Checkout Error]', err);
-        alert(`Ошибка оплаты: ${err.message || 'Неизвестная ошибка'}`);
+        alert(t('header.payment_failed', 'Ошибка оплаты: {{error}}', { error: err.message || 'Неизвестная ошибка' }));
         setIsCheckingOut(false);
       }
     } else {
-      alert('Заказ успешно оформлен!');
+      alert(t('checkout.order_success', 'Заказ успешно оформлен!'));
     }
   };
 
@@ -73,9 +85,9 @@ export default function CheckoutPage({ cartItems = [] }) {
             transition={{ duration: 0.4 }}
             className="flex items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-400"
           >
-            <Link to="/catalog" className="hover:text-primary transition-colors">Каталог</Link>
+            <Link to="/catalog" className="hover:text-primary transition-colors">{t('header.catalog', 'Каталог')}</Link>
             <span>/</span>
-            <span className="text-neutral-600">Оформление заказа</span>
+            <span className="text-neutral-600">{t('checkout.title')}</span>
           </motion.div>
 
           {/* Page Header */}
@@ -86,7 +98,7 @@ export default function CheckoutPage({ cartItems = [] }) {
             className="pb-6 border-b border-black/5"
           >
             <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
-              Оформление заказа
+              {t('checkout.title')}
             </h1>
           </motion.div>
 
@@ -103,29 +115,29 @@ export default function CheckoutPage({ cartItems = [] }) {
               <motion.div variants={fadeUp} className="space-y-6">
                 <div className="flex items-center mb-2">
                   <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">1</div>
-                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Контактная информация</h2>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">{t('checkout.contact_info')}</h2>
                   <div className="flex-1 h-px bg-black/5 ml-4" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Имя</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.first_name')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
-                      placeholder="Ваше имя"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder={t('checkout.first_name_placeholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Фамилия</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.last_name')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
-                      placeholder="Ваша фамилия"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder={t('checkout.last_name_placeholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Телефон</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.phone')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       type="tel"
                       placeholder="+7 (777) 777-77-77"
                     />
@@ -133,7 +145,7 @@ export default function CheckoutPage({ cartItems = [] }) {
                   <div>
                     <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Email</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       type="email"
                       placeholder="email@example.com"
                     />
@@ -145,12 +157,12 @@ export default function CheckoutPage({ cartItems = [] }) {
               <motion.div variants={fadeUp} className="space-y-6">
                 <div className="flex items-center mb-2">
                   <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">2</div>
-                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Способ доставки</h2>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">{t('checkout.delivery_method')}</h2>
                   <div className="flex-1 h-px bg-black/5 ml-4" />
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {DELIVERY_OPTIONS.map(d => (
+                  {deliveryOptions.map(d => (
                     <button
                       key={d.id}
                       type="button"
@@ -171,7 +183,7 @@ export default function CheckoutPage({ cartItems = [] }) {
                         <p className="text-[11px] text-neutral-500 font-medium mt-0.5">{d.time}</p>
                       </div>
                       <span className="text-xs font-bold text-black">
-                        {d.price === 0 ? 'Бесплатно' : `${d.price.toLocaleString('ru-KZ')} ₸`}
+                        {d.price === 0 ? t('checkout.free', 'Бесплатно') : `${d.price.toLocaleString('ru-KZ')} ₸`}
                       </span>
                     </button>
                   ))}
@@ -180,23 +192,23 @@ export default function CheckoutPage({ cartItems = [] }) {
                 {/* Address details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-2">
                   <div className="sm:col-span-2">
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Адрес доставки</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.address')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
-                      placeholder="ул. Примерная, д. 1, кв. 1"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder={t('checkout.address_placeholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Город</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.city')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
-                      placeholder="Атырау"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      placeholder={t('checkout.city_placeholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">Почтовый индекс</label>
+                    <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.zip')}</label>
                     <input
-                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[14px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
+                      className="w-full h-[50px] bg-white border border-neutral-200 rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black"
                       placeholder="060000"
                     />
                   </div>
@@ -207,12 +219,12 @@ export default function CheckoutPage({ cartItems = [] }) {
               <motion.div variants={fadeUp} className="space-y-6">
                 <div className="flex items-center mb-2">
                   <div className="w-7 h-7 flex items-center justify-center bg-black text-white rounded-full font-bold text-xs flex-none">3</div>
-                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">Способ оплаты</h2>
+                  <h2 className="text-xs font-black tracking-wider text-black uppercase ml-3">{t('checkout.payment_method')}</h2>
                   <div className="flex-1 h-px bg-black/5 ml-4" />
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {PAYMENT_OPTIONS.map(p => (
+                  {paymentOptions.map(p => (
                     <button
                       key={p.id}
                       type="button"
@@ -248,15 +260,15 @@ export default function CheckoutPage({ cartItems = [] }) {
             >
               {/* Order Bento Card */}
               <div className="bg-neutral-50 border border-black/5 p-6 md:p-8 rounded-[28px] space-y-6">
-                <h3 className="text-xs font-black tracking-wider text-black uppercase">Ваш заказ</h3>
+                <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('checkout.your_order')}</h3>
 
                 {/* Items */}
                 {cartItems.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="material-symbols-outlined text-4xl text-neutral-300 mb-3 block">shopping_bag</span>
-                    <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">Корзина пуста</p>
+                    <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">{t('checkout.empty_cart')}</p>
                     <Link to="/catalog" className="w-full h-[46px] bg-black hover:bg-neutral-900 text-white font-bold text-xs uppercase tracking-widest rounded-[20px] transition-colors flex items-center justify-center mt-6 cursor-pointer">
-                      В каталог
+                      {t('checkout.back_to_catalog')}
                     </Link>
                   </div>
                 ) : (
@@ -276,7 +288,7 @@ export default function CheckoutPage({ cartItems = [] }) {
                           </div>
                           <div className="flex justify-between items-baseline mt-1">
                             <span className="text-[10px] text-neutral-400 font-bold">
-                              {item.qty} шт × {item.price.toLocaleString('ru-KZ')} ₸
+                              {t('checkout.item_summary', { qty: item.qty, price: item.price.toLocaleString('ru-KZ') })}
                             </span>
                             <span className="text-[11px] font-black text-black">
                               {(item.price * item.qty).toLocaleString('ru-KZ')} ₸
@@ -291,16 +303,16 @@ export default function CheckoutPage({ cartItems = [] }) {
                 {/* Totals */}
                 <div className="border-t border-black/5 pt-6 space-y-3 font-sans text-xs">
                   <div className="flex justify-between text-neutral-500 font-medium">
-                    <span>Товары</span>
+                    <span>{t('checkout.items')}</span>
                     <span className="font-bold text-black">{subtotal.toLocaleString('ru-KZ')} ₸</span>
                   </div>
                   <div className="flex justify-between text-neutral-500 font-medium">
-                    <span>Доставка</span>
-                    <span className="font-bold text-black">{deliveryCost === 0 ? 'Бесплатно' : `${deliveryCost.toLocaleString('ru-KZ')} ₸`}</span>
+                    <span>{t('checkout.delivery')}</span>
+                    <span className="font-bold text-black">{deliveryCost === 0 ? t('checkout.free', 'Бесплатно') : `${deliveryCost.toLocaleString('ru-KZ')} ₸`}</span>
                   </div>
                   <div className="h-px bg-black/5 my-2" />
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-black text-black uppercase tracking-wider">Итого к оплате</span>
+                    <span className="text-[11px] font-black text-black uppercase tracking-wider">{t('checkout.total')}</span>
                     <span className="text-xl font-black text-primary tracking-wide">
                       {total.toLocaleString('ru-KZ')} ₸
                     </span>
@@ -320,15 +332,15 @@ export default function CheckoutPage({ cartItems = [] }) {
                       <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
                         <circle cx="12" cy="12" r="9" />
                       </svg>
-                      <span>Обработка...</span>
+                      <span>{t('header.processing')}</span>
                     </>
                   ) : (
-                    <span>Подтвердить заказ — {total.toLocaleString('ru-KZ')} ₸</span>
+                    <span>{t('checkout.confirm', { total: total.toLocaleString('ru-KZ') })}</span>
                   )}
                 </button>
                 <p className="text-[10px] text-neutral-400 text-center tracking-wider font-medium">
-                  Нажимая кнопку, вы принимаете условия{' '}
-                  <Link to="/privacy" className="underline hover:text-black transition-colors">политики конфиденциальности</Link>
+                  {t('checkout.terms')}{' '}
+                  <Link to="/privacy" className="underline hover:text-black transition-colors">{t('checkout.policy_link')}</Link>
                 </p>
               </div>
 
@@ -340,8 +352,8 @@ export default function CheckoutPage({ cartItems = [] }) {
                     <span className="material-symbols-outlined text-[20px]">visibility_off</span>
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-black text-black uppercase tracking-widest">100% Конфиденциальность</h4>
-                    <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mt-0.5">Гарантия анонимности</p>
+                    <h4 className="text-[10px] font-black text-black uppercase tracking-widest">{t('checkout.sec_title')}</h4>
+                    <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mt-0.5">{t('checkout.sec_sub')}</p>
                   </div>
                 </div>
 
@@ -349,24 +361,24 @@ export default function CheckoutPage({ cartItems = [] }) {
                   <div className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">inventory_2</span>
                     <div>
-                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Нейтральная упаковка</span>
-                      Все заказы отправляются в плотных непрозрачных сейф-пакетах или стандартных картонных коробках без каких-либо логотипов, надписей бренда или указания интимного характера содержимого.
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">{t('checkout.packaging')}</span>
+                      {t('checkout.packaging_desc')}
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">account_balance_wallet</span>
                     <div>
-                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Нейтральный биллинг</span>
-                      В выписке по вашей карте или Kaspi при списании отобразится нейтральное наименование продавца (например, <span className="text-black font-bold">«Retail Atyrau»</span> или <span className="text-black font-bold">«HS-Atyrau»</span>), без упоминания интимных товаров или бренда.
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">{t('checkout.billing')}</span>
+                      {t('checkout.billing_desc')}
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-[16px] text-primary mt-0.5 flex-none">shield</span>
                     <div>
-                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">Защита SSL и данных</span>
-                      Ваши персональные данные защищены 256-битным SSL-шифрованием и используются исключительно для конфиденциальной доставки заказа курьером.
+                      <span className="text-black font-black block mb-0.5 uppercase tracking-wider text-[9px]">{t('checkout.ssl')}</span>
+                      {t('checkout.ssl_desc')}
                     </div>
                   </div>
                 </div>

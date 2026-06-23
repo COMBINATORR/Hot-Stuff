@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './styles/globals.css';
+import i18n from './i18n.js';
 
 // ── Global Error Boundary ──────────────────────
 class ErrorBoundary extends React.Component {
@@ -27,10 +28,10 @@ class ErrorBoundary extends React.Component {
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-            Что-то пошло не так
+            {i18n.t('error.wrong', 'Что-то пошло не так')}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '2rem', maxWidth: 400 }}>
-            {this.state.error?.message || 'Неизвестная ошибка'}
+            {this.state.error?.message || i18n.t('common.error', 'Неизвестная ошибка')}
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -44,7 +45,7 @@ class ErrorBoundary extends React.Component {
               cursor: 'pointer',
             }}
           >
-            Перезагрузить страницу
+            {i18n.t('error.reload', 'Перезагрузить страницу')}
           </button>
         </div>
       );
@@ -53,11 +54,14 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+import { Analytics } from '@vercel/analytics/react';
+
 // ── Mount ──────────────────────────────────────
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <App />
+      <Analytics />
     </ErrorBoundary>
   </React.StrictMode>
 );

@@ -2,8 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from '../components/ResponsiveImage';
+import { useTranslation } from 'react-i18next';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function ProductPage({ onAddToCart }) {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   
   // Find product by id from URL, default to first product if not found
@@ -71,7 +74,11 @@ export default function ProductPage({ onAddToCart }) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    return `${String(h).padStart(2, '0')}ч ${String(m).padStart(2, '0')}м ${String(s).padStart(2, '0')}с`;
+    const lang = i18n.language;
+    const hUnit = lang === 'en' ? 'h' : lang === 'kk' ? 'сағ' : 'ч';
+    const mUnit = lang === 'en' ? 'm' : lang === 'kk' ? 'мин' : 'м';
+    const sUnit = lang === 'en' ? 's' : lang === 'kk' ? 'сек' : 'с';
+    return `${String(h).padStart(2, '0')}${hUnit} ${String(m).padStart(2, '0')}${mUnit} ${String(s).padStart(2, '0')}${sUnit}`;
   };
 
   // Reset states when active product changes
@@ -147,23 +154,115 @@ export default function ProductPage({ onAddToCart }) {
     }
   };
 
-  const handleCrossSellAdd = (name, price) => {
+  const handleCrossSellAdd = (key, defaultName, price) => {
     if (onAddToCart) {
       onAddToCart({
-        id: name === 'Personal Moisturizer' ? 101 : name === 'Cleaning Spray' ? 102 : 103,
-        name: name,
+        id: key === 'moisturizer' ? 101 : key === 'spray' ? 102 : 103,
+        name: t(`product.crosssell.${key}_name`, defaultName),
         price: price,
-        emoji: name === 'Personal Moisturizer' ? '🧴' : name === 'Cleaning Spray' ? '🧼' : '🕯️',
+        emoji: key === 'moisturizer' ? '🧴' : key === 'spray' ? '🧼' : '🕯️',
         variant: 'Default',
         qty: 1
       });
     }
   };
 
+  const translateSpecValue = (value, specKey) => {
+    if (!value) return '';
+    const lang = i18n.language;
+    if (lang === 'ru') return value;
+
+    const lower = value.toLowerCase();
+
+    if (specKey === 'material') {
+      if (lower.includes('силикон') && lower.includes('abs')) {
+        return lang === 'en' 
+          ? 'Body-safe medical grade silicone, ABS plastic' 
+          : 'Медициналық қауіпсіз силикон, ABS-пластик';
+      }
+    }
+    
+    if (specKey === 'runtime') {
+      if (lower.includes('2 часа') || lower.includes('2 часов')) {
+        return lang === 'en' ? 'Up to 2 hours' : '2 сағатқа дейін';
+      }
+      if (lower.includes('1.5 часа') || lower.includes('1.5 часов')) {
+        return lang === 'en' ? 'Up to 1.5 hours' : '1.5 сағатқа дейін';
+      }
+    }
+
+    if (specKey === 'modes') {
+      if (lower.includes('10 режимов')) {
+        return lang === 'en' ? '10 vibration modes' : '10 діріл режимі';
+      }
+      if (lower.includes('8 режимов вибрации')) {
+        return lang === 'en' ? '8 vibration modes' : '8 діріл режимі';
+      }
+      if (lower.includes('8 режимов стимуляции')) {
+        return lang === 'en' ? '8 stimulation modes' : '8 ынталандыру режимі';
+      }
+      if (lower.includes('6 режимов вибрации')) {
+        return lang === 'en' ? '6 vibration modes' : '6 діріл режимі';
+      }
+      if (lower.includes('12 режимов стимуляции')) {
+        return lang === 'en' ? '12 stimulation modes' : '12 ынталандыру режимі';
+      }
+      if (lower.includes('sensemotion')) {
+        return lang === 'en' ? '6 modes with SenseMotion™ technology' : 'SenseMotion™ технологиясы бар 6 режим';
+      }
+      if (lower.includes('wavemotion')) {
+        return lang === 'en' ? '12 modes (WaveMotion™)' : '12 режим (WaveMotion™)';
+      }
+      if (lower.includes('множество')) {
+        return lang === 'en' ? 'Many customizable patterns' : 'Көптеген реттелетін үлгілер';
+      }
+    }
+
+    if (specKey === 'dimensions') {
+      if (lower.includes('эргономичный')) {
+        return lang === 'en' ? 'Ergonomic design' : 'Эргономикалық дизайн';
+      }
+      return value.replace('мм', lang === 'en' ? 'mm' : 'мм');
+    }
+
+    return value;
+  };
+
+  const getExperienceTranslation = (exp) => {
+    if (exp === 'Новичок') return t('home.quiz.exp_new');
+    if (exp === 'Средний') return t('home.quiz.exp_mid');
+    if (exp === 'Сексперт') return t('home.quiz.exp_pro');
+    return exp;
+  };
+
+  const getSensitivityTranslation = (sens) => {
+    const lang = i18n.language;
+    if (sens === 'Низкая') return lang === 'en' ? 'Low' : lang === 'kk' ? 'Төмен' : 'Низкая';
+    if (sens === 'Нормальная') return lang === 'en' ? 'Normal' : lang === 'kk' ? 'Қалыпты' : 'Нормальная';
+    if (sens === 'Высокая') return lang === 'en' ? 'High' : lang === 'kk' ? 'Жоғары' : 'Высокая';
+    return sens;
+  };
+
+  const getReviewTextTranslation = (id, defaultText) => {
+    const lang = i18n.language;
+    if (lang === 'ru') return defaultText;
+    if (id === 1) {
+      return lang === 'en'
+        ? `The ${product.name} toy completely met expectations. Very soft silicone and quiet operation. The wave movements function feels completely different than normal vibration.`
+        : `${product.name} ойыншығы күткендегідей болды. Силиконы өте жұмсақ және тыныш жұмыс істейді. Толқындық қозғалыстар функциясы кәдімгі дірілге қарағанда мүлдем басқаша сезіледі.`;
+    }
+    if (id === 2) {
+      return lang === 'en'
+        ? `Bought as a gift for my partner. We are both thrilled. The build quality is top-notch, packed absolutely anonymously. Delivery to Atyrau took only one day.`
+        : `Серіктесіме сыйлық ретінде сатып алдым. Екеуміз де ризамыз. Жинау сапасы жоғары деңгейде, мүлдем анонимді түрде қапталған. Атырауға жеткізу бір күн гаңа уақытты алды.`;
+    }
+    return defaultText;
+  };
+
   const handleSubmitReview = (e) => {
     e.preventDefault();
     if (!formName.trim() || !formText.trim()) {
-      alert('Пожалуйста, заполните имя и текст отзыва');
+      alert(i18n.language === 'en' ? 'Please fill in your name and review text' : i18n.language === 'kk' ? 'Атыңызды және пікір мәтінін толтырыңыз' : 'Пожалуйста, заполните имя и текст отзыва');
       return;
     }
     const newRev = {
@@ -173,7 +272,7 @@ export default function ProductPage({ onAddToCart }) {
       experience: formExp,
       sensitivity: formSens,
       rating: formRating,
-      date: new Date().toLocaleDateString('ru-RU'),
+      date: new Date().toLocaleDateString(i18n.language === 'en' ? 'en-US' : i18n.language === 'kk' ? 'kk-KZ' : 'ru-RU'),
       text: formText,
       noise: formNoise,
       strength: formStrength,
@@ -193,45 +292,35 @@ export default function ProductPage({ onAddToCart }) {
 
   const getTechnologyDescription = (prod) => {
     if (prod.features.includes('cruise_control')) {
-      return 'Испытайте вершину звуковой волновой стимуляции. Запатентованная технология Cruise Control™ автоматически увеличивает интенсивность импульсов при сильном нажатии девайса к телу, гарантируя плавный и непрерывный пик удовольствия без падения мощности.';
+      return t('product.tech.cruise_control');
     }
     if (prod.features.includes('wave_motion')) {
-      return 'Революционная технология WaveMotion™ имитирует ласкающие волнообразные движения пальцев внутри тела, создавая глубокое и невероятно реалистичное чувство наполненности в сочетании с нежным ритмом внешнего лепестка.';
+      return t('product.tech.wave_motion');
     }
     if (prod.features.includes('sense_motion')) {
-      return 'Инновационная беспроводная технология SenseMotion™ позволяет управлять интенсивностью вибрации взмахом руки. Ваши движения и жесты пультом напрямую контролируют глубину и силу каждого импульса.';
+      return t('product.tech.sense_motion');
     }
     if (prod.features.includes('dual_stimulation')) {
-      return 'Сбалансированная двойная стимуляция обеспечивает одновременный оргазм благодаря глубокому точечному массажу зоны G и нежным, интенсивным ласкам клитора. Идеально распределенная мощность моторов.';
+      return t('product.tech.dual_stimulation');
     }
-    return prod.description;
+    return t('product.tech_defaults.' + prod.id, prod.description);
   };
 
   return (
     <div className="bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
       <main className="pt-20">
+        <Breadcrumbs theme="dark" />
         
-        {/* Breadcrumbs */}
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8">
-          <nav className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase text-outline">
-            <Link to="/" className="hover:text-white transition-colors">Главная</Link>
-            <span>/</span>
-            <Link to="/catalog" className="hover:text-white transition-colors">Каталог</Link>
-            <span>/</span>
-            <span className="text-white">{product.name}</span>
-          </nav>
-        </div>
-
         {/* Hero Section */}
         <section className="min-h-[700px] md:min-h-[850px] flex flex-col md:flex-row max-w-container-max mx-auto relative mt-4">
           <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 md:py-20 z-10 text-left">
             {product.isNew && (
-              <span className="text-[10px] font-black tracking-[0.25em] text-primary uppercase mb-3">NEW ARRIVAL</span>
+              <span className="text-[10px] font-black tracking-[0.25em] text-primary uppercase mb-3">{t('product.new_arrival', 'NEW ARRIVAL')}</span>
             )}
             <h1 className="font-sans font-black text-[36px] md:text-[56px] lg:text-[64px] text-white leading-tight uppercase tracking-tight mb-4">
               {product.name}
             </h1>
-            <p className="font-sans font-bold text-xs tracking-[0.15em] text-outline uppercase mb-6">{product.categoryLabel}</p>
+            <p className="font-sans font-bold text-xs tracking-[0.15em] text-outline uppercase mb-6">{t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}</p>
             
             {/* Price Block */}
             <div className="flex items-baseline gap-4 mb-10">
@@ -240,7 +329,7 @@ export default function ProductPage({ onAddToCart }) {
                   <span className="font-sans font-bold text-2xl text-primary">{product.price.toLocaleString('ru-KZ')} ₸</span>
                   <span className="font-sans text-sm text-outline line-through">{product.oldPrice.toLocaleString('ru-KZ')} ₸</span>
                   <span className="bg-primary text-on-primary text-[9px] font-black px-2 py-1 uppercase tracking-wider leading-none">
-                    Сэкономить {(product.oldPrice - product.price).toLocaleString('ru-KZ')} ₸
+                    {t('product.save', { amount: (product.oldPrice - product.price).toLocaleString('ru-KZ') })}
                   </span>
                 </>
               ) : (
@@ -249,20 +338,20 @@ export default function ProductPage({ onAddToCart }) {
             </div>
 
             <p className="font-sans text-sm text-on-surface-variant leading-relaxed max-w-lg mb-10">
-              {product.description}
+              {t('product.tech_defaults.' + product.id, product.description)}
             </p>
 
             {/* Colors Selection */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-10">
-                <span className="font-sans font-bold text-[10px] tracking-widest text-outline block mb-4 uppercase">Цвет: {selectedColor}</span>
-                <div className="flex gap-4">
+                <span className="font-sans font-bold text-[10px] tracking-widest text-outline block mb-4 uppercase">{t('product.color_label', { color: selectedColor })}</span>
+                <div className="flex gap-5">
                   {product.colors.map(color => (
                     <button
                       key={color.name}
                       aria-label={color.name}
                       onClick={() => setSelectedColor(color.name)}
-                      className={`w-7 h-7 rounded-full border-2 transition-all ring-1 ring-offset-2 ring-offset-black ${
+                      className={`relative w-9 h-9 rounded-full border-2 transition-all ring-1 ring-offset-2 ring-offset-black after:absolute after:-inset-1.5 after:content-[''] ${
                         selectedColor === color.name 
                           ? 'border-white ring-primary' 
                           : 'border-transparent ring-transparent'
@@ -278,13 +367,15 @@ export default function ProductPage({ onAddToCart }) {
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <div className="flex items-center border border-white/10 h-[52px]">
                 <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold"
+                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                   onClick={() => setQty(q => Math.max(1, q - 1))}
+                  aria-label={t('common.decrease', 'Уменьшить')}
                 >−</button>
                 <span className="px-5 text-xs font-bold text-center min-w-[2.5rem] select-none">{qty}</span>
                 <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold"
+                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
                   onClick={() => setQty(q => q + 1)}
+                  aria-label={t('common.increase', 'Увеличить')}
                 >+</button>
               </div>
               
@@ -292,7 +383,7 @@ export default function ProductPage({ onAddToCart }) {
                 onClick={handleAdd}
                 className="bg-primary text-on-primary font-sans font-black text-xs tracking-[0.2em] uppercase h-[52px] px-12 hover:bg-[#ffe088] transition-colors duration-300 flex-1 md:flex-none"
               >
-                В КОРЗИНУ
+                {t('product.add_to_cart')}
               </button>
             </div>
 
@@ -300,15 +391,15 @@ export default function ProductPage({ onAddToCart }) {
             <div className="w-full flex items-center gap-3 bg-neutral-900/40 p-4 border border-white/5 rounded-none mb-4">
               <div className="flex-none bg-[#E11D48] text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-none uppercase font-sans">Kaspi Red</div>
               <div className="text-left font-sans text-xs text-white/90">
-                Рассрочка 0-0-3: <span className="font-bold text-primary">{Math.round(product.price / 3).toLocaleString('ru-KZ')} ₸</span> / мес без переплат
+                {t('product.installment', { amount: Math.round(product.price / 3).toLocaleString('ru-KZ') })}
               </div>
             </div>
 
             {/* Countdown Timer */}
             <div className="w-full flex items-center gap-3 bg-primary/10 p-4 border border-primary/20 rounded-none mb-6">
               <span className="material-symbols-outlined text-primary text-[18px]">alarm</span>
-              <div className="text-left font-sans text-xs text-white/95">
-                Закажите в течение <span className="font-black text-primary font-mono">{formatTime(timeLeft)}</span>, и мы отправим сегодня!
+              <div className="text-left font-sans text-xs text-white/95 text-balance">
+                {t('product.order_countdown', { time: formatTime(timeLeft) })}
               </div>
             </div>
 
@@ -316,15 +407,15 @@ export default function ProductPage({ onAddToCart }) {
             <div className="w-full grid grid-cols-3 gap-2.5 border-t border-white/10 pt-6 mt-2">
               <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">visibility_off</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">Анонимно</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.anon')}</span>
               </div>
               <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">verified_user</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">2 года гарантии</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.warranty_badge')}</span>
               </div>
               <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
                 <span className="material-symbols-outlined text-[18px] text-primary mb-1">shield</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">Безопасно</span>
+                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.safe')}</span>
               </div>
             </div>
           </div>
@@ -355,23 +446,23 @@ export default function ProductPage({ onAddToCart }) {
               
               {displayMode === 'scale' ? (
                 <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-neutral-950/40 rounded-none border border-white/5 font-sans text-left min-h-[350px]">
-                  <p className="text-[10px] font-black tracking-widest text-primary uppercase mb-6 text-center">Сравнение размеров</p>
+                  <p className="text-[10px] font-black tracking-widest text-primary uppercase mb-6 text-center">{t('product.size_comparison')}</p>
                   
                   <div className="flex items-end justify-center gap-8 md:gap-12 w-full h-56 pb-4">
                     {/* Palm */}
                     <div className="flex flex-col items-center gap-2 h-full justify-end">
                       <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-2xl transition-all" style={{ height: `${18 * 8}px` }}>
                         ✋
-                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">~18 см</span>
+                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">~18 {i18n.language === 'en' ? 'cm' : 'см'}</span>
                       </div>
-                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">Ладонь</span>
+                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">{t('product.palm')}</span>
                     </div>
 
                     {/* Product Device */}
                     <div className="flex flex-col items-center gap-2 h-full justify-end">
                       <div className="relative w-16 bg-primary/20 border-2 border-primary flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(242,202,80,0.2)]" style={{ height: `${deviceLength * 8}px` }}>
                         {product.emoji || '🌸'}
-                        <span className="absolute -top-6 text-[11px] font-black text-primary">{deviceLength} см</span>
+                        <span className="absolute -top-6 text-[11px] font-black text-primary">{deviceLength} {i18n.language === 'en' ? 'cm' : 'см'}</span>
                       </div>
                       <span className="text-[9px] font-black tracking-wider text-white uppercase text-center truncate max-w-[80px]">{product.name}</span>
                     </div>
@@ -380,14 +471,14 @@ export default function ProductPage({ onAddToCart }) {
                     <div className="flex flex-col items-center gap-2 h-full justify-end">
                       <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-xl" style={{ height: `${14.6 * 8}px` }}>
                         📱
-                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">14.6 см</span>
+                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">14.6 {i18n.language === 'en' ? 'cm' : 'см'}</span>
                       </div>
                       <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">iPhone 15</span>
                     </div>
                   </div>
 
-                  <p className="text-[9px] text-outline text-center leading-relaxed mt-4 max-w-xs">
-                    * Сравнение габаритов с раскрытой ладонью взрослого человека и стандартным смартфоном iPhone 15.
+                  <p className="text-[9px] text-outline text-center leading-relaxed mt-4 max-w-xs text-balance">
+                    {t('product.size_note')}
                   </p>
                 </div>
               ) : (
@@ -405,15 +496,19 @@ export default function ProductPage({ onAddToCart }) {
                 </div>
               )}
 
-              {/* Mobile Swipe Indicator (Line progress bar) */}
+              {/* Mobile Swipe Indicator (Pagination Dots) */}
               {displayMode === 'studio' && product.gallery && product.gallery.length > 1 && (
-                <div className="w-full max-w-[150px] mx-auto h-[2px] bg-white/10 mt-6 relative overflow-hidden md:hidden">
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-primary transition-all duration-300"
-                    style={{ 
-                      width: `${((activeImageIndex + 1) / product.gallery.length) * 100}%` 
-                    }}
-                  />
+                <div className="flex justify-center gap-2 mt-5 md:hidden z-20">
+                  {product.gallery.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 border-none outline-none focus:outline-none p-0 cursor-pointer ${
+                        activeImageIndex === idx ? 'bg-primary w-4' : 'bg-white/25 hover:bg-white/40'
+                      }`}
+                      aria-label={`Go to image ${idx + 1}`}
+                    />
+                  ))}
                 </div>
               )}
 
@@ -427,7 +522,7 @@ export default function ProductPage({ onAddToCart }) {
                       : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
                   }`}
                 >
-                  Студийный ракурс
+                  {t('product.studio_view')}
                 </button>
                 <button
                   onClick={() => setDisplayMode('scale')}
@@ -437,7 +532,7 @@ export default function ProductPage({ onAddToCart }) {
                       : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
                   }`}
                 >
-                  Сравнение размера
+                  {t('product.size_view')}
                 </button>
               </div>
             </div>
@@ -447,7 +542,7 @@ export default function ProductPage({ onAddToCart }) {
         {/* The Ritual Section */}
         <section className="min-h-[500px] md:min-h-[600px] flex flex-col md:flex-row max-w-container-max mx-auto mt-24">
           <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-16 order-2 md:order-1 bg-surface-container-low text-left">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white mb-6 uppercase">МАГИЯ ТЕХНОЛОГИЙ</h2>
+            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white mb-6 uppercase">{t('product.magic_tech')}</h2>
             <p className="font-sans text-sm md:text-base text-on-surface-variant max-w-lg leading-relaxed mb-6">
               {getTechnologyDescription(product)}
             </p>
@@ -468,41 +563,41 @@ export default function ProductPage({ onAddToCart }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
             <div className="flex flex-col items-center text-center">
               <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">water_drop</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">100% ВОДОНЕПРОНИЦАЕМОСТЬ</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">Полностью герметичный корпус подходит для использования в ванне или душе и легко очищается.</p>
+              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.waterproof')}</h3>
+              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.waterproof_desc')}</p>
             </div>
             <div className="flex flex-col items-center text-center">
               <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">spa</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">МЕДИЦИНСКИЙ СИЛИКОН</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">Сверхгладкий, гипоаллергенный и безопасный для тела премиум-силикон премиального качества.</p>
+              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.silicone')}</h3>
+              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.silicone_desc')}</p>
             </div>
             <div className="flex flex-col items-center text-center">
               <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">battery_charging_full</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">ЗАРЯДКА ОТ USB</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">Долговечный встроенный аккумулятор для длительных и беспрерывных сессий удовольствия.</p>
+              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.usb')}</h3>
+              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.usb_desc')}</p>
             </div>
           </div>
         </section>
 
         {/* Technical Specs */}
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto bg-black text-left">
-          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-center text-white mb-16 uppercase">Технические Характеристики</h2>
+          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-center text-white mb-16 uppercase">{t('product.tech_specs')}</h2>
           <div className="max-w-3xl mx-auto border-t border-white/10 font-sans text-sm">
             <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">Материал</div>
-              <div className="w-full sm:w-2/3 text-white">{product.specs?.material || 'Безопасный медицинский силикон, ABS-пластик'}</div>
+              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_material')}</div>
+              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.material, 'material') || translateSpecValue('Безопасный медицинский силикон, ABS-пластик', 'material')}</div>
             </div>
             <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">Время работы</div>
-              <div className="w-full sm:w-2/3 text-white">{product.specs?.runtime || 'До 2 часов непрерывного использования'}</div>
+              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_runtime')}</div>
+              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.runtime, 'runtime') || translateSpecValue('До 2 часов непрерывного использования', 'runtime')}</div>
             </div>
             <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">Режимы стимуляции</div>
-              <div className="w-full sm:w-2/3 text-white">{product.specs?.modes || 'Множество настраиваемых паттернов'}</div>
+              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_modes')}</div>
+              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.modes, 'modes') || translateSpecValue('Множество настраиваемых паттернов', 'modes')}</div>
             </div>
             <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">Размеры</div>
-              <div className="w-full sm:w-2/3 text-white">{product.specs?.dimensions || 'Эргономичный дизайн'}</div>
+              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_dimensions')}</div>
+              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.dimensions, 'dimensions') || translateSpecValue('Эргономичный дизайн', 'dimensions')}</div>
             </div>
           </div>
         </section>
@@ -518,7 +613,7 @@ export default function ProductPage({ onAddToCart }) {
           />
           <div className="z-20 text-center px-6">
             <p className="font-sans font-black text-[32px] sm:text-[48px] md:text-[56px] text-white italic max-w-4xl mx-auto drop-shadow-2xl">
-              "The closest you can get to magic."
+              {t('product.magic_quote', '"The closest you can get to magic."')}
             </p>
           </div>
         </section>
@@ -526,7 +621,7 @@ export default function ProductPage({ onAddToCart }) {
         {/* Cross-Sell Grid */}
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-left">
           <div className="flex items-center justify-between mb-16">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase">ДОПОЛНИТЕ СВОЙ РИТУАЛ</h2>
+            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase">{t('product.complete_ritual')}</h2>
             <div className="hidden md:block h-px bg-white/10 flex-1 ml-12"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
@@ -541,14 +636,14 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Personal Moisturizer</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">Премиальный водный лубрикант для максимального скольжения и комфорта.</p>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.moisturizer_name', 'Personal Moisturizer')}</h3>
+                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.moisturizer_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">12 500 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Personal Moisturizer', 12500)}
+                  onClick={() => handleCrossSellAdd('moisturizer', 'Personal Moisturizer', 12500)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
-                  В КОРЗИНУ
+                  {t('product.add_to_cart')}
                 </button>
               </div>
             </div>
@@ -563,14 +658,14 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Cleaning Spray</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">Бесспиртовой антибактериальный спрей для безопасного ухода за игрушками.</p>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.spray_name', 'Cleaning Spray')}</h3>
+                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.spray_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">8 900 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Cleaning Spray', 8900)}
+                  onClick={() => handleCrossSellAdd('spray', 'Cleaning Spray', 8900)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
-                  В КОРЗИНУ
+                  {t('product.add_to_cart')}
                 </button>
               </div>
             </div>
@@ -585,14 +680,14 @@ export default function ProductPage({ onAddToCart }) {
                 />
               </div>
               <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">Scented Candle</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">Парфюмированная свеча с теплыми нотами амбры, ванили и черного дерева.</p>
+                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.candle_name', 'Scented Candle')}</h3>
+                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.candle_desc')}</p>
                 <div className="font-sans font-bold text-lg mb-6 text-primary">15 200 ₸</div>
                 <button 
-                  onClick={() => handleCrossSellAdd('Scented Candle', 15200)}
+                  onClick={() => handleCrossSellAdd('candle', 'Scented Candle', 15200)}
                   className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
                 >
-                  В КОРЗИНУ
+                  {t('product.add_to_cart')}
                 </button>
               </div>
             </div>
@@ -602,7 +697,7 @@ export default function ProductPage({ onAddToCart }) {
         {/* Review Section */}
         <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low text-left font-sans">
           <div className="max-w-5xl mx-auto flex flex-col gap-16">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase text-center">ОТЗЫВЫ ПОКУПАТЕЛЕЙ</h2>
+            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase text-center">{t('product.reviews_title')}</h2>
             
             {/* Reviews Summary and Add Form Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -612,22 +707,22 @@ export default function ProductPage({ onAddToCart }) {
                 <div className="flex items-center gap-6">
                   <div className="text-left">
                     <p className="text-5xl font-black text-white leading-none">4.9</p>
-                    <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">из 5 звезд</p>
+                    <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">{t('product.reviews_stars')}</p>
                   </div>
                   <div className="flex flex-col gap-1 text-primary">
                     <div className="flex gap-1 text-lg">★★★★★</div>
-                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">На основе {reviewsList.length} отзывов</p>
+                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">{t('product.reviews_based', { count: reviewsList.length })}</p>
                   </div>
                 </div>
 
                 {/* Sub-criteria progress bars */}
                 <div className="space-y-4 pt-6 border-t border-white/10">
-                  <h3 className="text-[10px] font-black tracking-widest text-white uppercase">Оценка характеристик</h3>
+                  <h3 className="text-[10px] font-black tracking-widest text-white uppercase">{t('product.reviews_breakdown')}</h3>
                   
                   {/* Noise Level */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">Уровень шума (Тишина)</span>
+                      <span className="uppercase tracking-wider">{t('product.noise_level')}</span>
                       <span className="text-white">9.2 / 10</span>
                     </div>
                     <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -638,7 +733,7 @@ export default function ProductPage({ onAddToCart }) {
                   {/* Vibration Strength */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">Сила вибрации</span>
+                      <span className="uppercase tracking-wider">{t('product.vibration_strength')}</span>
                       <span className="text-white">9.5 / 10</span>
                     </div>
                     <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -649,7 +744,7 @@ export default function ProductPage({ onAddToCart }) {
                   {/* Ergonomics */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">Эргономика и дизайн</span>
+                      <span className="uppercase tracking-wider">{t('product.ergonomics')}</span>
                       <span className="text-white">9.8 / 10</span>
                     </div>
                     <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -661,25 +756,25 @@ export default function ProductPage({ onAddToCart }) {
 
               {/* Right Column: Write a Review Form */}
               <div className="bg-neutral-900/40 p-6 md:p-8 border border-white/5 rounded-none">
-                <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6">Написать отзыв</h3>
+                <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6">{t('product.write_review')}</h3>
                 <form onSubmit={handleSubmitReview} className="space-y-6">
                   {/* Name */}
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">Ваше имя</label>
+                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">{t('product.form_name')}</label>
                     <input 
                       type="text" 
                       required
                       value={formName}
                       onChange={e => setFormName(e.target.value)}
-                      placeholder="Введите имя"
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
+                      placeholder={t('product.form_name_placeholder')}
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                     />
                   </div>
 
                   {/* Dropdowns Row */}
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Возраст</label>
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_age')}</label>
                       <select 
                         value={formAge} 
                         onChange={e => setFormAge(e.target.value)}
@@ -693,28 +788,28 @@ export default function ProductPage({ onAddToCart }) {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Опыт</label>
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_exp')}</label>
                       <select 
                         value={formExp} 
                         onChange={e => setFormExp(e.target.value)}
                         className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                       >
-                        <option value="Новичок">Новичок</option>
-                        <option value="Средний">Средний</option>
-                        <option value="Сексперт">Сексперт</option>
+                        <option value="Новичок">{t('home.quiz.exp_new')}</option>
+                        <option value="Средний">{t('home.quiz.exp_mid')}</option>
+                        <option value="Сексперт">{t('home.quiz.exp_pro')}</option>
                       </select>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">Чувствительность</label>
+                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_sens')}</label>
                       <select 
                         value={formSens} 
                         onChange={e => setFormSens(e.target.value)}
                         className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                       >
-                        <option value="Низкая">Низкая</option>
-                        <option value="Нормальная">Нормальная</option>
-                        <option value="Высокая">Высокая</option>
+                        <option value="Низкая">{i18n.language === 'en' ? 'Low' : i18n.language === 'kk' ? 'Төмен' : 'Низкая'}</option>
+                        <option value="Нормальная">{i18n.language === 'en' ? 'Normal' : i18n.language === 'kk' ? 'Қалыпты' : 'Нормальная'}</option>
+                        <option value="Высокая">{i18n.language === 'en' ? 'High' : i18n.language === 'kk' ? 'Жоғары' : 'Высокая'}</option>
                       </select>
                     </div>
                   </div>
@@ -722,7 +817,7 @@ export default function ProductPage({ onAddToCart }) {
                   {/* Character Sliders */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>Шум: {formNoise}/10</span>
+                      <span>{t('product.form_noise', { noise: formNoise })}</span>
                       <input 
                         type="range" min="1" max="10" 
                         value={formNoise} onChange={e => setFormNoise(parseInt(e.target.value))}
@@ -730,7 +825,7 @@ export default function ProductPage({ onAddToCart }) {
                       />
                     </div>
                     <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>Вибрация: {formStrength}/10</span>
+                      <span>{t('product.form_vib', { vib: formStrength })}</span>
                       <input 
                         type="range" min="1" max="10" 
                         value={formStrength} onChange={e => setFormStrength(parseInt(e.target.value))}
@@ -738,7 +833,7 @@ export default function ProductPage({ onAddToCart }) {
                       />
                     </div>
                     <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>Эргономика: {formErgo}/10</span>
+                      <span>{t('product.form_ergo', { ergo: formErgo })}</span>
                       <input 
                         type="range" min="1" max="10" 
                         value={formErgo} onChange={e => setFormErgo(parseInt(e.target.value))}
@@ -749,14 +844,14 @@ export default function ProductPage({ onAddToCart }) {
 
                   {/* Review Text */}
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">Ваш отзыв</label>
+                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">{t('product.form_review')}</label>
                     <textarea 
                       required
                       value={formText}
                       onChange={e => setFormText(e.target.value)}
-                      placeholder="Поделитесь вашим опытом..."
+                      placeholder={t('product.form_placeholder')}
                       rows={3}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
                     />
                   </div>
 
@@ -764,7 +859,7 @@ export default function ProductPage({ onAddToCart }) {
                     type="submit" 
                     className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-3.5 uppercase hover:bg-[#ffe088] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] transition-all rounded-none"
                   >
-                    ОТПРАВИТЬ ОТЗЫВ
+                    {t('product.form_submit')}
                   </button>
                 </form>
               </div>
@@ -773,7 +868,7 @@ export default function ProductPage({ onAddToCart }) {
 
             {/* Bottom Reviews List Stack */}
             <div className="space-y-6 pt-12 border-t border-white/10">
-              <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6 text-left">Список отзывов ({reviewsList.length})</h3>
+              <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6 text-left">{t('product.reviews_list_title', { count: reviewsList.length })}</h3>
               
               <div className="space-y-6">
                 {reviewsList.map(rev => (
@@ -788,25 +883,25 @@ export default function ProductPage({ onAddToCart }) {
                       {/* Profile Badges */}
                       <div className="flex flex-wrap gap-2">
                         <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          Возраст: {rev.age}
+                          {t('product.rev_age', { age: rev.age })}
                         </span>
                         <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          Опыт: {rev.experience}
+                          {t('product.rev_exp', { exp: getExperienceTranslation(rev.experience) })}
                         </span>
                         <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          Чувствительность: {rev.sensitivity}
+                          {t('product.rev_sens', { sens: getSensitivityTranslation(rev.sensitivity) })}
                         </span>
                       </div>
                     </div>
 
                     {/* Review text */}
-                    <p className="text-xs text-white/80 leading-relaxed font-sans font-normal text-left">{rev.text}</p>
+                    <p className="text-xs text-white/80 leading-relaxed font-sans font-normal text-left">{getReviewTextTranslation(rev.id, rev.text)}</p>
 
                     {/* Review sub-ratings */}
                     <div className="flex flex-wrap gap-x-6 gap-y-2 text-[9px] text-outline font-bold tracking-wider uppercase pt-4 border-t border-white/5">
-                      <span>Шум: <span className="text-white font-mono">{rev.noise}/10</span></span>
-                      <span>Вибрация: <span className="text-white font-mono">{rev.strength}/10</span></span>
-                      <span>Эргономика: <span className="text-white font-mono">{rev.ergo}/10</span></span>
+                      <span>{t('product.rev_noise', { noise: rev.noise })}</span>
+                      <span>{t('product.rev_vib', { vib: rev.strength })}</span>
+                      <span>{t('product.rev_ergo', { ergo: rev.ergo })}</span>
                     </div>
                   </div>
                 ))}
@@ -843,7 +938,7 @@ export default function ProductPage({ onAddToCart }) {
             onClick={handleAdd}
             className="bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.15em] uppercase py-2.5 px-5 hover:bg-[#ffe088] transition-colors rounded-full"
           >
-            В КОРЗИНУ
+            {t('product.add_to_cart')}
           </button>
         </div>
       )}

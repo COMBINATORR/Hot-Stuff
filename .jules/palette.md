@@ -1,0 +1,10 @@
+## 2026-06-19 - Improved Icon-Only Button Accessibility in Header
+**Learning:** Generic icons inside icon-only buttons (`material-symbols-outlined`) must have `aria-hidden="true"` so that screen readers don't announce the visible text of the icon (e.g., "search" or "close") alongside the button's purpose, but rather rely on a descriptive `aria-label` added to the `<button>` element itself. Also, heavy focus rings on icon buttons can break the premium aesthetic of a site.
+**Action:** Always wrap generic text-based icons in `aria-hidden="true"` and apply a descriptive, translated `aria-label` directly on the parent `<button>`. Ensure focus indicators are elegant and match the site's aesthetic, such as using `focus-visible:text-primary` for icon buttons instead of heavy rings.
+## 2023-10-27 - AnimatePresence rapid mount freeze
+**Learning:** Framer Motion's AnimatePresence with `mode="wait"` can freeze and refuse to enter the new component if a rapid mount/unmount cycle occurs during page load (such as during OAuth redirect loops).
+**Action:** When animating conditional UI states like auth headers, use `mode="popLayout"` with `initial={false}` or avoid `mode="wait"` to prevent the UI from getting permanently stuck in an exiting state.
+
+## 2024-10-XX - Quantity Stepper Accessibility
+**Learning:** Icon-only or text-symbol-only (+/-) buttons for quantity steppers (often used in carts and product pages) need explicit `aria-label`s for screen readers to understand their function. Relying solely on the visual symbol (+ or -) is insufficient and provides a poor experience for assistive technology users.
+**Action:** Always ensure quantity adjustment buttons have descriptive `aria-label`s like "Increase quantity" and "Decrease quantity", utilizing the translation system (e.g., `aria-label={t('common.increase')}`).
