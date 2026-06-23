@@ -649,15 +649,20 @@ export default function Header({
 
           {/* RIGHT: Search, Profile, Cart, Sandwich (Mobile) */}
           <div className="flex items-center justify-end gap-5 md:gap-6">
-            <motion.button 
-              whileHover={{ scale: 1.15, y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            <button 
               onClick={() => setSearchOpen(true)} 
               className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
               aria-label={t('header.open_search', 'Открыть поиск')}
             >
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">search</span>
-            </motion.button>
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                search
+              </motion.span>
+            </button>
             <AnimatePresence mode="popLayout" initial={false}>
               {session ? (
                 <motion.div
@@ -734,34 +739,44 @@ export default function Header({
                 </motion.div>
               )}
             </AnimatePresence>
-            <motion.button 
-              whileHover={{ scale: 1.15, y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            <button 
               onClick={onOpenFavorites} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
               aria-label={t('header.open_favorites', 'Открыть избранное')}
             >
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">favorite</span>
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                favorite
+              </motion.span>
               {favoritesCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {favoritesCount}
                 </span>
               )}
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.15, y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            </button>
+            <button 
               onClick={onOpenCart || (() => setCartOpen(true))} 
               className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`} 
               aria-label={t('header.open_cart', 'Открыть корзину')}
             >
-              <span className="material-symbols-outlined text-[22px] font-light leading-none block" aria-hidden="true">shopping_bag</span>
+              <motion.span 
+                whileHover={{ scale: 1.15, y: -2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="material-symbols-outlined text-[22px] font-light leading-none block" 
+                aria-hidden="true"
+              >
+                shopping_bag
+              </motion.span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none z-10">
                   {cartCount}
                 </span>
               )}
-            </motion.button>
+            </button>
 
             {/* Sandwich for Mobile */}
             <motion.button 
