@@ -751,7 +751,7 @@ export default function HomePage({ onAddToCart }) {
           onMouseMove={handleMouseMove}
           className="flex overflow-x-auto gap-4 px-6 md:px-20 scrollbar-none snap-x snap-mandatory md:snap-none pb-6 cursor-grab select-none"
           onScroll={handleScroll}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {categories.map((cat) => (
             <div 
@@ -954,7 +954,7 @@ export default function HomePage({ onAddToCart }) {
                  type="email"
                  placeholder={t('home.newsletter.placeholder')}
                  required
-                 className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-xs sm:text-sm outline-none font-sans"
+                 className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-[16px] outline-none font-sans"
                />
                <button 
                  type="submit" 

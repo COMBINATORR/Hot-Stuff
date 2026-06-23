@@ -345,13 +345,13 @@ export default function ProductPage({ onAddToCart }) {
             {product.colors && product.colors.length > 0 && (
               <div className="mb-10">
                 <span className="font-sans font-bold text-[10px] tracking-widest text-outline block mb-4 uppercase">{t('product.color_label', { color: selectedColor })}</span>
-                <div className="flex gap-4">
+                <div className="flex gap-5">
                   {product.colors.map(color => (
                     <button
                       key={color.name}
                       aria-label={color.name}
                       onClick={() => setSelectedColor(color.name)}
-                      className={`w-7 h-7 rounded-full border-2 transition-all ring-1 ring-offset-2 ring-offset-black ${
+                      className={`relative w-9 h-9 rounded-full border-2 transition-all ring-1 ring-offset-2 ring-offset-black after:absolute after:-inset-1.5 after:content-[''] ${
                         selectedColor === color.name 
                           ? 'border-white ring-primary' 
                           : 'border-transparent ring-transparent'
@@ -496,15 +496,19 @@ export default function ProductPage({ onAddToCart }) {
                 </div>
               )}
 
-              {/* Mobile Swipe Indicator (Line progress bar) */}
+              {/* Mobile Swipe Indicator (Pagination Dots) */}
               {displayMode === 'studio' && product.gallery && product.gallery.length > 1 && (
-                <div className="w-full max-w-[150px] mx-auto h-[2px] bg-white/10 mt-6 relative overflow-hidden md:hidden">
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-primary transition-all duration-300"
-                    style={{ 
-                      width: `${((activeImageIndex + 1) / product.gallery.length) * 100}%` 
-                    }}
-                  />
+                <div className="flex justify-center gap-2 mt-5 md:hidden z-20">
+                  {product.gallery.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 border-none outline-none focus:outline-none p-0 cursor-pointer ${
+                        activeImageIndex === idx ? 'bg-primary w-4' : 'bg-white/25 hover:bg-white/40'
+                      }`}
+                      aria-label={`Go to image ${idx + 1}`}
+                    />
+                  ))}
                 </div>
               )}
 
@@ -763,7 +767,7 @@ export default function ProductPage({ onAddToCart }) {
                       value={formName}
                       onChange={e => setFormName(e.target.value)}
                       placeholder={t('product.form_name_placeholder')}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
                     />
                   </div>
 
@@ -847,7 +851,7 @@ export default function ProductPage({ onAddToCart }) {
                       onChange={e => setFormText(e.target.value)}
                       placeholder={t('product.form_placeholder')}
                       rows={3}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-xs text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
+                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
                     />
                   </div>
 

@@ -147,7 +147,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
             </div>
             
             {/* Color dots swatches (Interactive!) */}
-            <div className="flex gap-1 mt-0.5 flex-none z-20">
+            <div className="flex gap-2.5 mt-0.5 flex-none z-20">
               {colors.map((c, idx) => (
                 <button 
                   key={c.name} 
@@ -157,7 +157,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
                     e.stopPropagation();
                     setSelectedColorIndex(idx);
                   }}
-                  className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                  className={`relative w-2.5 h-2.5 rounded-full border transition-all after:absolute after:-inset-3 after:content-[''] ${
                     selectedColorIndex === idx 
                       ? 'border-black scale-110 ring-1 ring-black/20' 
                       : 'border-black/10 hover:border-black/30'
@@ -653,7 +653,7 @@ export default function CatalogPage({ onAddToCart }) {
             <div className="flex justify-between items-center py-3 border-b border-gray-100 mb-8 font-sans">
               <button 
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors"
+                className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors py-3.5 -my-3.5 px-2 -mx-2 relative z-10"
               >
                 <span className="material-symbols-outlined text-[16px]">tune</span>
                 {t('catalog.filters')}

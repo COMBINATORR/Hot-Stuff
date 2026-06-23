@@ -184,7 +184,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
         {/* Header */}
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <h2 className="font-headline-lg text-title-md uppercase tracking-widest text-on-surface">{t('header.cart_title', 'ВАША КОРЗИНА')}</h2>
-          <button className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:text-primary" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
+          <button className="w-11 h-11 -mr-3 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:text-primary rounded-[2px]" onClick={onClose} aria-label={t('header.close_cart', 'Закрыть корзину')}>
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
@@ -314,7 +314,7 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
                 <label className="font-label-caps text-[10px] text-on-surface-variant uppercase">{t('header.promo_label', 'ПРОМОКОД')}</label>
                 <div className="flex gap-2">
                   <input 
-                    className="flex-1 bg-background border border-white/10 px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors" 
+                    className="flex-1 bg-background border border-white/10 px-4 py-2 text-[16px] text-on-surface focus:border-primary outline-none transition-colors" 
                     placeholder={t('header.promo_placeholder', 'Введите код')} 
                     type="text"
                     value={promo}
@@ -1017,7 +1017,7 @@ export default function Header({
                     }
                   }}
                 />
-                <button onClick={() => setSearchOpen(false)} className="text-white hover:text-primary transition-colors focus:outline-none focus-visible:text-primary bg-transparent border-none" aria-label={t('header.close_search', 'Закрыть поиск')}>
+                <button onClick={() => setSearchOpen(false)} className="w-12 h-12 flex items-center justify-center text-white hover:text-primary transition-colors focus:outline-none focus-visible:text-primary bg-transparent border-none rounded-[2px]" aria-label={t('header.close_search', 'Закрыть поиск')}>
                   <span className="material-symbols-outlined text-3xl font-light" aria-hidden="true">close</span>
                 </button>
               </div>

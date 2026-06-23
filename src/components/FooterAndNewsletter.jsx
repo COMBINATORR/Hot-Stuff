@@ -35,7 +35,7 @@ export default function FooterAndNewsletter() {
                 type="email"
                 placeholder={t('home.newsletter.placeholder', 'ВАШ EMAIL')}
                 required
-                className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-xs sm:text-sm outline-none font-sans rounded-none"
+                className="flex-1 bg-white px-5 text-black placeholder-gray-500 text-[16px] outline-none font-sans rounded-none"
               />
               <button 
                 type="submit" 

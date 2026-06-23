@@ -1040,7 +1040,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={t('account.email', 'Email')}
-                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
+                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
                     disabled={loading}
                   />
                 </div>
@@ -1137,7 +1137,7 @@ export default function AccountPage({ onAddToCart, lang }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
+                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
                       disabled={loading}
                     />
                   </div>

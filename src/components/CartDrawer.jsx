@@ -215,7 +215,7 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
                     value={promo}
                     onChange={(e) => setPromo(e.target.value)}
                     placeholder={t('header.promo_placeholder', 'ПРОМОКОД')}
-                    className="flex-1 bg-stone-950 border border-white/10 px-3 py-2 text-[10px] tracking-widest uppercase text-white outline-none rounded-none focus:border-primary"
+                    className="flex-1 bg-stone-950 border border-white/10 px-3 py-2 text-[16px] tracking-widest uppercase text-white outline-none rounded-none focus:border-primary"
                   />
                   <button
                     onClick={handleApplyPromo}
