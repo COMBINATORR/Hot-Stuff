@@ -83,7 +83,6 @@ export default function AppRouter({ cartItems, onAddToCart, onUpdateQty, onRemov
 
     // 3. Listen to active auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[Router] onAuthStateChange event:', event, 'Session active:', !!session);
       if (session && session.user) {
         const email = (session.user.email || '').trim().toLowerCase();
         // Save user state in localStorage to login immediately on all pages
