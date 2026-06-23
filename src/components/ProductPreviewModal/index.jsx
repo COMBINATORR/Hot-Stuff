@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import ResponsiveImage from './ResponsiveImage';
+import ResponsiveImage from '../ResponsiveImage';
+import ProductPreviewAccordions from './ProductPreviewAccordions';
+import ProductPreviewSwatches from './ProductPreviewSwatches';
+import ProductPreviewActions from './ProductPreviewActions';
 import { useTranslation } from 'react-i18next';
 
 // Mapping for color labels
@@ -283,155 +286,28 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                 </div>
 
                 {/* Color Swatches */}
-                {colorsList.length > 0 && (
-                  <div className="mt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="flex gap-2">
-                        {colorsList.map((colorObj) => {
-                          const isSelected = selectedColor.toLowerCase() === colorObj.hex.toLowerCase();
-                          return (
-                            <button
-                              key={colorObj.hex}
-                              onClick={() => setSelectedColor(colorObj.hex)}
-                              className={`w-5.5 h-5.5 rounded-full border transition-all flex items-center justify-center ${
-                                isSelected ? 'border-black scale-105 ring-1 ring-black' : 'border-gray-300'
-                              }`}
-                              style={{ backgroundColor: colorObj.hex }}
-                            >
-                              {isSelected && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-white mix-blend-difference" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <span className="font-sans font-bold text-[9px] tracking-wider text-black uppercase">
-                        {activeColorName}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <ProductPreviewSwatches
+                  colorsList={colorsList}
+                  selectedColor={selectedColor}
+                  setSelectedColor={setSelectedColor}
+                  activeColorName={activeColorName}
+                  variant="mobile"
+                />
 
                 {/* Actions Grid */}
-                <div className="mt-8 flex gap-3">
-                  <button
-                    onClick={handleNavigateToProduct}
-                    className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
-                  >
-                    {t('product.view')}
-                  </button>
-                  <button
-                    onClick={handleAdd}
-                    className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] py-3.5 uppercase focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98] transition-all"
-                  >
-                    {t('product.add_to_cart')}
-                  </button>
-                </div>
+                  <ProductPreviewActions
+                    handleNavigateToProduct={handleNavigateToProduct}
+                    handleAdd={handleAdd}
+                    variant="mobile"
+                  />
 
                 {/* Accordions */}
-                <div className="mt-8 border-t border-gray-100 pb-12">
-                  {/* Description Accordion */}
-                  <div className="border-b border-gray-100 py-3.5">
-                    <button
-                      onClick={() => toggleSection('description')}
-                      className="w-full flex justify-between items-center text-left"
-                    >
-                      <span className="text-[11px] font-bold tracking-wider text-black">{t('product.desc_tab')}</span>
-                      <span className="material-symbols-outlined text-[16px] text-gray-500">
-                        {expandedSection === 'description' ? 'expand_less' : 'expand_more'}
-                      </span>
-                    </button>
-                    {expandedSection === 'description' && (
-                      <p className="mt-2.5 text-[11px] text-gray-600 leading-relaxed font-sans">
-                        {t('product.tech_defaults.' + product.id, product.description || `Вибромассажер премиального класса ${product.name}.`)}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Warranty Accordion */}
-                  <div className="border-b border-gray-100 py-3.5">
-                    <button
-                      onClick={() => toggleSection('warranty')}
-                      className="w-full flex justify-between items-center text-left"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">verified_user</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.warranty_tab')}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-[16px] text-gray-500">
-                        {expandedSection === 'warranty' ? 'expand_less' : 'expand_more'}
-                      </span>
-                    </button>
-                    {expandedSection === 'warranty' && (
-                      <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        {t('product.warranty_desc')}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Secure Accordion */}
-                  <div className="border-b border-gray-100 py-3.5">
-                    <button
-                      onClick={() => toggleSection('secure')}
-                      className="w-full flex justify-between items-center text-left"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">credit_card</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.safe_tab')}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-[16px] text-gray-500">
-                        {expandedSection === 'secure' ? 'expand_less' : 'expand_more'}
-                      </span>
-                    </button>
-                    {expandedSection === 'secure' && (
-                      <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        {t('product.safe_desc')}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Delivery Accordion */}
-                  <div className="border-b border-gray-100 py-3.5">
-                    <button
-                      onClick={() => toggleSection('delivery')}
-                      className="w-full flex justify-between items-center text-left"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">local_shipping</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.delivery_tab')}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-[16px] text-gray-500">
-                        {expandedSection === 'delivery' ? 'expand_less' : 'expand_more'}
-                      </span>
-                    </button>
-                    {expandedSection === 'delivery' && (
-                      <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        {t('product.delivery_desc')}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Package Accordion */}
-                  <div className="border-b border-gray-100 py-3.5">
-                    <button
-                      onClick={() => toggleSection('package')}
-                      className="w-full flex justify-between items-center text-left"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-gray-500 font-light">visibility_off</span>
-                        <span className="text-[11px] font-bold tracking-wider text-black">{t('product.discreet_tab')}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-[16px] text-gray-500">
-                        {expandedSection === 'package' ? 'expand_less' : 'expand_more'}
-                      </span>
-                    </button>
-                    {expandedSection === 'package' && (
-                      <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">
-                        {t('product.discreet_desc')}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  <ProductPreviewAccordions
+                    product={product}
+                    expandedSection={expandedSection}
+                    toggleSection={toggleSection}
+                    variant="mobile"
+                  />
               </div>
             </motion.div>
           ) : (
@@ -545,145 +421,30 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
                       </div>
 
                       {/* Color Swatches */}
-                      {colorsList.length > 0 && (
-                        <div className="mt-6 flex items-center gap-3">
-                          <div className="flex gap-2">
-                            {colorsList.map((colorObj) => {
-                              const isSelected = selectedColor.toLowerCase() === colorObj.hex.toLowerCase();
-                              return (
-                                <button
-                                  key={colorObj.hex}
-                                  onClick={() => setSelectedColor(colorObj.hex)}
-                                  className={`w-5 h-5 rounded-full border transition-all flex items-center justify-center ${
-                                    isSelected ? 'border-black scale-110 ring-1 ring-black' : 'border-gray-300 hover:border-black'
-                                  }`}
-                                  style={{ backgroundColor: colorObj.hex }}
-                                >
-                                  {isSelected && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white mix-blend-difference" />
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <span className="font-sans font-bold text-[10px] tracking-wider text-black uppercase">
-                            {activeColorName}
-                          </span>
-                        </div>
-                      )}
+                      <ProductPreviewSwatches
+                        colorsList={colorsList}
+                        selectedColor={selectedColor}
+                        setSelectedColor={setSelectedColor}
+                        activeColorName={activeColorName}
+                        variant="desktop"
+                      />
 
                       {/* Action Buttons */}
-                      <div className="mt-6 flex gap-2.5">
-                        <button
-                          onClick={handleNavigateToProduct}
-                          className="flex-1 bg-white text-black border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-black hover:text-white transition-all text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black active:scale-[0.98]"
-                        >
-                          {t('product.view')}
-                        </button>
-                        <button
-                          onClick={handleAdd}
-                          className="flex-1 bg-black text-white border border-black font-sans font-bold text-[10px] tracking-[0.15em] uppercase py-3 hover:bg-gray-800 transition-all"
-                        >
-                          {t('product.add_to_cart')}
-                        </button>
-                      </div>
+                      <ProductPreviewActions
+                        handleNavigateToProduct={handleNavigateToProduct}
+                        handleAdd={handleAdd}
+                        variant="desktop"
+                      />
 
                       {/* Accordions */}
-                      <div className="mt-6 border-t border-gray-100">
-                        {/* Description */}
-                        <div className="border-b border-gray-100 py-3.5">
-                          <button onClick={() => toggleSection('description')} className="w-full flex justify-between items-center text-left">
-                            <span className="text-[11px] font-bold tracking-wider text-black">{t('product.desc_tab')}</span>
-                            <span className="material-symbols-outlined text-[16px] text-gray-400">
-                              {expandedSection === 'description' ? 'expand_less' : 'expand_more'}
-                            </span>
-                          </button>
-                          {expandedSection === 'description' && (
-                            <p className="mt-2 text-[11px] text-gray-600 leading-relaxed font-sans">
-                              {t('product.tech_defaults.' + product.id, product.description || `Вибромассажер премиального класса ${product.name}.`)}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Warranty */}
-                        <div className="border-b border-gray-100 py-3.5">
-                          <button onClick={() => toggleSection('warranty')} className="w-full flex justify-between items-center text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">verified_user</span>
-                              <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.warranty_tab')}</span>
-                                <span className="text-[9px] text-gray-400 font-sans">{t('product.warranty_badge')}</span>
-                              </div>
-                            </div>
-                            <span className="material-symbols-outlined text-[16px] text-gray-400">
-                              {expandedSection === 'warranty' ? 'expand_less' : 'expand_more'}
-                            </span>
-                          </button>
-                          {expandedSection === 'warranty' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.warranty_desc')}</p>
-                          )}
-                        </div>
-
-                        {/* Secure */}
-                        <div className="border-b border-gray-100 py-3.5">
-                          <button onClick={() => toggleSection('secure')} className="w-full flex justify-between items-center text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">credit_card</span>
-                              <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.safe_tab')}</span>
-                                <span className="text-[9px] text-gray-400 font-sans">{t('product.safe')}</span>
-                              </div>
-                            </div>
-                            <span className="material-symbols-outlined text-[16px] text-gray-400">
-                              {expandedSection === 'secure' ? 'expand_less' : 'expand_more'}
-                            </span>
-                          </button>
-                          {expandedSection === 'secure' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.safe_desc')}</p>
-                          )}
-                        </div>
-
-                        {/* Delivery */}
-                        <div className="border-b border-gray-100 py-3.5">
-                          <button onClick={() => toggleSection('delivery')} className="w-full flex justify-between items-center text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">local_shipping</span>
-                              <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.delivery_tab')}</span>
-                                <span className="text-[9px] text-gray-400 font-sans">{t('product.delivery_tab')}</span>
-                              </div>
-                            </div>
-                            <span className="material-symbols-outlined text-[16px] text-gray-400">
-                              {expandedSection === 'delivery' ? 'expand_less' : 'expand_more'}
-                            </span>
-                          </button>
-                          {expandedSection === 'delivery' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.delivery_desc')}</p>
-                          )}
-                        </div>
-
-                        {/* Package */}
-                        <div className="border-b border-gray-100 py-3.5">
-                          <button onClick={() => toggleSection('package')} className="w-full flex justify-between items-center text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[18px] text-gray-400 font-light">visibility_off</span>
-                              <div>
-                                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.discreet_tab')}</span>
-                                <span className="text-[9px] text-gray-400 font-sans">{t('product.discreet_tab')}</span>
-                              </div>
-                            </div>
-                            <span className="material-symbols-outlined text-[16px] text-gray-400">
-                              {expandedSection === 'package' ? 'expand_less' : 'expand_more'}
-                            </span>
-                          </button>
-                          {expandedSection === 'package' && (
-                            <p className="mt-2 pl-7 text-[10px] text-gray-500 font-sans">{t('product.discreet_desc')}</p>
-                          )}
-                        </div>
-                      </div>
+                      <ProductPreviewAccordions
+                        product={product}
+                        expandedSection={expandedSection}
+                        toggleSection={toggleSection}
+                        variant="desktop"
+                      />
                     </div>
                   </div>
-
                 </div>
               </motion.div>
             </div>
