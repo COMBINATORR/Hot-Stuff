@@ -223,17 +223,15 @@ Deno.serve(async (req) => {
       normalizedData.sub = normalizedData.id;
     }
 
-    // 1. Critical Email Fix (Prevents Supabase "Unverified email" rejection)
-    normalizedData.email = normalizedData.default_email;
-    normalizedData.email_verified = true;
-
-    // Fallback if email is still missing but emails array is present
-    if (
-      !normalizedData.email &&
-      normalizedData.emails &&
-      normalizedData.emails.length > 0
-    ) {
+    // 1. Map email and mark as verified to prevent Supabase "Unverified email" rejection
+    if (normalizedData.default_email) {
+      normalizedData.email = normalizedData.default_email;
+    } else if (normalizedData.emails && normalizedData.emails.length > 0) {
       normalizedData.email = normalizedData.emails[0];
+    }
+
+    if (normalizedData.email) {
+      normalizedData.email_verified = true;
     }
 
     // 2. Extract Birthday (Yandex returns 'birthday', map to OIDC standard 'birthdate')
