@@ -1,3 +1,7 @@
+## 2024-06-23 - Avoid JSX in Vitest Mock Configurations
+**Learning:** When using `vi.mock` inside configuration files like `vitest.setup.js` (which may be loaded and parsed before standard Babel/JSX transformers run or outside their scope), including raw JSX (e.g., `<div>{children}</div>`) can cause parsing errors (`Unexpected JSX expression`).
+**Action:** Use `React.createElement` instead of JSX within setup file mocks (e.g., `React.createElement('div', props, children)`) to ensure the file can be parsed correctly by Vite's import analyzer across the entire test suite.
+
 ## 2026-06-19 - Added React.memo to ProductCard in CatalogPage
 **Learning:** Wrapping complex interactive components rendered in loops with React.memo is highly effective in React, especially if their props (like the `product` object and state setter functions like `setSelectedPreviewProduct`) do not change unnecessarily on parent re-renders. This avoids heavy re-rendering of product grids during interactions.
 **Action:** Look for heavy components like `ProductCard` and use `React.memo` to prevent unnecessary re-rendering.
@@ -21,7 +25,7 @@
 ## 2024-10-25 - O(N) array search replaced with O(1) Map lookup globally
 **Learning:** When a constant list of objects (`ALL_PRODUCTS`) is queried repeatedly by ID across multiple components (`Breadcrumbs.jsx`, `ProductPage.jsx`, `AccountPage.jsx`), calling `Array.find()` each time forces an O(N) linear search. Although N may be small, this wastes execution cycles.
 **Action:** Export a pre-computed `Map` (e.g., `PRODUCTS_MAP`) in the data definition file alongside the raw array. Consume `PRODUCTS_MAP.get(id)` globally for instant O(1) lookups, simplifying component logic and improving performance.
-## 2024-06-23 - Map Lookup Optimization in React Render
 
+## 2024-06-23 - Map Lookup Optimization in React Render
 **Learning:** Array `.find()` operations inside deeply nested React render cycles (like breadcrumbs generation) can become a performance bottleneck when dealing with larger state arrays (e.g., categories).
 **Action:** When computing derived state via `useMemo` that will be repeatedly queried by a unique key (like a slug or ID), pre-compute a `Map` and use `map.get(key)` for O(1) lookups instead of relying solely on arrays and O(N) linear search.
