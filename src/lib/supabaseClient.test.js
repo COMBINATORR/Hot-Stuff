@@ -1,103 +1,64 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as supabaseModule from '@supabase/supabase-js';
 
-// Mock the createClient from supabase-js
+// We must use mock functions that can be updated or tracked easily
+const mockSignInWithOAuth = vi.fn();
+const mockSignOut = vi.fn();
+const mockFunctionsInvoke = vi.fn();
+
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(),
+  createClient: vi.fn(() => ({
+    auth: {
+      signInWithOAuth: mockSignInWithOAuth,
+      signOut: mockSignOut,
+    },
+    functions: {
+      invoke: mockFunctionsInvoke,
+    }
+  }))
 }));
 
-describe('supabaseClient', () => {
+describe('supabaseClient helpers', () => {
+  let consoleWarnMock;
+  let consoleErrorMock;
+
   beforeEach(() => {
-    // Reset modules to ensure a fresh import of supabaseClient for each test
     vi.resetModules();
     vi.clearAllMocks();
+    consoleWarnMock = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
+    consoleWarnMock.mockRestore();
+    consoleErrorMock.mockRestore();
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
-  describe('Uninitialized state (no env vars)', () => {
-    beforeEach(() => {
-      vi.stubEnv('VITE_SUPABASE_URL', '');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
-      // Some versions of vitest might need this as well
-      vi.stubGlobal('import.meta', { env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' } });
+  const stubEnvConfigured = () => {
+    vi.stubGlobal('import.meta', {
+      env: {
+        VITE_SUPABASE_URL: 'https://test.supabase.co',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+      }
     });
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+  };
 
-    it('should return error object when calling signInWithGoogle', async () => {
-      const { signInWithGoogle, supabase } = await import('./supabaseClient.js');
-      expect(supabase).toBeNull();
+  const stubEnvUnconfigured = () => {
+    vi.stubGlobal('import.meta', { env: {} });
+    vi.stubEnv('VITE_SUPABASE_URL', '');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+  };
 
-      const result = await signInWithGoogle();
-      expect(result).toEqual({ error: 'Supabase not configured' });
-    });
+  describe('signInWithYandex', () => {
+    it('calls signInWithOAuth with correct Yandex provider and options when configured', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
 
-    it('should return error object when calling signInWithApple', async () => {
-      const { signInWithApple } = await import('./supabaseClient.js');
-      const result = await signInWithApple();
-      expect(result).toEqual({ error: 'Supabase not configured' });
-    });
-
-    it('should return error object when calling signInWithYandex', async () => {
-      const { signInWithYandex } = await import('./supabaseClient.js');
-      const result = await signInWithYandex();
-      expect(result).toEqual({ error: 'Supabase not configured' });
-    });
-  });
-
-  describe('Initialized state (with env vars)', () => {
-    let mockSignInWithOAuth;
-    let mockSupabaseClient;
-
-    beforeEach(() => {
-      // Setup env vars
-      vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
-      vi.stubGlobal('import.meta', {
-        env: {
-          VITE_SUPABASE_URL: 'https://test.supabase.co',
-          VITE_SUPABASE_ANON_KEY: 'test-anon-key',
-        },
-      });
-
-      // Setup the mock supabase client
-      mockSignInWithOAuth = vi.fn().mockResolvedValue({ data: {}, error: null });
-      mockSupabaseClient = {
-        auth: {
-          signInWithOAuth: mockSignInWithOAuth,
-        },
-      };
-
-      // Ensure createClient returns our mock
-      supabaseModule.createClient.mockReturnValue(mockSupabaseClient);
-    });
-
-    it('should call supabase.auth.signInWithOAuth with google provider', async () => {
-      const { signInWithGoogle, supabase } = await import('./supabaseClient.js');
-
-      expect(supabase).not.toBeNull();
-
-      await signInWithGoogle();
-
-      expect(mockSignInWithOAuth).toHaveBeenCalledWith({ provider: 'google' });
-      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call supabase.auth.signInWithOAuth with apple provider', async () => {
-      const { signInWithApple } = await import('./supabaseClient.js');
-
-      await signInWithApple();
-
-      expect(mockSignInWithOAuth).toHaveBeenCalledWith({ provider: 'apple' });
-      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call supabase.auth.signInWithOAuth with yandex custom provider and scopes', async () => {
-      const { signInWithYandex } = await import('./supabaseClient.js');
-
-      await signInWithYandex();
+      await supabaseClient.signInWithYandex();
 
       expect(mockSignInWithOAuth).toHaveBeenCalledWith({
         provider: 'custom:yandex',
@@ -106,6 +67,140 @@ describe('supabaseClient', () => {
         }
       });
       expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signInWithYandex();
+
+      expect(result).toEqual({ error: 'Supabase not configured' });
+      expect(consoleWarnMock).toHaveBeenCalledWith('[Auth] Supabase не инициализирован. Добавьте ключи в .env');
+    });
+  });
+
+  describe('signInWithGoogle', () => {
+    it('calls signInWithOAuth with correct Google provider', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
+
+      await supabaseClient.signInWithGoogle();
+
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google'
+      });
+      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signInWithGoogle();
+
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+  });
+
+  describe('signInWithApple', () => {
+    it('calls signInWithOAuth with correct Apple provider', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
+
+      await supabaseClient.signInWithApple();
+
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+        provider: 'apple'
+      });
+      expect(mockSignInWithOAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error if Supabase client is not configured', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signInWithApple();
+
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+  });
+
+  describe('signOut', () => {
+    it('calls signOut on the supabase client', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockSignOut.mockResolvedValue({ error: null });
+
+      await supabaseClient.signOut();
+
+      expect(mockSignOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.signOut();
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+  });
+
+  describe('createKaspiPayment', () => {
+    it('invokes kaspi-pay edge function with payload', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: { status: 'ok' }, error: null });
+
+      const result = await supabaseClient.createKaspiPayment({ amount: 100 });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('kaspi-pay', { body: { amount: 100 } });
+      expect(result).toEqual({ status: 'ok' });
+    });
+
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.createKaspiPayment({ amount: 100 });
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+
+    it('throws error if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('Network error') });
+
+      await expect(supabaseClient.createKaspiPayment({ amount: 100 })).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('calculateYandexDelivery', () => {
+    it('invokes yandex-delivery edge function with payload', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: { price: 500 }, error: null });
+
+      const result = await supabaseClient.calculateYandexDelivery({ address: 'test' });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('yandex-delivery', { body: { address: 'test' } });
+      expect(result).toEqual({ price: 500 });
+    });
+
+    it('returns error if supabase is not initialized', async () => {
+      stubEnvUnconfigured();
+      const supabaseClient = await import('./supabaseClient');
+
+      const result = await supabaseClient.calculateYandexDelivery({ address: 'test' });
+      expect(result).toEqual({ error: 'Supabase not configured' });
+    });
+
+    it('throws error if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('API error') });
+
+      await expect(supabaseClient.calculateYandexDelivery({ address: 'test' })).rejects.toThrow('API error');
     });
   });
 });
