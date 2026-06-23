@@ -35,8 +35,6 @@ const categorySlugMap = {
   'lubricants-cosmetics': (p) => false
 };
 
-const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
-
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
@@ -53,7 +51,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
   // Determine active display image
   // 1. If hovered, show alternative view: (selectedColorIndex + 1) % gallery.length
   // 2. Otherwise, show gallery[selectedColorIndex] or product.image
-  const activeImage = isHovered 
+  const activeImage = isHovered
     ? (gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : product.image)
     : (gallery.length > 0 ? gallery[selectedColorIndex] : product.image);
 
@@ -79,17 +77,17 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
   };
 
   return (
-    <div 
+    <div
       className="relative group h-[400px] z-10 hover:z-20 text-left"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* The expanding border box */}
       <div className="absolute -inset-px border border-black bg-white transition-all duration-300 group-hover:-bottom-16 pointer-events-none" />
-      
+
       {/* Transparent hover bridge to prevent losing hover when moving cursor down */}
       <div className="absolute top-full left-0 right-0 h-16 bg-transparent opacity-0 pointer-events-none group-hover:pointer-events-auto z-10" />
-      
+
       {/* The card content */}
       <div className="relative h-full p-4 flex flex-col justify-between z-10">
         {/* Top Badges */}
@@ -108,21 +106,21 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
 
         {/* Center Image */}
         <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
-          <Link 
-            to={`/product/${product.id}`} 
+          <Link
+            to={`/product/${product.id}`}
             className="w-full h-full flex flex-col items-center justify-center select-none"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <ResponsiveImage 
-              src={activeImage} 
-              alt={product.name} 
-              className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500" 
-              loading="lazy" 
+            <ResponsiveImage
+              src={activeImage}
+              alt={product.name}
+              className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             {gallery.length > 1 && (
               <div className="w-full max-w-[80px] h-[2px] bg-gray-200 mt-4 relative overflow-hidden md:hidden">
-                <div 
+                <div
                   className="absolute top-0 left-0 h-full bg-black transition-all duration-300"
                   style={{ width: `${((selectedColorIndex + 1) / gallery.length) * 100}%` }}
                 />
@@ -137,7 +135,7 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
           <button className="text-black hover:text-primary transition-colors mb-2 block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-none">
             <span className="material-symbols-outlined font-light text-[20px]">favorite_border</span>
           </button>
-          
+
           <div className="flex justify-between items-start gap-2">
             <div className="flex-1 min-w-0">
               <Link to={`/product/${product.id}`} className="font-sans font-bold text-[10px] tracking-wider uppercase text-black leading-tight truncate hover:text-primary transition-colors block">
@@ -147,12 +145,12 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
                 {t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}
               </p>
             </div>
-            
+
             {/* Color dots swatches (Interactive!) */}
             <div className="flex gap-2.5 mt-0.5 flex-none z-20">
               {colors.map((c, idx) => (
-                <button 
-                  key={c.name} 
+                <button
+                  key={c.name}
                   aria-label={c.name}
                   onClick={(e) => {
                     e.preventDefault();
@@ -160,11 +158,11 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
                     setSelectedColorIndex(idx);
                   }}
                   className={`relative w-2.5 h-2.5 rounded-full border transition-all after:absolute after:-inset-3 after:content-[''] ${
-                    selectedColorIndex === idx 
-                      ? 'border-black scale-110 ring-1 ring-black/20' 
+                    selectedColorIndex === idx
+                      ? 'border-black scale-110 ring-1 ring-black/20'
                       : 'border-black/10 hover:border-black/30'
                   }`}
-                  style={{ background: c.hex }} 
+                  style={{ background: c.hex }}
                 />
               ))}
             </div>
@@ -246,14 +244,14 @@ export default function CatalogPage({ onAddToCart }) {
           .select('id, name, slug, description, subcategories(id, name, slug, description)')
           .order('id', { ascending: true });
         if (error) throw error;
-        
+
         const processed = (data || []).map(cat => {
           if (cat.subcategories) {
             cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
           }
           return cat;
         });
-        
+
         setCategories(processed);
         localStorage.setItem('hs_categories', JSON.stringify(processed));
       } catch (err) {
@@ -279,7 +277,7 @@ export default function CatalogPage({ onAddToCart }) {
       const addedList = [];
 
       productIds.forEach(id => {
-        const product = productsMap.get(id);
+        const product = ALL_PRODUCTS.find(p => p.id === id);
         if (product) {
           addedList.push(product);
           if (onAddToCart) {
@@ -435,19 +433,19 @@ export default function CatalogPage({ onAddToCart }) {
   };
 
   const handleStimulationToggle = (val) => {
-    setSelectedStimulations(prev => 
+    setSelectedStimulations(prev =>
       prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]
     );
   };
 
   const handlePriceRangeToggle = (val) => {
-    setSelectedPriceRanges(prev => 
+    setSelectedPriceRanges(prev =>
       prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]
     );
   };
 
   const handleFeatureToggle = (val) => {
-    setSelectedFeatures(prev => 
+    setSelectedFeatures(prev =>
       prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]
     );
   };
@@ -487,7 +485,7 @@ export default function CatalogPage({ onAddToCart }) {
 
   return (
     <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
-      
+
       {/* Floating Gift Hint Banner */}
       <AnimatePresence>
         {showGiftBanner && (
@@ -526,10 +524,10 @@ export default function CatalogPage({ onAddToCart }) {
       <Breadcrumbs theme="light" />
 
       <div className="container-hs py-8">
-        
+
         {/* Main Columns Container */}
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-          
+
           {/* LEFT SIDEBAR CATEGORIES */}
           <aside className="hidden md:block w-[240px] flex-none border-r border-gray-100 pr-8">
             <div className="flex items-center gap-2 mb-8 select-none">
@@ -538,7 +536,7 @@ export default function CatalogPage({ onAddToCart }) {
                   {t('catalog.all_toys')}
               </span>
             </div>
-            
+
             <nav className="space-y-4">
               {/* Popular item */}
               <div className="border-b border-gray-100 pb-2">
@@ -561,7 +559,7 @@ export default function CatalogPage({ onAddToCart }) {
                   const subcategories = cat.subcategories || [];
                   const hasSub = subcategories.length > 0;
                   const isExpanded = !!expandedSidebarCats[cat.slug];
-                  
+
                   return (
                     <div key={cat.slug} className="border-b border-gray-100 pb-2">
                       {hasSub ? (
@@ -577,7 +575,7 @@ export default function CatalogPage({ onAddToCart }) {
                             </span>
                             <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
                           </button>
-                          
+
                           {isExpanded && (
                             <div className="pl-6 space-y-3 mt-2 pb-2">
                               {/* Option to view all in this category */}
@@ -653,7 +651,7 @@ export default function CatalogPage({ onAddToCart }) {
 
             {/* Filter Bar */}
             <div className="flex justify-between items-center py-3 border-b border-gray-100 mb-8 font-sans">
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(true)}
                 className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-black uppercase hover:text-primary transition-colors py-3.5 -my-3.5 px-2 -mx-2 relative z-10"
               >
@@ -665,10 +663,10 @@ export default function CatalogPage({ onAddToCart }) {
                   </span>
                 )}
               </button>
-              
+
               <div className="flex items-center gap-2 text-[11px] text-gray-500">
                 <span>{t('catalog.sort')}</span>
-                <select 
+                <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-transparent text-black font-bold focus:outline-none cursor-pointer"
@@ -692,7 +690,7 @@ export default function CatalogPage({ onAddToCart }) {
                   <p className="font-sans font-bold text-xs uppercase tracking-wider text-gray-500">
                     {t('catalog.not_found')}
                   </p>
-                  <button 
+                  <button
                     onClick={handleResetFilters}
                     className="border border-black font-sans font-bold text-[10px] tracking-widest uppercase py-3 px-8 hover:bg-black hover:text-white transition-colors"
                   >
@@ -719,7 +717,7 @@ export default function CatalogPage({ onAddToCart }) {
           {isFilterOpen && (
           <>
             {/* Backdrop */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -737,7 +735,7 @@ export default function CatalogPage({ onAddToCart }) {
               {/* Header */}
               <div className="p-8 border-b border-gray-100 flex justify-between items-center relative z-[1000]">
                 <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">{t('catalog.filters_upper')}</h2>
-                <button 
+                <button
                   onClick={() => setIsFilterOpen(false)}
                   className="text-black hover:text-gray-600 transition-colors flex items-center justify-center border-none bg-transparent focus:outline-none"
                 >
@@ -765,8 +763,8 @@ export default function CatalogPage({ onAddToCart }) {
                           key={opt.val}
                           onClick={() => handleStimulationToggle(opt.val)}
                           className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
+                            selected
+                              ? 'bg-black text-white border-black shadow-sm'
                               : 'bg-white text-black border-gray-200 hover:border-black'
                           }`}
                         >
@@ -793,8 +791,8 @@ export default function CatalogPage({ onAddToCart }) {
                           key={opt.val}
                           onClick={() => handlePriceRangeToggle(opt.val)}
                           className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
+                            selected
+                              ? 'bg-black text-white border-black shadow-sm'
                               : 'bg-white text-black border-gray-200 hover:border-black'
                           }`}
                         >
@@ -812,8 +810,8 @@ export default function CatalogPage({ onAddToCart }) {
                     type="button"
                     onClick={() => setOnlyDiscounted(!onlyDiscounted)}
                     className={`w-full py-4 px-4 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                      onlyDiscounted 
-                        ? 'bg-black text-white border-black shadow-sm' 
+                      onlyDiscounted
+                        ? 'bg-black text-white border-black shadow-sm'
                         : 'bg-white text-black border-gray-200 hover:border-black'
                     }`}
                   >
@@ -838,8 +836,8 @@ export default function CatalogPage({ onAddToCart }) {
                           key={opt.val}
                           onClick={() => handleFeatureToggle(opt.val)}
                           className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
+                            selected
+                              ? 'bg-black text-white border-black shadow-sm'
                               : 'bg-white text-black border-gray-200 hover:border-black'
                           }`}
                         >
@@ -875,7 +873,7 @@ export default function CatalogPage({ onAddToCart }) {
     )}
 
       {/* Product Preview Modal */}
-      <ProductPreviewModal 
+      <ProductPreviewModal
         product={selectedPreviewProduct}
         isOpen={!!selectedPreviewProduct}
         onClose={() => setSelectedPreviewProduct(null)}
