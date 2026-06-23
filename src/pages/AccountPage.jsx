@@ -371,7 +371,7 @@ export default function AccountPage({ onAddToCart, lang }) {
         provider: 'custom:yandex',
         options: {
           redirectTo: window.location.origin + window.location.pathname,
-          scopes: 'login:email login:info login:avatar',
+          scopes: 'login:email login:info login:avatar login:birthday login:default_phone',
           queryParams: {
             force_confirm: 'yes'
           }
