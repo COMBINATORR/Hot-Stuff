@@ -15,7 +15,7 @@ export default function TelegramLoginWidget() {
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-radius', '12');
     script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-auth-url', 'http://localhost:3000/telegram-auth-callback');
+    script.setAttribute('data-auth-url', 'https://hot-stuff-theta.vercel.app/telegram-auth-callback');
     script.async = true;
 
     if (containerRef.current) {
