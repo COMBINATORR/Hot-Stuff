@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 import { supabase } from '../lib/supabase';
-import TelegramLoginWidget from '../components/TelegramLoginWidget';
 
+import AccountDashboard from '../components/account/AccountDashboard';
+import AccountLoginForm from '../components/account/AccountLoginForm';
 
 export default function AccountPage({ onAddToCart, lang }) {
   const { t, i18n } = useTranslation();
@@ -675,610 +676,61 @@ export default function AccountPage({ onAddToCart, lang }) {
 
       
       {isLoggedIn ? (
-        /* Authenticated Dashboard view */
-        <div className="w-full max-w-5xl bg-white text-black border border-black/5 p-6 md:p-10 rounded-[28px] shadow-2xl font-sans relative z-10 overflow-hidden">
-          {/* Background radial highlight for light dashboard */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
 
-          <div className="relative z-10 space-y-10 text-left">
-            {/* Dashboard Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-black/5">
-              <div className="flex items-center gap-4">
-                {getDisplayAvatar() ? (
-                  <img
-                    src={getDisplayAvatar()}
-                    alt="User Avatar"
-                    className="w-12 h-12 rounded-full object-cover border border-black/10 shadow-sm"
-                  />
-                ) : (
-                  <span className="material-symbols-outlined text-4xl text-primary font-light">account_circle</span>
-                )}
-                <div>
-                  <h1 className="text-xl md:text-2xl font-black text-black uppercase tracking-wider">
-                    {getDisplayName()}
-                  </h1>
-                  <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">
-                    {getDisplayEmailOrPhone()}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-4 md:gap-6 self-start md:self-auto">
-                {/* Incognito Toggle Button */}
-                <button
-                  type="button"
-                  onClick={handleTogglePrivate}
-                  className={`flex items-center gap-2 border px-4 py-2.5 rounded-[20px] transition-all cursor-pointer font-sans text-[10px] font-bold uppercase tracking-wider ${
-                    isPrivate
-                      ? 'bg-black border-black text-white'
-                      : 'bg-white border-black/10 text-neutral-500 hover:text-black hover:border-black'
-                  }`}
-                  title={isPrivate ? t('account.private_title_off', 'Выключить режим приватности') : t('account.private_title_on', 'Включить режим приватности')}
-                >
-                  <span className="material-symbols-outlined text-[16px] leading-none">
-                    {isPrivate ? 'visibility_off' : 'visibility'}
-                  </span>
-                  <span>{isPrivate ? t('account.private', 'Приватно') : t('account.public', 'Публично')}</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  disabled={loading}
-                  className="flex items-center justify-center gap-2 border border-black/10 hover:border-red-500 hover:text-red-500 text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-colors rounded-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 active:scale-95 disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-[16px] leading-none">logout</span>
-                  <span>{t('account.logout_btn', 'ВЫЙТИ ИЗ АККАУНТА')}</span>
-                </button>
-              </div>
-            </div>
+        <AccountDashboard
+          t={t}
+          getDisplayAvatar={getDisplayAvatar}
+          getDisplayName={getDisplayName}
+          getDisplayEmailOrPhone={getDisplayEmailOrPhone}
+          isPrivate={isPrivate}
+          handleTogglePrivate={handleTogglePrivate}
+          loading={loading}
+          setLoading={setLoading}
+          handleLogout={handleLogout}
+          loyaltyData={loyaltyData}
+          activeOrders={activeOrders}
+          orderHistory={orderHistory}
+          lang={lang}
+          favorites={favorites}
+          handleAddWishlistItem={handleAddWishlistItem}
+          handleShareWishlist={handleShareWishlist}
+          MOCK_REGISTERED_USERS={MOCK_REGISTERED_USERS}
+          setSavedAccounts={setSavedAccounts}
+          setRegisteredUsers={setRegisteredUsers}
+        />
 
-            {/* Main Dashboard Grid - Bento Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* 1. Loyalty Tier (Bento: 2 cols) */}
-              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2 flex flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.privileges', 'Клуб Привилегий')}</h3>
-                    <span className="bg-primary/15 text-[#b28b10] text-[8px] font-black tracking-widest px-2.5 py-1 rounded-[2px] uppercase">
-                      {loyaltyData.tier}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-black leading-none">{loyaltyData.discount}%</span>
-                    <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wide">{t('account.personal_discount', 'Ваша персональная скидка')}</span>
-                  </div>
-                </div>
-
-                {loyaltyData.discount === 0 ? (
-                  <div className="mt-4 p-4 bg-white/60 rounded-xl border border-black/5">
-                    <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-                      {t('account.loyalty_intro', 'Совершите вашу первую покупку, чтобы стать участником клуба привилегий и начать копить персональную скидку!')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 mt-4">
-                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
-                      <span>{t('account.to_next_level', 'До следующего уровня осталось:')}</span>
-                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
-                    </div>
-                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: `${Math.max(10, Math.min(100, (50000 - loyaltyData.toNextLevel) / 500))}%` }} />
-                    </div>
-                  </div>
-                )}
-
-                {loyaltyData.discount === 0 && (
-                  <div className="space-y-2 mt-4">
-                    <div className="flex justify-between text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
-                      <span>{t('account.to_first_discount', 'До первой скидки осталось:')}</span>
-                      <span className="text-black">{loyaltyData.toNextLevel.toLocaleString('ru-KZ')} ₸</span>
-                    </div>
-                    <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: '0%' }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Anonymous Active Delivery (Bento: 1 col) */}
-              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-5 lg:col-span-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-3 text-green-600 mb-4">
-                    <span className="material-symbols-outlined text-[20px] font-light">local_shipping</span>
-                    <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.current_delivery', 'Текущая Доставка')}</h3>
-                  </div>
-                  {activeOrders.length === 0 ? (
-                    <div className="py-4">
-                      <p className="text-xs text-neutral-500 font-medium">
-                        {t('account.no_active_orders', 'У вас пока нет активных заказов.')}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {activeOrders.map(order => (
-                        <div key={order.id} className="border-l-2 border-primary pl-4 py-1 space-y-2">
-                          <p className="text-xs font-black text-black">
-                            {t('account.delivery_order_num', { num: order.number })} — {order.status}
-                          </p>
-                          <p className="text-[10px] text-neutral-500">{order.details}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Anti-Anxiety Privacy Banner */}
-                <div className="bg-neutral-100 border border-black/5 p-4 rounded-[16px] flex items-start gap-3 mt-4">
-                  <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">visibility_off</span>
-                  <div>
-                    <h4 className="text-[9px] font-black text-black uppercase tracking-wider">{t('account.anon_title', 'Гарантия 100% анонимности доставки:')}</h4>
-                    <p className="text-[9px] text-neutral-600 leading-relaxed mt-1 font-normal">
-                      {t('account.anon_desc', 'Заказ упакован в плотный непрозрачный сейф-пакет без каких-либо логотипов. В накладной содержимое указано как «Аксессуары (косметика)».')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Order History (Bento: 2 cols) */}
-              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2">
-                <h3 className="text-xs font-black tracking-wider text-black uppercase mb-2">{t('account.history', 'История Покупок')}</h3>
-                
-                {orderHistory.length === 0 ? (
-                  <div className="py-8 flex flex-col items-center justify-center text-center gap-4">
-                    <p className="text-xs text-neutral-500 font-medium">
-                      {t('account.no_orders_yet', 'Вы еще ничего не заказывали.')}
-                    </p>
-                    <Link
-                      to={lang && lang !== 'ru' ? `/${lang}/catalog` : '/catalog'}
-                      className="border border-black hover:bg-black hover:text-white text-black font-sans font-black text-[9px] tracking-[0.2em] px-6 py-3.5 uppercase transition-all rounded-none cursor-pointer"
-                    >
-                      {t('account.go_to_catalog', 'Перейти в каталог')}
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-black/5 text-xs font-sans">
-                    {orderHistory.map(order => (
-                      <div key={order.id} className="py-4 flex justify-between items-center gap-4">
-                        <div>
-                          <p className="font-bold text-black uppercase">{t('account.order_completed', { num: order.number, date: order.date })}</p>
-                          <p className="text-[10px] text-neutral-500 mt-1">
-                            {isPrivate ? t('account.delicate_accessory', 'Деликатный аксессуар •••• x1') : `${order.itemsSummary}`} — {order.status}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-neutral-900">{order.totalPrice.toLocaleString('ru-KZ')} ₸</p>
-                          {order.canRepeat && (
-                            <button 
-                              onClick={() => {
-                                const prod = ALL_PRODUCTS.find(p => p.id === order.productId);
-                                if (prod) handleAddWishlistItem(prod);
-                              }}
-                              className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
-                            >
-                              {t('account.repeat', 'Повторить в 1 клик')}
-                            </button>
-                          )}
-                          {!order.canRepeat && (
-                            <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5 block">{t('account.archive', 'Архив')}</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 4. Wishlist (Избранное) (Bento: 1 col) */}
-              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-1 flex flex-col justify-between">
-                <div className="space-y-6">
-                  <h3 className="text-xs font-black tracking-wider text-black uppercase">{t('account.favorites', 'Избранные Товары')}</h3>
-                  
-                  {favorites.length === 0 ? (
-                    <div className="py-8">
-                      <p className="text-xs text-neutral-500 font-medium text-center">
-                        {t('account.favorites_empty', 'Ваш список желаний пуст.')}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-5">
-                      {favorites.map(product => (
-                        <div key={product.id} className="flex gap-4 p-3 bg-white border border-black/5 rounded-lg">
-                          <div className="w-16 h-16 bg-neutral-50 rounded-[4px] overflow-hidden flex items-center justify-center flex-none relative">
-                            {isPrivate ? (
-                              <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 select-none">
-                                <span className="material-symbols-outlined text-[18px]">visibility_off</span>
-                                <span className="text-[7px] font-bold uppercase tracking-wider mt-0.5">{t('account.hidden', 'Скрыто')}</span>
-                              </div>
-                            ) : (
-                              <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
-                            )}
-                          </div>
-                          <div className="flex-1 flex flex-col justify-between">
-                            <div>
-                              <h4 className="text-[10px] font-black text-black uppercase tracking-wider truncate max-w-[150px]">
-                                {isPrivate ? t('account.intimate_device', 'Интимный девайс ••••') : product.name}
-                              </h4>
-                              <p className="text-[11px] text-neutral-900 font-bold mt-0.5">{product.price.toLocaleString('ru-KZ')} ₸</p>
-                            </div>
-                            <button
-                              onClick={() => handleAddWishlistItem(product)}
-                              className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[8px] tracking-widest uppercase py-1.5 px-3 rounded-[2px] transition-colors self-start mt-2 cursor-pointer"
-                            >
-                              {t('account.to_cart', 'В КОРЗИНУ')}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {favorites.length > 0 && (
-                  <button
-                    onClick={handleShareWishlist}
-                    className="w-full bg-black hover:bg-neutral-800 text-white font-sans font-bold text-[9px] tracking-[0.2em] py-3.5 px-4 rounded-[20px] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer mt-4"
-                  >
-                    <span className="material-symbols-outlined text-[16px] leading-none">share</span>
-                    <span>{t('account.hint', 'НАМЕКНУТЬ ПАРТНЕРУ (АНОНИМНО)')}</span>
-                  </button>
-                )}
-              </div>
-
-
-              {/* 5. Session Security & Devices (Bento: 3 cols) */}
-              <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-6 lg:col-span-3">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div>
-                    <h3 className="text-xs font-black tracking-wider text-black uppercase mb-1 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-black">security</span>
-                      <span>{t('account.security', 'Безопасность и управление сессиями')}</span>
-                    </h3>
-                    <p className="text-[11px] text-neutral-500 font-sans">
-                      {t('account.security_desc', 'Вы можете завершить сессии на других устройствах или стереть историю входов на этом компьютере.')}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={async () => {
-                        startTransition(() => {
-                          setLoading(true);
-                        });
-                        try {
-                          const { error } = await supabase.auth.signOut({ scope: 'others' });
-                          if (error) throw error;
-                          alert(t('account.err_others_success', 'Все сессии на других устройствах успешно завершены!'));
-                        } catch (err) {
-                          console.error(err);
-                          alert(t('common.error', 'Ошибка') + ': ' + err.message);
-                        } finally {
-                          startTransition(() => {
-                            setLoading(false);
-                          });
-                        }
-                      }}
-                      className="bg-black hover:bg-neutral-800 text-white font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? (
-                        <span className="flex items-center gap-2">
-                          <svg className="animate-spin h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
-                            <circle cx="12" cy="12" r="9" />
-                          </svg>
-                          {t('account.loading', 'Загрузка...')}
-                        </span>
-                      ) : (
-                        t('account.logout_others', 'Выйти на других устройствах')
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm(t('account.clear_history_confirm', 'Вы уверены, что хотите очистить историю входов на этом устройстве? При следующем входе вам потребуется подтверждение по коду.'))) {
-                          localStorage.removeItem('hs_registered_users');
-                          setSavedAccounts([]);
-                          setRegisteredUsers(MOCK_REGISTERED_USERS);
-                          alert(t('account.err_history_cleared', 'История входов на этом устройстве очищена!'));
-                        }
-                      }}
-                      className="border border-black/10 hover:border-black text-black font-sans font-black text-[9px] tracking-wider uppercase py-2.5 px-4 rounded-[20px] transition-colors cursor-pointer active:scale-95"
-                    >
-                      {t('account.clear_history', 'Стереть историю входов здесь')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
       ) : (
-        /* Image-accurate Light Mobile login view wrapped in a white card/plate */
-        <div className="w-full max-w-[360px] bg-white text-black rounded-[28px] shadow-2xl p-6 md:p-8 flex flex-col items-center select-none z-10 border border-black/5">
-          
-          {/* Header */}
-          <h1 className="text-xl font-light tracking-[0.2em] text-black uppercase mb-4 mt-4 text-center">
-            HOT STUFF
-          </h1>
 
-          {/* Dynamic Form Header */}
-          <h2 className="text-[11px] font-sans font-black tracking-widest text-neutral-400 uppercase mb-8 text-center">
-            {step === 1 ? t('header.login_register') : (isRegistered ? t('account.login') : t('account.register'))}
-          </h2>
-
-          {error && (
-            <div className="w-full text-center text-xs text-red-500 font-bold pb-4">
-              ⚠️ {error}
-            </div>
-          )}
-
-          {step === 1 ? (
-            <div className="w-full flex flex-col">
-              {/* List of previously saved / authorized accounts */}
-              {savedAccounts.length > 0 && (
-                <div className="flex flex-col gap-3 mb-6 w-full">
-                  <span className="text-[11px] font-sans font-black tracking-widest text-neutral-400 uppercase text-center mb-1">
-                    {t('account.login_as')}
-                  </span>
-                  <div className="flex flex-col gap-2.5 max-h-[180px] overflow-y-auto pr-1">
-                    {savedAccounts.map((email) => (
-                      <div
-                        key={email}
-                        className="group flex items-center justify-between w-full h-[54px] bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-[20px] px-5 transition-all duration-300 cursor-pointer"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIdentifier(email);
-                            loginSuccess(email);
-                          }}
-                          className="flex items-center gap-3 flex-1 h-full text-left bg-transparent border-none p-0 outline-none cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[20px] text-neutral-400 group-hover:text-black transition-colors">
-                            account_circle
-                          </span>
-                          <span className="text-[14px] text-black font-medium truncate max-w-[200px]">
-                            {email}
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Delete from saved accounts list
-                            setSavedAccounts(prev => {
-                              const next = prev.filter(x => x !== email);
-                              const savedList = localStorage.getItem('hs_registered_users');
-                              const parsedList = savedList ? JSON.parse(savedList) : [];
-                              const nextParsed = parsedList.filter(x => x.trim().toLowerCase() !== email);
-                              localStorage.setItem('hs_registered_users', JSON.stringify(nextParsed));
-                              return next;
-                            });
-                            // Also remove from registeredUsers state
-                            setRegisteredUsers(prev => prev.filter(x => x !== email));
-                          }}
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-neutral-200/50 transition-all cursor-pointer border-none bg-transparent outline-none"
-                          title={t('account.delete_from_list', 'Удалить из списка')}
-                        >
-                          <span className="material-symbols-outlined text-[18px]">close</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mt-2 mb-2 w-full">
-                    <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
-                    <span className="px-4 text-[11px] text-neutral-400 font-bold uppercase tracking-wider whitespace-nowrap">{t('account.other_account')}</span>
-                    <div className="h-[0.5px] bg-neutral-200 flex-1"></div>
-                  </div>
-                </div>
-              )}
-
-              <form onSubmit={handleIdentifierSubmit} className="w-full flex flex-col text-left">
-                {/* Input block */}
-                <div className="flex flex-col mb-4">
-                  <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">
-                    {t('account.email', 'Email')}
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    required
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder={t('account.email', 'Email')}
-                    className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Continue button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
-                >
-                  <span className="font-normal tracking-wide">{t('account.continue')}</span>
-                </button>
-              </form>
-
-              {/* Divider */}
-              <div className="flex items-center justify-between mt-8 mb-6 w-full">
-                <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
-                <span className="px-4 text-[13px] text-neutral-400 font-normal whitespace-nowrap">{t('account.or_via')}</span>
-                <div className="h-[0.5px] bg-neutral-300 flex-1"></div>
-              </div>
-
-              {/* Social Buttons — Google · Yandex · Telegram */}
-              <div className="flex flex-col items-center justify-center gap-4 mb-14 w-full">
-
-                <div className="flex flex-col gap-3 w-full">
-                  {/* Google */}
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
-                    title={t('account.google')}
-                    disabled={loading}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span className="text-neutral-800 font-medium text-sm">{t('account.google', 'Google')}</span>
-                  </button>
-
-                  {/* Yandex */}
-                  <button
-                    type="button"
-                    onClick={handleYandexClick}
-                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
-                    title={t('account.yandex')}
-                    disabled={loading}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#FC3F1D">
-                      <path d="M7 3 L12 11.5 L17 3 L15 3 L12 8.5 L9 3 Z M11 12 L11 21 L13 21 L13 12 Z"/>
-                    </svg>
-                    <span className="text-neutral-800 font-medium text-sm">{t('account.yandex', 'Yandex')}</span>
-                  </button>
-
-                  {/* Telegram */}
-                  <button
-                    type="button"
-                    onClick={isLocalHost() ? handleLocalTelegramLogin : () => document.getElementById('tg-widget-trigger')?.querySelector('a,button')?.click()}
-                    className="w-full bg-white border border-neutral-200 rounded-xl flex items-center justify-center gap-3 py-3 hover:bg-neutral-50 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
-                    title={t('account.telegram', 'Telegram')}
-                    disabled={loading}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <path fill="#2AABEE" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
-                    </svg>
-                    <span className="text-neutral-800 font-medium text-sm">{t('account.telegram', 'Telegram')}</span>
-                  </button>
-                </div>
-
-                {/* Telegram Widget Area */}
-                <div className="w-full flex justify-center mt-2 border-t border-neutral-100 pt-4">
-                  {isLocalHost() ? (
-                    <button
-                      type="button"
-                      onClick={handleLocalTelegramLogin}
-                      className="w-full max-w-[220px] h-[40px] bg-[#2AABEE] hover:bg-[#229ED9] text-white font-sans font-bold text-[11px] uppercase tracking-wider rounded-[20px] transition-all cursor-pointer flex items-center justify-center gap-2 border border-black shadow-sm"
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <path fill="white" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
-                      </svg>
-                      <span>{t('account.local_login', 'Войти (Локально)')}</span>
-                    </button>
-                  ) : (
-                    <TelegramLoginWidget
-                      botName={import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStore_bot'}
-                      onAuth={handleTelegramLoginSuccess}
-                      size="large"
-                      radius="20"
-                    />
-                  )}
-                </div>
-
-              </div>
-            </div>
-          ) : (
-            /* Verify Step (OTP/Password) - Styled in same clean white minimalist theme */
-            <form onSubmit={handleVerifySubmit} className="w-full flex flex-col text-left">
-              {isRegistered && password ? (
-                <div className="flex flex-col mb-4">
-                  <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 ml-1">
-                    {t('account.registered_pwd')}
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="text-[14px] text-black font-normal ml-3 mb-1.5 leading-none">{t('account.password_label')}</label>
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full h-[54px] bg-white border border-black rounded-[20px] px-5 text-[16px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70"
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col mb-4">
-                  <div className="text-[13px] text-neutral-500 leading-relaxed mb-4 px-1 text-center">
-                    {t('account.sent_code')} <br />
-                    <strong className="text-black font-mono">{identifier}</strong>.
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="text-[14px] text-black font-normal text-center mb-3">{t('account.otp_label')}</label>
-                    <div className="flex justify-center gap-1.5 sm:gap-2">
-                      {[0, 1, 2, 3, 4, 5].map((idx) => (
-                        <input
-                          key={idx}
-                          id={`code-${idx}`}
-                          type="text"
-                          maxLength="1"
-                          value={code[idx]}
-                          onChange={(e) => handleCodeChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(idx, e)}
-                          className="w-10 h-10 sm:w-11 sm:h-11 bg-white border border-black text-center text-lg font-bold text-black focus:border-black/70 outline-none rounded-[10px]"
-                          disabled={loading}
-                        />
-                      ))}
-                    </div>
-                    <div className="text-center mt-6">
-                      {countdown > 0 ? (
-                        <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider font-sans">
-                          {t('account.resend_timer', { count: countdown })}
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => triggerOtpSend(identifier)}
-                          className="text-[11px] font-bold text-black hover:text-primary uppercase tracking-wider bg-transparent border-none cursor-pointer transition-colors font-sans focus-visible:outline-none focus-visible:underline"
-                          disabled={loading}
-                        >
-                          {t('account.resend_btn')}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-4 mt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-[54px] bg-black hover:bg-neutral-900 text-white font-normal text-[15px] rounded-[20px] transition-colors flex items-center justify-center gap-3 cursor-pointer"
-                >
-                  <span>{t('account.confirm')}</span>
-                  {loading && (
-                    <svg className="animate-spin h-[18px] w-[18px] text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
-                      <circle cx="12" cy="12" r="9" />
-                    </svg>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setStep(1); setError(''); }}
-                  className="w-full text-center text-[11px] font-bold text-neutral-500 hover:text-black uppercase tracking-wider py-1 bg-transparent border-none cursor-pointer"
-                  disabled={loading}
-                >
-                  {t('account.back')}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Image-accurate Disclaimer */}
-          <p className="text-[9.5px] text-black/90 leading-[1.6] text-center font-normal px-2 mt-4 max-w-[325px]">
-            {t('account.terms_text')}
-          </p>
-
-        </div>
+        <AccountLoginForm
+          t={t}
+          step={step}
+          setStep={setStep}
+          isRegistered={isRegistered}
+          error={error}
+          setError={setError}
+          savedAccounts={savedAccounts}
+          setIdentifier={setIdentifier}
+          loginSuccess={loginSuccess}
+          setSavedAccounts={setSavedAccounts}
+          setRegisteredUsers={setRegisteredUsers}
+          MOCK_REGISTERED_USERS={MOCK_REGISTERED_USERS}
+          handleIdentifierSubmit={handleIdentifierSubmit}
+          identifier={identifier}
+          loading={loading}
+          handleGoogleLogin={handleGoogleLogin}
+          handleYandexClick={handleYandexClick}
+          isLocalHost={isLocalHost}
+          handleLocalTelegramLogin={handleLocalTelegramLogin}
+          handleTelegramLoginSuccess={handleTelegramLoginSuccess}
+          handleVerifySubmit={handleVerifySubmit}
+          password={password}
+          setPassword={setPassword}
+          code={code}
+          handleCodeChange={handleCodeChange}
+          handleKeyDown={handleKeyDown}
+          countdown={countdown}
+          triggerOtpSend={triggerOtpSend}
+        />
       )}
       </div>
     </div>
