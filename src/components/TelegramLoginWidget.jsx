@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * TelegramLoginWidget — renders the official Telegram Login Widget.
+ * TelegramLoginWidget — renders the official Telegram Login Widget (updated).
  *
  * Uses `data-onauth` (callback mode) so the user data object is passed
  * directly to a global JS function, which in turn calls the React `onAuth`
