@@ -731,7 +731,6 @@ export default function AccountPage({ onAddToCart, lang }) {
           countdown={countdown}
           triggerOtpSend={triggerOtpSend}
         />
-
       )}
       </div>
     </div>
