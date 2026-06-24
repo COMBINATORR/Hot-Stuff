@@ -1,112 +1,76 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
- * TelegramLoginWidget component dynamically renders the official Telegram widget.
- * It uses a JS callback instead of redirect, matching single-page application flows.
+ * TelegramLoginWidget — renders the official Telegram Login Widget.
+ *
+ * Uses `data-onauth` (callback mode) so the user data object is passed
+ * directly to a global JS function, which in turn calls the React `onAuth`
+ * prop.  This avoids any page redirects and keeps the auth flow entirely
+ * inside the SPA.
+ *
+ * Props:
+ *  - botName  {string}  Telegram bot username (without @). Default: 'HotStuffStore_bot'
+ *  - onAuth   {(user) => void}  Callback receiving the Telegram user object.
+ *  - size     {'small'|'medium'|'large'}  Widget button size. Default: 'large'
+ *  - radius   {string|number}  Corner radius. Default: '12'
  */
-export default function TelegramLoginWidget({ 
-  onAuth, 
-  botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'HotStuffStore_bot', 
-  size = 'large', 
-  radius = '20', 
-  showUserPic = false 
+export default function TelegramLoginWidget({
+  botName = 'HotStuffStore_bot',
+  onAuth,
+  size = 'large',
+  radius = '12',
 }) {
   const containerRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Keep a stable ref to the latest onAuth callback so we don't need to
+  // remount the script every time the parent re-renders.
+  const onAuthRef = useRef(onAuth);
+  useEffect(() => {
+    onAuthRef.current = onAuth;
+  }, [onAuth]);
 
   useEffect(() => {
-    if (!botName) {
-      console.warn('[TelegramLoginWidget] botName is not configured.');
-      return;
-    }
+    // 1) Register a unique global callback that the Telegram script will call.
+    const callbackName = '__telegram_login_callback_' + Date.now();
+    window[callbackName] = (user) => {
+      if (onAuthRef.current) {
+        onAuthRef.current(user);
+      }
+    };
 
-    // Clear previous widget iframe if any
+    // 2) Clean up old widget content.
     if (containerRef.current) {
       containerRef.current.innerHTML = '';
     }
 
-    // Set global authentication callback window handler
-    window.onTelegramAuth = async (user) => {
-      console.log('[Telegram Auth] Widget callback invoked with payload:', user);
-      
-      try {
-        if (onAuth) {
-          // Pass the user payload up to the parent component
-          await onAuth(user);
-        } else {
-          // Fallback / skeleton API call to the supabase edge function
-          console.log('[Telegram Auth] No onAuth prop provided, running skeleton API call.');
-          const response = await fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ telegramData: user })
-          });
-          const result = await response.json();
-          console.log('[Telegram Auth] Proxy Response:', result);
-        }
-      } catch (err) {
-        console.error('[Telegram Auth Error] Verification failed:', err);
-      }
-    };
-
-    // Create the official widget script tag
+    // 3) Create the <script> element exactly as Telegram requires.
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.async = true;
     script.setAttribute('data-telegram-login', botName);
     script.setAttribute('data-size', size);
-    script.setAttribute('data-radius', radius);
+    script.setAttribute('data-radius', String(radius));
     script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', showUserPic ? 'true' : 'false');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.async = true;
-
-    // Monitor load event to hide loader
-    script.onload = () => {
-      setIsLoading(false);
-    };
+    // ↓ KEY: use callback mode, not redirect mode.
+    script.setAttribute('data-onauth', `${callbackName}(user)`);
 
     if (containerRef.current) {
       containerRef.current.appendChild(script);
     }
 
-    // Fallback: hide loader after 3 seconds in case script.onload doesn't trigger
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
+    // 4) Cleanup on unmount: remove global callback & empty the container.
     return () => {
-      clearTimeout(timeout);
-      // Clean up global callback on unmount
-      if (window.onTelegramAuth) {
-        delete window.onTelegramAuth;
+      delete window[callbackName];
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
-  }, [botName, onAuth, size, radius, showUserPic]);
+  }, [botName, size, radius]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50px] w-full font-sans transition-all duration-300">
-      {isLoading && (
-        <div className="flex items-center gap-2 text-neutral-400 text-xs font-bold uppercase tracking-widest animate-pulse py-2">
-          <svg 
-            className="animate-spin h-4 w-4" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="3" 
-            strokeLinecap="round" 
-            strokeDasharray="3 3"
-          >
-            <circle cx="12" cy="12" r="9" />
-          </svg>
-          <span>Загрузка виджета...</span>
-        </div>
-      )}
-      <div 
-        ref={containerRef} 
-        className={`w-full flex justify-center items-center ${isLoading ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100 h-auto'}`}
-      />
-    </div>
+    <div
+      ref={containerRef}
+      id="telegram-login-container"
+      className="flex justify-center items-center min-h-[44px]"
+    />
   );
 }
