@@ -9,6 +9,7 @@ import SorayaMockupPage from './pages/SorayaMockupPage.jsx';
 import CartPage from './pages/CartPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
 import LegalPage from './pages/LegalPage.jsx';
+import TelegramAuthCallback from './pages/TelegramAuthCallback.jsx';
 import { supabase } from './lib/supabase';
 
 // Языковые префиксы: ru (default), kz, en
@@ -125,6 +126,7 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
         <Route path="/account"      element={<PageWrapper><AccountPage onAddToCart={onAddToCart} /></PageWrapper>} />
         <Route path="/legal"        element={<PageWrapper><LegalPage /></PageWrapper>} />
         <Route path="/mockup/soraya-wave" element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />
+        <Route path="/telegram-auth-callback" element={<PageWrapper><TelegramAuthCallback /></PageWrapper>} />
 
         {/* Маршруты с языковыми префиксами /kz/... /en/... /ru/... */}
         {LANGS.map((lang) => (
@@ -137,6 +139,7 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
             <Route path={`/${lang}/account`}     element={<PageWrapper><AccountPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
             <Route path={`/${lang}/legal`}        element={<PageWrapper><LegalPage /></PageWrapper>} />
             <Route path={`/${lang}/mockup/soraya-wave`} element={<PageWrapper><SorayaMockupPage /></PageWrapper>} />
+            <Route path={`/${lang}/telegram-auth-callback`} element={<PageWrapper><TelegramAuthCallback /></PageWrapper>} />
           </React.Fragment>
         ))}
 
