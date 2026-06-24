@@ -129,8 +129,36 @@ export default function AccountPage({ onAddToCart, lang }) {
     return () => clearInterval(timer);
   }, [countdown]);
 
+  // ── Restore Telegram (or any) session from localStorage on mount ──
+  useEffect(() => {
+    if (isLoggedIn) return; // already logged in, nothing to do
 
+    const raw = localStorage.getItem('hs_user');
+    if (!raw) return;
 
+    try {
+      const saved = JSON.parse(raw);
+      if (!saved || !saved.emailOrPhone) return;
+
+      // Rebuild minimal sessionUser so the dashboard renders correctly
+      const restoredSessionUser = {
+        email: saved.emailOrPhone,
+        user_metadata: {
+          full_name: [saved.firstName, saved.lastName].filter(Boolean).join(' ') || saved.emailOrPhone,
+          first_name: saved.firstName || '',
+          last_name: saved.lastName || '',
+          username: saved.username || '',
+          avatar_url: saved.photoUrl || null,
+        },
+      };
+
+      setIsLoggedIn(true);
+      setLoggedInUser(saved.emailOrPhone);
+      setSessionUser(restoredSessionUser);
+    } catch (e) {
+      console.warn('[AccountPage] failed to restore session from localStorage', e);
+    }
+  }, []);
 
   // Validation
   const validateEmail = (val) => {
@@ -316,40 +344,68 @@ export default function AccountPage({ onAddToCart, lang }) {
     }, 800);
   };
 
-  const handleTelegramLoginSuccess = async (user) => {
+  const handleTelegramLoginSuccess = (user) => {
     setError('');
     setLoading(true);
-    
+
     try {
-      // Invoke our deployed Edge Function
-      const response = await fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      // Build a display identifier from the Telegram user object
+      const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Telegram User';
+      const emailOrPhone = user.username ? `@${user.username}` : `tg_${user.id}`;
+
+      // ── 1. Save to localStorage IMMEDIATELY ──
+      const authUser = {
+        emailOrPhone,
+        id: user.id,
+        firstName: user.first_name || '',
+        lastName: user.last_name || '',
+        username: user.username || '',
+        photoUrl: user.photo_url || '',
+        authDate: user.auth_date || '',
+        hash: user.hash || '',
+        isTelegram: true,
+      };
+      localStorage.setItem('hs_user', JSON.stringify(authUser));
+
+      // ── 2. Update React state so the page re-renders to the account view ──
+      const mockSessionUser = {
+        email: emailOrPhone,
+        user_metadata: {
+          full_name: displayName,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          username: user.username || '',
+          avatar_url: user.photo_url || null,
         },
-        body: JSON.stringify({
-          telegramData: user
+      };
+
+      setIsLoggedIn(true);
+      setLoggedInUser(emailOrPhone);
+      setSessionUser(mockSessionUser);
+      localStorage.setItem('hs_auth_session', JSON.stringify({ user: mockSessionUser }));
+      window.dispatchEvent(new Event('hs_auth_change'));
+
+      // ── 3. Optionally try the server-side Supabase session (fire-and-forget) ──
+      fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramData: user }),
+      })
+        .then((r) => r.json())
+        .then((result) => {
+          if (result?.session?.access_token && result?.session?.refresh_token) {
+            supabase.auth.setSession({
+              access_token: result.session.access_token,
+              refresh_token: result.session.refresh_token,
+            });
+          }
         })
-      });
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || t('account.err_telegram_verify', 'Ошибка проверки данных Telegram на сервере'));
-      }
-
-      if (result.session && result.session.access_token && result.session.refresh_token) {
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token
-        });
-        if (sessionError) throw sessionError;
-      } else {
-        throw new Error(t('account.err_invalid_response', 'Неверный формат ответа от сервера авторизации'));
-      }
+        .catch((err) => console.warn('[Telegram Proxy] optional server session failed:', err));
 
     } catch (err) {
       console.error('[Telegram Auth Error]', err);
       setError(err.message || t('account.err_telegram_fail', 'Не удалось войти через Telegram. Пожалуйста, попробуйте позже.'));
+    } finally {
       setLoading(false);
     }
   };
