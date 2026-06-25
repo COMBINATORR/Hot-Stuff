@@ -102,6 +102,136 @@ const CartItemRow = React.memo(function CartItemRow({ item, onQtyChange, onRemov
   );
 });
 
+
+const CartEmptyState = React.memo(() => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-neutral-950 border border-white/5 space-y-6 rounded-none">
+      <div className="w-16 h-16 flex items-center justify-center bg-neutral-900 border border-white/10 text-2xl text-primary rounded-none">
+        🛒
+      </div>
+      <div>
+        <p className="font-sans font-bold text-sm text-white uppercase tracking-wider">
+          {t('cart.empty')}
+        </p>
+        <p className="text-[11px] text-white/50 tracking-wide mt-1">
+          {t('cart.empty_hint')}
+        </p>
+      </div>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <Link
+          to="/catalog"
+          className="inline-flex items-center justify-center bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] px-8 py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none"
+          id="cart-cta-catalog"
+        >
+          {t('cart.go_to_catalog')}
+        </Link>
+      </motion.div>
+    </div>
+  );
+});
+
+
+const CartOrderSummary = React.memo(({ items, subtotal, delivery, total, checkoutPath, onKaspiCheckout, isCheckingOut }) => {
+  const { t } = useTranslation();
+  return (
+    <aside className="lg:col-span-1 bg-neutral-950 border border-white/5 p-6 sm:p-8 space-y-6 sticky top-28 rounded-none">
+      <p className="font-sans text-[10px] font-bold tracking-widest text-white/40 uppercase text-left">
+        {t('cart.order_summary')}
+      </p>
+
+      <div className="space-y-3">
+        <div className="flex justify-between text-xs tracking-wide text-white/60">
+          <span>{t('cart.items_count', { count: items.reduce((s, i) => s + i.qty, 0) })}</span>
+          <span className="font-semibold text-white">{subtotal.toLocaleString('ru-KZ')} ₸</span>
+        </div>
+
+        <div className="flex justify-between text-xs tracking-wide text-white/60">
+          <span>{t('cart.delivery')}</span>
+          <span className={`font-semibold ${delivery === 0 ? 'text-green-400' : 'text-white'}`}>
+            {delivery === 0 ? t('cart.free') : `${delivery.toLocaleString('ru-KZ')} ₸`}
+          </span>
+        </div>
+
+        {delivery > 0 && (
+          <p className="text-[10px] text-white/40 text-left mt-1 leading-normal">
+            {t('cart.free_hint', { amount: (15000 - subtotal).toLocaleString('ru-KZ') })}
+          </p>
+        )}
+      </div>
+
+      <div className="flex justify-between items-baseline border-t border-white/10 pt-4 text-white">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t('cart.to_pay')}</span>
+        <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
+      </div>
+
+       <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="pt-2"
+      >
+        <Link
+          to={checkoutPath}
+          className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none"
+          id="cart-cta-checkout"
+        >
+          {t('cart.checkout')}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </Link>
+      </motion.div>
+
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="pt-1"
+      >
+        <button
+          type="button"
+          onClick={onKaspiCheckout}
+          disabled={isCheckingOut}
+          className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none"
+          id="cart-cta-kaspi"
+        >
+          {isCheckingOut ? (
+            <>
+              <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+              <span>{t('header.processing')}</span>
+            </>
+          ) : (
+            <>
+              <span>{t('cart.kaspi')}</span>
+              <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
+              </svg>
+            </>
+          )}
+        </button>
+      </motion.div>
+
+      {/* Trust micro-copy */}
+      <div className="border-t border-white/5 pt-6 space-y-3">
+        {[
+          { text: t('cart.sec_ssl') },
+          { text: t('cart.sec_kaspi') },
+          { text: t('cart.sec_returns') }
+        ].map(item => (
+          <p
+            key={item.text}
+            className="text-[9px] font-bold text-white/40 flex items-center gap-2.5 uppercase tracking-wider text-left"
+          >
+            {item.text}
+          </p>
+        ))}
+      </div>
+    </aside>
+  );
+});
+
 export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -199,29 +329,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
           </motion.h1>
 
           {items.length === 0 ? (
-            /* ─ Empty State ─────────────────── */
-            <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-neutral-950 border border-white/5 space-y-6 rounded-none">
-              <div className="w-16 h-16 flex items-center justify-center bg-neutral-900 border border-white/10 text-2xl text-primary rounded-none">
-                🛒
-              </div>
-              <div>
-                <p className="font-sans font-bold text-sm text-white uppercase tracking-wider">
-                  {t('cart.empty')}
-                </p>
-                <p className="text-[11px] text-white/50 tracking-wide mt-1">
-                  {t('cart.empty_hint')}
-                </p>
-              </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link 
-                  to="/catalog" 
-                  className="inline-flex items-center justify-center bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] px-8 py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
-                  id="cart-cta-catalog"
-                >
-                  {t('cart.go_to_catalog')}
-                </Link>
-              </motion.div>
-            </div>
+            <CartEmptyState />
           ) : (
             /* ─ Cart layout ─────────────────── */
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start mt-10">
@@ -249,101 +357,15 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
                 </div>
               </div>
 
-              {/* Right: order summary */}
-              <aside className="lg:col-span-1 bg-neutral-950 border border-white/5 p-6 sm:p-8 space-y-6 sticky top-28 rounded-none">
-                <p className="font-sans text-[10px] font-bold tracking-widest text-white/40 uppercase text-left">
-                  {t('cart.order_summary')}
-                </p>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs tracking-wide text-white/60">
-                    <span>{t('cart.items_count', { count: items.reduce((s, i) => s + i.qty, 0) })}</span>
-                    <span className="font-semibold text-white">{subtotal.toLocaleString('ru-KZ')} ₸</span>
-                  </div>
-
-                  <div className="flex justify-between text-xs tracking-wide text-white/60">
-                    <span>{t('cart.delivery')}</span>
-                    <span className={`font-semibold ${delivery === 0 ? 'text-green-400' : 'text-white'}`}>
-                      {delivery === 0 ? t('cart.free') : `${delivery.toLocaleString('ru-KZ')} ₸`}
-                    </span>
-                  </div>
-
-                  {delivery > 0 && (
-                    <p className="text-[10px] text-white/40 text-left mt-1 leading-normal">
-                      {t('cart.free_hint', { amount: (15000 - subtotal).toLocaleString('ru-KZ') })}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-baseline border-t border-white/10 pt-4 text-white">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t('cart.to_pay')}</span>
-                  <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
-                </div>
-
-                 <motion.div
-                  whileHover={{ scale: 1.01 }} 
-                  whileTap={{ scale: 0.99 }}
-                  className="pt-2"
-                >
-                  <Link 
-                    to={checkoutPath} 
-                    className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 transition-all rounded-none" 
-                    id="cart-cta-checkout"
-                  >
-                    {t('cart.checkout')}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  </Link>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.01 }} 
-                  whileTap={{ scale: 0.99 }}
-                  className="pt-1"
-                >
-                  <button
-                    type="button"
-                    onClick={handleKaspiCheckout}
-                    disabled={isCheckingOut}
-                    className="w-full flex items-center justify-center gap-2 bg-[#E31E24] hover:bg-[#c9181e] disabled:bg-[#E31E24]/60 text-white font-sans font-black text-[10px] tracking-[0.2em] py-4 uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E31E24] active:scale-95 transition-all rounded-none cursor-pointer border-none"
-                    id="cart-cta-kaspi"
-                  >
-                    {isCheckingOut ? (
-                      <>
-                        <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 3">
-                          <circle cx="12" cy="12" r="9" />
-                        </svg>
-                        <span>{t('header.processing')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>{t('cart.kaspi')}</span>
-                        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
-                          <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm12 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4z" />
-                        </svg>
-                      </>
-                    )}
-                  </button>
-                </motion.div>
-
-                {/* Trust micro-copy */}
-                <div className="border-t border-white/5 pt-6 space-y-3">
-                  {[
-                    { text: t('cart.sec_ssl') },
-                    { text: t('cart.sec_kaspi') },
-                    { text: t('cart.sec_returns') }
-                  ].map(item => (
-                    <p 
-                      key={item.text} 
-                      className="text-[9px] font-bold text-white/40 flex items-center gap-2.5 uppercase tracking-wider text-left"
-                    >
-                      {item.text}
-                    </p>
-                  ))}
-                </div>
-              </aside>
+              <CartOrderSummary
+                items={items}
+                subtotal={subtotal}
+                delivery={delivery}
+                total={total}
+                checkoutPath={checkoutPath}
+                onKaspiCheckout={handleKaspiCheckout}
+                isCheckingOut={isCheckingOut}
+              />
             </div>
           )}
         </div>

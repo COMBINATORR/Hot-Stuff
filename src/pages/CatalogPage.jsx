@@ -7,8 +7,12 @@ import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
 import Breadcrumbs from '../components/Breadcrumbs';
-import ResponsiveImage from '../components/ResponsiveImage';
 import ProductPreviewModal from '../components/ProductPreviewModal';
+
+import ProductCard from '../components/catalog/ProductCard';
+import FilterDrawer from '../components/catalog/FilterDrawer';
+import CategorySidebar from '../components/catalog/CategorySidebar';
+
 
 const categorySlugMap = {
   'toys-women': (p) => p.category === 'vibrators' && p.categoryLabel !== 'АНАЛЬНЫЕ ПРОБКИ',
@@ -40,180 +44,6 @@ const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
-// ProductCard Component to manage hover and color swatch state
-const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProduct }) {
-  const { t } = useTranslation();
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(0);
-
-  const colors = product.colors || [];
-  const gallery = product.gallery || [];
-
-  // Determine active display image
-  // 1. If hovered, show alternative view: (selectedColorIndex + 1) % gallery.length
-  // 2. Otherwise, show gallery[selectedColorIndex] or product.image
-  const activeImage = isHovered 
-    ? (gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : product.image)
-    : (gallery.length > 0 ? gallery[selectedColorIndex] : product.image);
-
-  const handleTouchStart = (e) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = (e) => {
-    const touchEndX = e.changedTouches[0].clientX;
-    const diffX = touchStartX - touchEndX;
-    const totalImages = gallery.length || 1;
-    if (totalImages <= 1) return;
-
-    if (Math.abs(diffX) > 40) {
-      if (diffX > 0) {
-        // Swipe left, show next
-        setSelectedColorIndex((prev) => (prev + 1) % totalImages);
-      } else {
-        // Swipe right, show prev
-        setSelectedColorIndex((prev) => (prev - 1 + totalImages) % totalImages);
-      }
-    }
-  };
-
-  return (
-    <div 
-      className="relative group h-[400px] z-10 hover:z-20 text-left"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* The expanding border box */}
-      <div className="absolute -inset-px border border-black bg-white transition-all duration-300 group-hover:-bottom-16 pointer-events-none" />
-      
-      {/* Transparent hover bridge to prevent losing hover when moving cursor down */}
-      <div className="absolute top-full left-0 right-0 h-16 bg-transparent opacity-0 pointer-events-none group-hover:pointer-events-auto z-10" />
-      
-      {/* The card content */}
-      <div className="relative h-full p-4 flex flex-col justify-between z-10">
-        {/* Top Badges */}
-        <div className="flex justify-between items-start w-full">
-          <span>
-            {product.isNew && (
-              <span className="text-[9px] font-bold tracking-widest text-primary uppercase">{t('product.is_new', 'NEW')}</span>
-            )}
-          </span>
-          {product.discount ? (
-            <span className="bg-primary text-on-primary text-[9px] font-bold px-2 py-0.5 rounded-none leading-none">
-              -{product.discount}%
-            </span>
-          ) : <div />}
-        </div>
-
-        {/* Center Image */}
-        <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
-          <Link 
-            to={`/product/${product.id}`} 
-            className="w-full h-full flex flex-col items-center justify-center select-none"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          >
-            <ResponsiveImage 
-              src={activeImage} 
-              alt={product.name} 
-              className="max-h-[160px] object-contain group-hover:scale-105 transition-transform duration-500" 
-              loading="lazy" 
-            />
-            {gallery.length > 1 && (
-              <div className="w-full max-w-[80px] h-[2px] bg-gray-200 mt-4 relative overflow-hidden md:hidden">
-                <div 
-                  className="absolute top-0 left-0 h-full bg-black transition-all duration-300"
-                  style={{ width: `${((selectedColorIndex + 1) / gallery.length) * 100}%` }}
-                />
-              </div>
-            )}
-          </Link>
-        </div>
-
-        {/* Info & Meta */}
-        <div className="mt-2">
-          {/* Heart Favorite */}
-          <button className="text-black hover:text-primary transition-colors mb-2 block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-none">
-            <span className="material-symbols-outlined font-light text-[20px]">favorite_border</span>
-          </button>
-          
-          <div className="flex justify-between items-start gap-2">
-            <div className="flex-1 min-w-0">
-              <Link to={`/product/${product.id}`} className="font-sans font-bold text-[10px] tracking-wider uppercase text-black leading-tight truncate hover:text-primary transition-colors block">
-                {product.name}
-              </Link>
-              <p className="text-[8px] text-gray-500 font-sans mt-0.5 truncate">
-                {t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}
-              </p>
-            </div>
-            
-            {/* Color dots swatches (Interactive!) */}
-            <div className="flex gap-2.5 mt-0.5 flex-none z-20">
-              {colors.map((c, idx) => (
-                <button 
-                  key={c.name} 
-                  aria-label={c.name}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSelectedColorIndex(idx);
-                  }}
-                  className={`relative w-2.5 h-2.5 rounded-full border transition-all after:absolute after:-inset-3 after:content-[''] ${
-                    selectedColorIndex === idx 
-                      ? 'border-black scale-110 ring-1 ring-black/20' 
-                      : 'border-black/10 hover:border-black/30'
-                  }`}
-                  style={{ background: c.hex }} 
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Pricing block */}
-          <div className="mt-3 flex flex-col font-sans">
-            {product.oldPrice ? (
-              <>
-                <span className="text-[9px] text-gray-400 line-through">
-                  {product.oldPrice.toLocaleString('ru-KZ')} ₸
-                </span>
-                <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-primary font-bold text-[12px]">
-                    {product.price.toLocaleString('ru-KZ')} ₸
-                  </span>
-                  <span className="text-gray-500 text-[8px]">
-                    {t('product.save', { amount: (product.oldPrice - product.price).toLocaleString('ru-KZ') })}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <span className="text-black font-bold text-[12px]">
-                {product.price.toLocaleString('ru-KZ')} ₸
-              </span>
-            )}
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Hover-revealed button */}
-      <div className="absolute bottom-0 group-hover:-bottom-12 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 pointer-events-none group-hover:pointer-events-auto">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setSelectedPreviewProduct(product);
-          }}
-          className="w-full bg-black text-white text-center font-sans font-bold text-[9px] tracking-[0.2em] py-3 uppercase hover:bg-gray-800 transition-colors shadow-md border-none"
-        >
-          {t('product.preview', 'ПРЕДПРОСМОТР')}
-        </button>
-      </div>
-
-    </div>
-  );
-});
 
 export default function CatalogPage({ onAddToCart }) {
   const { t } = useTranslation();
@@ -347,40 +177,27 @@ export default function CatalogPage({ onAddToCart }) {
     const searchValLower = searchVal.toLowerCase();
     const filterFn = categorySlugMap[activeCat];
 
-    let result = [];
-
-    for (let i = 0; i < ALL_PRODUCTS.length; i++) {
-      const p = ALL_PRODUCTS[i];
-
-      // 1. Search Query
-      if (searchValLower) {
-        if (!(p.name.toLowerCase().includes(searchValLower) ||
-            p.categoryLabel.toLowerCase().includes(searchValLower) ||
-            p.description.toLowerCase().includes(searchValLower))) {
-          continue;
-        }
-      }
-
+    const result = ALL_PRODUCTS.filter(p => {
       // 1.5 Sidebar Category (Only if not searching, or if cat matches)
       if (activeCat !== 'all' && activeCat !== 'popular') {
         if (activeCat === 'new') {
-          if (!p.isNew) continue;
+          if (!p.isNew) return false;
         } else {
           if (filterFn) {
-            if (!filterFn(p)) continue;
+            if (!filterFn(p)) return false;
           } else {
             if (!(p.category === activeCat ||
                 p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
-              continue;
+              return false;
             }
           }
         }
       }
 
-      // 2. Stimulation Zone
-      if (selectedStimulations.length > 0) {
-        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
-          continue;
+      // 4. Specials (Discount only)
+      if (onlyDiscounted) {
+        if (!(p.oldPrice && p.oldPrice > p.price)) {
+          return false;
         }
       }
 
@@ -392,25 +209,34 @@ export default function CatalogPage({ onAddToCart }) {
           if (range === 'high') return p.price > 120000;
           return true;
         });
-        if (!matchRange) continue;
+        if (!matchRange) return false;
       }
 
-      // 4. Specials (Discount only)
-      if (onlyDiscounted) {
-        if (!(p.oldPrice && p.oldPrice > p.price)) {
-          continue;
+      // 2. Stimulation Zone
+      if (selectedStimulations.length > 0) {
+        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
+          return false;
         }
       }
 
       // 5. Features / Technologies
       if (selectedFeatures.length > 0) {
         if (!(p.features && p.features.some(f => selectedFeatures.includes(f)))) {
-          continue;
+          return false;
         }
       }
 
-      result.push(p);
-    }
+      // 1. Search Query
+      if (searchValLower) {
+        if (!(p.name.toLowerCase().includes(searchValLower) ||
+            p.categoryLabel.toLowerCase().includes(searchValLower) ||
+            p.description.toLowerCase().includes(searchValLower))) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     // 6. Sorting
     if (sortBy === 'price-asc') {
@@ -531,112 +357,14 @@ export default function CatalogPage({ onAddToCart }) {
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
           
           {/* LEFT SIDEBAR CATEGORIES */}
-          <aside className="hidden md:block w-[240px] flex-none border-r border-gray-100 pr-8">
-            <div className="flex items-center gap-2 mb-8 select-none">
-              <span className="material-symbols-outlined text-[18px] text-black font-light leading-none">favorite</span>
-              <span className="font-sans font-bold text-[10px] tracking-[0.2em] text-black uppercase">
-                  {t('catalog.all_toys')}
-              </span>
-            </div>
-            
-            <nav className="space-y-4">
-              {/* Popular item */}
-              <div className="border-b border-gray-100 pb-2">
-                <button
-                  onClick={() => handleCategoryClick('all')}
-                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
-                    activeCat === 'all' || activeCat === 'popular' ? 'text-primary' : 'text-black'
-                  }`}
-                >
-                  <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                  <span>{t('catalog.popular_upper')}</span>
-                </button>
-              </div>
-
-              {/* Dynamic categories from DB */}
-              {loading ? (
-                <div className="text-[10px] text-gray-400 font-sans py-2">{t('catalog.loading_categories')}</div>
-              ) : (
-                categories.map((cat) => {
-                  const subcategories = cat.subcategories || [];
-                  const hasSub = subcategories.length > 0;
-                  const isExpanded = !!expandedSidebarCats[cat.slug];
-                  
-                  return (
-                    <div key={cat.slug} className="border-b border-gray-100 pb-2">
-                      {hasSub ? (
-                        <div>
-                          <button
-                            onClick={() => toggleSidebarCat(cat.slug)}
-                            className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
-                              activeCat === cat.slug ? 'text-primary' : 'text-black'
-                            }`}
-                          >
-                            <span className="text-[13px] font-light w-4 flex-none text-center">
-                              {isExpanded ? '–' : '+'}
-                            </span>
-                            <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
-                          </button>
-                          
-                          {isExpanded && (
-                            <div className="pl-6 space-y-3 mt-2 pb-2">
-                              {/* Option to view all in this category */}
-                              <button
-                                onClick={() => handleCategoryClick(cat.slug)}
-                                className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
-                                  activeCat === cat.slug ? 'text-primary' : 'text-gray-500 hover:text-black'
-                                }`}
-                              >
-                                {t('catalog.view_all')}
-                              </button>
-
-                              {subcategories.map((sub) => {
-                                const isActive = activeCat === sub.slug;
-                                return (
-                                  <button
-                                    key={sub.slug}
-                                    onClick={() => handleCategoryClick(sub.slug)}
-                                    className={`block w-full text-left font-sans font-bold text-[10px] tracking-[0.15em] uppercase transition-colors ${
-                                      isActive ? 'text-primary' : 'text-gray-500 hover:text-black'
-                                    }`}
-                                  >
-                                    {t('menu.' + sub.name.toLowerCase(), sub.name).toUpperCase()}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleCategoryClick(cat.slug)}
-                          className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
-                            activeCat === cat.slug ? 'text-primary' : 'text-black'
-                          }`}
-                        >
-                          <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                          <span>{t('menu.' + cat.name.toLowerCase(), cat.name).toUpperCase()}</span>
-                        </button>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-
-              {/* News item */}
-              <div className="border-b border-gray-100 pb-2">
-                <button
-                  onClick={() => handleCategoryClick('new')}
-                  className={`w-full flex items-center gap-2 text-left font-sans font-bold text-[11px] tracking-wider py-2 hover:text-primary transition-colors ${
-                    activeCat === 'new' ? 'text-primary' : 'text-black'
-                  }`}
-                >
-                  <span className="text-[13px] font-light w-4 flex-none text-center">+</span>
-                  <span>{t('catalog.new_upper')}</span>
-                </button>
-              </div>
-            </nav>
-          </aside>
+          <CategorySidebar
+            activeCat={activeCat}
+            expandedSidebarCats={expandedSidebarCats}
+            categories={categories}
+            loading={loading}
+            handleCategoryClick={handleCategoryClick}
+            toggleSidebarCat={toggleSidebarCat}
+          />
 
           {/* RIGHT GRID & DETAILS */}
           <main className="flex-1 w-full">
@@ -714,165 +442,19 @@ export default function CatalogPage({ onAddToCart }) {
       </div>
 
       {/* Filter Sidebar Drawer */}
-      {createPortal(
-        <AnimatePresence>
-          {isFilterOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsFilterOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]"
-            />
-            {/* Filter Drawer */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-full max-w-full md:max-w-sm bg-white text-black z-[999] shadow-2xl flex flex-col font-sans"
-            >
-              {/* Header */}
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center relative z-[1000]">
-                <h2 className="font-sans font-black text-[14px] tracking-[0.2em] text-black uppercase">{t('catalog.filters_upper')}</h2>
-                <button 
-                  onClick={() => setIsFilterOpen(false)}
-                  className="text-black hover:text-gray-600 transition-colors flex items-center justify-center border-none bg-transparent focus:outline-none"
-                >
-                  <span className="material-symbols-outlined text-[24px]">close</span>
-                </button>
-              </div>
-
-              {/* Scrollable Filters list */}
-              <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                {/* 1. Stimulation Area */}
-                <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.stim_zone')}</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { val: 'clitoris', label: t('catalog.stim_clit') },
-                      { val: 'g-spot', label: t('catalog.stim_gspot') },
-                      { val: 'anal', label: t('catalog.stim_anal') },
-                      { val: 'prostate', label: t('catalog.stim_prostate') },
-                      { val: 'couples', label: t('catalog.stim_couples') }
-                    ].map(opt => {
-                      const selected = selectedStimulations.includes(opt.val);
-                      return (
-                        <button
-                          type="button"
-                          key={opt.val}
-                          onClick={() => handleStimulationToggle(opt.val)}
-                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
-                              : 'bg-white text-black border-gray-200 hover:border-black'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 2. Price Range */}
-                <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.price_filter')}</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { val: 'low', label: t('catalog.price_up_to_80') },
-                      { val: 'mid', label: t('catalog.price_80_120', '80 000 ₸ – 120 000 ₸') },
-                      { val: 'high', label: t('catalog.price_over_120') }
-                    ].map(opt => {
-                      const selected = selectedPriceRanges.includes(opt.val);
-                      return (
-                        <button
-                          type="button"
-                          key={opt.val}
-                          onClick={() => handlePriceRangeToggle(opt.val)}
-                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
-                              : 'bg-white text-black border-gray-200 hover:border-black'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 3. Special Offers */}
-                <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.specials')}</h3>
-                  <button
-                    type="button"
-                    onClick={() => setOnlyDiscounted(!onlyDiscounted)}
-                    className={`w-full py-4 px-4 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                      onlyDiscounted 
-                        ? 'bg-black text-white border-black shadow-sm' 
-                        : 'bg-white text-black border-gray-200 hover:border-black'
-                    }`}
-                  >
-                    {t('catalog.only_discount')}
-                  </button>
-                </div>
-
-                {/* 4. Technologies & Features */}
-                <div>
-                  <h3 className="font-sans font-bold text-[10px] tracking-widest text-gray-400 uppercase mb-4">{t('catalog.features_filter')}</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { val: 'cruise_control', label: 'Cruise Control™' },
-                      { val: 'wave_motion', label: 'WaveMotion™' },
-                      { val: 'sense_motion', label: 'SenseMotion™' },
-                      { val: 'dual_stimulation', label: t('catalog.feat_dual') }
-                    ].map(opt => {
-                      const selected = selectedFeatures.includes(opt.val);
-                      return (
-                        <button
-                          type="button"
-                          key={opt.val}
-                          onClick={() => handleFeatureToggle(opt.val)}
-                          className={`py-3.5 px-2 text-center border font-sans font-bold text-[10px] tracking-wider uppercase rounded-[2px] transition-all duration-200 ${
-                            selected 
-                              ? 'bg-black text-white border-black shadow-sm' 
-                              : 'bg-white text-black border-gray-200 hover:border-black'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer Buttons */}
-              <div className="p-8 border-t border-gray-100 flex gap-4 bg-gray-50/50">
-                <button
-                  onClick={handleResetFilters}
-                  className="flex-1 border border-black text-black font-sans font-bold text-xs tracking-wider py-3.5 hover:bg-black hover:text-white transition-all uppercase"
-                >
-                  {t('catalog.reset')}
-                </button>
-                <button
-                  onClick={() => setIsFilterOpen(false)}
-                  className="flex-1 bg-black text-white font-sans font-bold text-xs tracking-wider py-3.5 hover:bg-gray-800 transition-colors uppercase"
-                >
-                  {t('catalog.apply')}
-                </button>
-              </div>
-
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>,
-      document.body
-    )}
+      <FilterDrawer
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        selectedStimulations={selectedStimulations}
+        selectedPriceRanges={selectedPriceRanges}
+        selectedFeatures={selectedFeatures}
+        onlyDiscounted={onlyDiscounted}
+        setOnlyDiscounted={setOnlyDiscounted}
+        handleStimulationToggle={handleStimulationToggle}
+        handlePriceRangeToggle={handlePriceRangeToggle}
+        handleFeatureToggle={handleFeatureToggle}
+        handleResetFilters={handleResetFilters}
+      />
 
       {/* Product Preview Modal */}
       <ProductPreviewModal 
