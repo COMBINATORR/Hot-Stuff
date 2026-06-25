@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import ResponsiveImage from '../ResponsiveImage';
 import { ALL_PRODUCTS } from '../../data/products';
 
+const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 export default function Bestsellers({ onSelectPreview }) {
   const { t } = useTranslation();
   const [dbProducts, setDbProducts] = useState([]);
@@ -37,7 +39,6 @@ export default function Bestsellers({ onSelectPreview }) {
 
         if (error) throw error;
         if (data && data.length > 0) {
-          const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
           const mutated = data.map(p => {
             const localProduct = productsMap.get(p.id);
             return {

@@ -33,3 +33,6 @@
 ## 2024-06-25 - Refactoring Large React Components
 **Learning:** Extracting sections of a monolithic React component into smaller sub-components drastically improves readability and maintainability. When the extracted sections require state or function props from the parent, carefully trace these dependencies to prevent rendering errors. Utilizing python scripts or `sed` can make bulk-moving JSX code safer and less prone to manual copy-paste errors.
 **Action:** When working on code health improvements involving large files, always verify exactly what the code does before breaking it out. Create a clear directory structure for sub-components (e.g. `src/components/ComponentName`) to keep the codebase organized. Ensure proper Prop drilling or context usage is maintained in the new structure.
+## 2024-11-25 - React Performance: Redundant Map Instantiation
+**Learning:** Instantiating a `Map` over a static dataset inside a React component or effect hook causes unnecessary allocations on every render or execution, leading to performance degradation. In benchmarking, creating it inside a loop vs outside resulted in a ~87% time increase.
+**Action:** Move static data structure initialization outside of React component definitions so they are created only once per module load.
