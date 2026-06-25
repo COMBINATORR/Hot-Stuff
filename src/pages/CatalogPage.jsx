@@ -55,6 +55,27 @@ export default function CatalogPage({ onAddToCart }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [products, setProducts] = useState(ALL_PRODUCTS);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  // Load products from cache
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const cached = localStorage.getItem('hs_products');
+        if (cached) {
+          const data = JSON.parse(cached);
+          setProducts(data);
+        }
+      } catch (e) {
+        console.error('Failed to parse catalog products', e);
+      } finally {
+        setProductsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
+
   // Load categories and subcategories from Supabase
   useEffect(() => {
     async function loadCategories() {
@@ -179,8 +200,8 @@ export default function CatalogPage({ onAddToCart }) {
 
     let result = [];
 
-    for (let i = 0; i < ALL_PRODUCTS.length; i++) {
-      const p = ALL_PRODUCTS[i];
+    for (let i = 0; i < products.length; i++) {
+      const p = products[i];
 
       // 1. Search Query
       if (searchValLower) {
