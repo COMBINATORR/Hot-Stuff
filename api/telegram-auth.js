@@ -123,11 +123,28 @@ export default async function handler(req, res) {
     }
 
     // 4. Generate magic link for the user
+
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://hotstuff.kz').split(',').map(o => o.trim());
+  let safeRedirectTo = `${supabaseUrl}/auth/v1/callback`;
+
+  if (redirectTo) {
+    try {
+      const redirectUrl = new URL(redirectTo);
+      if (allowedOrigins.includes(redirectUrl.origin)) {
+        safeRedirectTo = redirectTo;
+      } else {
+        console.warn(`[Telegram Auth] Blocked redirect to untrusted origin: ${redirectUrl.origin}`);
+      }
+    } catch (e) {
+      console.warn('[Telegram Auth] Invalid redirectTo URL provided');
+    }
+  }
+
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email,
       options: {
-        redirectTo: redirectTo || `${supabaseUrl}/auth/v1/callback`
+        redirectTo: safeRedirectTo
       }
     });
 
