@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
-import ResponsiveImage from './ResponsiveImage';
+import CartItem from './cart/CartItem';
+import FreeShippingIndicator from './cart/FreeShippingIndicator';
+import CartFooter from './cart/CartFooter';
 
 export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUpdateQty, onRemove }) {
   const { t, i18n } = useTranslation();
@@ -128,24 +130,11 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
 
             {/* Free Shipping Indicator */}
             {items.length > 0 && (
-              <div className="px-6 py-4 bg-stone-900 border-b border-white/5 space-y-2">
-                <div className="text-[9px] font-bold tracking-wider text-stone-400 uppercase flex justify-between">
-                  {subtotal < FREE_SHIPPING_THRESHOLD ? (
-                    <>
-                      <span>{t('header.free_shipping_hint', { defaultValue: 'до бесплатной доставки осталось {{amount}} ₸', amount: (FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ru-KZ') })}</span>
-                      <span className="text-primary">{Math.round(progressPercent)}%</span>
-                    </>
-                  ) : (
-                    <span className="text-green-400 font-bold">{t('header.free_shipping_success', '✨ поздравляем! доставка бесплатна!')}</span>
-                  )}
-                </div>
-                <div className="w-full h-1 bg-stone-800 rounded-none overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500 ease-out" 
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
+              <FreeShippingIndicator
+                subtotal={subtotal}
+                freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
+                progressPercent={progressPercent}
+              />
             )}
 
             {/* Content List */}
@@ -160,46 +149,12 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
               ) : (
                 <div className="space-y-6">
                   {items.map((item, idx) => (
-                    <div key={`${item.id}-${item.variant}-${idx}`} className="flex gap-4 border-b border-white/5 pb-6">
-                      <div className="w-20 h-24 bg-stone-900 flex-none border border-white/5">
-                        {item.image ? (
-                          <ResponsiveImage alt={item.name} className="w-full h-full object-cover" src={item.image} loading="lazy" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-2xl bg-stone-850">🌸</div>
-                        )}
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between min-w-0">
-                        <div>
-                          <h3 className="text-[10px] tracking-widest text-white uppercase font-bold truncate">{item.name}</h3>
-                          {item.variant && <p className="text-[9px] tracking-wider text-stone-400 uppercase mt-0.5">{item.variant}</p>}
-                          <p className="text-primary text-[11px] font-bold mt-1">{item.price.toLocaleString('ru-KZ')} ₸</p>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mt-2">
-                          {/* Quantity Selector */}
-                          <div className="flex items-center border border-white/15">
-                            <button 
-                              className="px-2 py-0.5 text-stone-400 hover:text-white transition-colors"
-                              onClick={() => handleUpdateQty(item.id, item.variant, item.qty - 1)}
-                            >-</button>
-                            <span className="px-3 text-[11px] font-bold">{item.qty}</span>
-                            <button 
-                              className="px-2 py-0.5 text-stone-400 hover:text-white transition-colors"
-                              onClick={() => handleUpdateQty(item.id, item.variant, item.qty + 1)}
-                            >+</button>
-                          </div>
-
-                          {/* Delete Button */}
-                          <button 
-                            onClick={() => handleRemove(item.id, item.variant)}
-                            className="text-stone-500 hover:text-red-400 transition-colors"
-                            aria-label={t('header.remove_item', 'Удалить товар')}
-                          >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <CartItem
+                      key={`${item.id}-${item.variant}-${idx}`}
+                      item={item}
+                      handleUpdateQty={handleUpdateQty}
+                      handleRemove={handleRemove}
+                    />
                   ))}
                 </div>
               )}
@@ -207,56 +162,17 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
 
             {/* Footer Summary */}
             {items.length > 0 && (
-              <div className="p-6 bg-stone-900 border-t border-white/10 space-y-4">
-                {/* Promo Code */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={promo}
-                    onChange={(e) => setPromo(e.target.value)}
-                    placeholder={t('header.promo_placeholder', 'ПРОМОКОД')}
-                    className="flex-1 bg-stone-950 border border-white/10 px-3 py-2 text-[16px] tracking-widest uppercase text-white outline-none rounded-none focus:border-primary"
-                  />
-                  <button
-                    onClick={handleApplyPromo}
-                    className="border border-white hover:bg-white hover:text-black text-white px-4 text-[10px] tracking-widest uppercase font-bold rounded-none transition-all"
-                  >
-                    {t('header.promo_btn', 'ок')}
-                  </button>
-                </div>
-
-                {appliedPromo && (
-                  <div className="flex justify-between text-[10px] tracking-wider text-green-400 uppercase">
-                    <span>{t('header.promo_applied', { code: appliedPromo, defaultValue: 'скидка 15% примененa' })}:</span>
-                    <span>-{discountAmount.toLocaleString('ru-KZ')} ₸</span>
-                  </div>
-                )}
-
-                {/* Subtotal */}
-                <div className="flex justify-between text-xs tracking-widest uppercase text-white font-bold">
-                  <span>{t('header.subtotal', 'итого')}:</span>
-                  <span>{finalTotal.toLocaleString('ru-KZ')} ₸</span>
-                </div>
-
-                {/* Checkout Actions */}
-                <div className="flex flex-col gap-2 mt-2">
-                  <button
-                    onClick={handleKaspiCheckout}
-                    disabled={isCheckingOut}
-                    className="w-full bg-[#E31E24] hover:bg-[#c21419] text-white text-[10px] tracking-[0.2em] font-black py-3 uppercase rounded-none transition-all flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">credit_card</span>
-                    {isCheckingOut ? t('header.processing', 'обработка...') : t('header.kaspi_invoice', 'счет на Kaspi.kz')}
-                  </button>
-
-                  <button
-                    onClick={handleCheckoutNavigate}
-                    className="w-full bg-white hover:bg-neutral-200 text-black text-[10px] tracking-[0.2em] font-black py-3 uppercase rounded-none transition-all"
-                  >
-                    {t('header.go_to_checkout', 'оформить заказ')}
-                  </button>
-                </div>
-              </div>
+              <CartFooter
+                promo={promo}
+                setPromo={setPromo}
+                appliedPromo={appliedPromo}
+                handleApplyPromo={handleApplyPromo}
+                discountAmount={discountAmount}
+                finalTotal={finalTotal}
+                isCheckingOut={isCheckingOut}
+                handleKaspiCheckout={handleKaspiCheckout}
+                handleCheckoutNavigate={handleCheckoutNavigate}
+              />
             )}
           </motion.div>
         </>
