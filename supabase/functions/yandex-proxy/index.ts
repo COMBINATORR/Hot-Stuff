@@ -19,7 +19,12 @@ function getCorsHeaders(reqOrigin: string | null) {
 }
 
 // Global in-memory logs buffer
-const logs: { timestamp: string; message: string; detail: unknown }[] = [];
+interface LogEntry {
+  timestamp: string;
+  message: string;
+  detail?: unknown;
+}
+const logs: LogEntry[] = [];
 
 function maskSensitiveData(data: unknown): unknown {
   if (typeof data === "string") {
@@ -37,7 +42,7 @@ function maskSensitiveData(data: unknown): unknown {
     return data.map(item => maskSensitiveData(item));
   }
   if (typeof data === "object" && data !== null) {
-    const cloned = { ...data } as Record<string, unknown>;
+    const cloned: Record<string, unknown> = { ...(data as Record<string, unknown>) };
     const exactKeysToMask = [
       'client_secret', 'clientSecret',
       'access_token', 'accessToken',
@@ -49,7 +54,7 @@ function maskSensitiveData(data: unknown): unknown {
       if (exactKeysToMask.includes(key) && cloned[key]) {
         cloned[key] = "******";
       } else if (key.toLowerCase() === "authorization" && typeof cloned[key] === "string") {
-        const match = cloned[key].match(/^(Bearer|OAuth|Basic)\s+(.*)$/i);
+        const match = (cloned[key] as string).match(/^(Bearer|OAuth|Basic)\s+(.*)$/i);
         cloned[key] = match ? `${match[1]} ******` : "******";
       } else if (typeof cloned[key] === "object" && cloned[key] !== null) {
         cloned[key] = maskSensitiveData(cloned[key]);
@@ -61,7 +66,7 @@ function maskSensitiveData(data: unknown): unknown {
 }
 
 async function addLog(message: string, detail?: unknown) {
-  const logEntry = {
+  const logEntry: LogEntry = {
     timestamp: new Date().toISOString(),
     message,
     detail: maskSensitiveData(detail),
@@ -163,7 +168,7 @@ Deno.serve(async (req) => {
         status: yandexResponse.status,
         headers: responseHeaders,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       await addLog("Exception in token proxy", { error: errorMessage });
       return new Response(JSON.stringify({ error: errorMessage }), {
@@ -285,7 +290,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     await addLog("Exception in yandex-proxy edge function", {
       error: errorMessage,

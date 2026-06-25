@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Exception in telegram-proxy:", errorMessage);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
