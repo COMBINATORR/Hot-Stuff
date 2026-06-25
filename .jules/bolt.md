@@ -33,3 +33,7 @@
 ## 2024-06-25 - Refactoring Large React Components
 **Learning:** Extracting sections of a monolithic React component into smaller sub-components drastically improves readability and maintainability. When the extracted sections require state or function props from the parent, carefully trace these dependencies to prevent rendering errors. Utilizing python scripts or `sed` can make bulk-moving JSX code safer and less prone to manual copy-paste errors.
 **Action:** When working on code health improvements involving large files, always verify exactly what the code does before breaking it out. Create a clear directory structure for sub-components (e.g. `src/components/ComponentName`) to keep the codebase organized. Ensure proper Prop drilling or context usage is maintained in the new structure.
+
+## 2024-05-24 - Array Filtering Optimization
+**Learning:** Manual `for` loops in hot paths like catalog filtering can be safely refactored to `Array.prototype.filter()` for improved readability without sacrificing performance, provided that short-circuiting is heavily utilized.
+**Action:** When writing `.filter()` callbacks, always place the computationally cheapest checks (booleans, strict equality on numbers/strings) at the top of the function and the most expensive checks (string `.toLowerCase()`, `.includes()`, or nested array `.some()`) at the bottom. This ensures the expensive logic is only executed for items that pass all other criteria.
