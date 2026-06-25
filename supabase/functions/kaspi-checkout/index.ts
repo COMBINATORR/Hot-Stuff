@@ -104,10 +104,11 @@ Deno.serve(async (req) => {
             }
           );
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         console.error("Failed to connect to payment gateway for status check:", err);
         return new Response(
-          JSON.stringify({ error: `Connection failed: ${err.message}` }),
+          JSON.stringify({ error: `Connection failed: ${errorMessage}` }),
           {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -168,8 +169,9 @@ Deno.serve(async (req) => {
           const errorText = await apiResponse.text();
           console.error("External payment gateway invoice creation error:", errorText);
         }
-      } catch (err) {
-        console.error("Failed to connect to payment gateway during creation:", err.message);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error("Failed to connect to payment gateway during creation:", errorMessage);
       }
     }
 
@@ -194,9 +196,10 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Exception in kaspi-checkout function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

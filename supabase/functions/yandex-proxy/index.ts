@@ -163,9 +163,10 @@ Deno.serve(async (req) => {
         status: yandexResponse.status,
         headers: responseHeaders,
       });
-    } catch (error: any) {
-      await addLog("Exception in token proxy", { error: error.message });
-      return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await addLog("Exception in token proxy", { error: errorMessage });
+      return new Response(JSON.stringify({ error: errorMessage }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -284,11 +285,12 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     await addLog("Exception in yandex-proxy edge function", {
-      error: error.message,
+      error: errorMessage,
     });
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
