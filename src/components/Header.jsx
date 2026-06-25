@@ -145,7 +145,6 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
       const orderId = `HS-${Date.now()}`;
       const amount = finalTotal;
       
-      console.log(`[Kaspi Checkout] Requesting invoice for ${amount} ₸ (Order ID: ${orderId})`);
       
       const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
         body: { amount, orderId }
@@ -154,7 +153,6 @@ function CartDrawer({ isOpen, onClose, items = [], onUpdateQty, onRemove, onAddT
       if (error) throw error;
       
       if (data && data.paymentUrl) {
-        console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
         window.location.href = data.paymentUrl;
       } else {
         throw new Error(t('header.err_payment_init_fail', 'Не удалось получить ссылку на оплату от сервера'));
