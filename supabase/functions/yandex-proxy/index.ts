@@ -19,9 +19,9 @@ function getCorsHeaders(reqOrigin: string | null) {
 }
 
 // Global in-memory logs buffer
-const logs: any[] = [];
+const logs: { timestamp: string; message: string; detail: unknown }[] = [];
 
-function maskSensitiveData(data: any): any {
+function maskSensitiveData(data: unknown): unknown {
   if (typeof data === "string") {
     let masked = data;
     const sensitiveKeys = [
@@ -37,7 +37,7 @@ function maskSensitiveData(data: any): any {
     return data.map(item => maskSensitiveData(item));
   }
   if (typeof data === "object" && data !== null) {
-    const cloned = { ...data };
+    const cloned = { ...data } as Record<string, unknown>;
     const exactKeysToMask = [
       'client_secret', 'clientSecret',
       'access_token', 'accessToken',
@@ -60,7 +60,7 @@ function maskSensitiveData(data: any): any {
   return data;
 }
 
-async function addLog(message: string, detail?: any) {
+async function addLog(message: string, detail?: unknown) {
   const logEntry = {
     timestamp: new Date().toISOString(),
     message,
@@ -163,9 +163,10 @@ Deno.serve(async (req) => {
         status: yandexResponse.status,
         headers: responseHeaders,
       });
-    } catch (error: any) {
-      await addLog("Exception in token proxy", { error: error.message });
-      return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await addLog("Exception in token proxy", { error: errorMessage });
+      return new Response(JSON.stringify({ error: errorMessage }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -284,11 +285,12 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     await addLog("Exception in yandex-proxy edge function", {
-      error: error.message,
+      error: errorMessage,
     });
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
