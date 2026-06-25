@@ -114,7 +114,19 @@ describe('telegram-auth API handler', () => {
     await handler(req, res);
 
     expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Credentials', true);
-    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*');
+    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', 'http://localhost:3000');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.end).toHaveBeenCalled();
+  });
+
+
+  it('should fallback to default origin if the origin is not allowed', async () => {
+    req.method = 'OPTIONS';
+    req.headers.origin = 'http://malicious-site.com';
+    await handler(req, res);
+
+    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Credentials', true);
+    expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', 'http://localhost:3000');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.end).toHaveBeenCalled();
   });
