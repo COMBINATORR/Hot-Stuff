@@ -57,11 +57,14 @@ export default function TelegramLoginWidget({
       containerRef.current.appendChild(script);
     }
 
+    // Capture the current ref value for cleanup
+    const currentContainer = containerRef.current;
+
     // 4) Cleanup on unmount: remove global callback & empty the container.
     return () => {
       delete window[callbackName];
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (currentContainer) {
+        currentContainer.innerHTML = '';
       }
     };
   }, [botName, size, radius]);
