@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
+import { useCategories } from '../../contexts/CategoriesContext';
 import ResponsiveImage from '../ResponsiveImage';
 
 import logoNoirDress from '../../assets/images/products/noir_silhouette_dress.png';
@@ -11,12 +12,18 @@ import logoGoldBoots from '../../assets/images/products/gold_trimmed_boots.png';
 export default function PopularCategories() {
   const { t } = useTranslation();
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [categories, setCategories] = useState(() => [
+  const { categories: contextCategories } = useCategories();
+
+  const defaultCategories = [
     { id: 1, name: 'Классическое нижнее белье', slug: 'lingerie-classic' },
     { id: 2, name: 'Эротическое белье и одежда', slug: 'lingerie-erotic' },
     { id: 3, name: 'Игрушки для женщин', slug: 'toys-women' },
     { id: 4, name: 'Игрушки для мужчин', slug: 'toys-men' }
-  ]);
+  ];
+
+  const categories = contextCategories && contextCategories.length > 0
+    ? contextCategories.slice(0, 4)
+    : defaultCategories;
 
   // Helper to map DB category slug to local image
   const getCategoryImage = (slug) => {
@@ -34,27 +41,6 @@ export default function PopularCategories() {
   const getCategoryLink = (slug) => {
     return `/catalog?cat=${slug}`;
   };
-
-  // Load 4 priority categories from Supabase categories table
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('id, name, slug')
-          .order('id', { ascending: true })
-          .limit(4);
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setCategories(data);
-        }
-      } catch (err) {
-        console.warn('[HomePage] Error loading categories from Supabase, using defaults:', err);
-      }
-    }
-    loadCategories();
-  }, []);
 
   // Mouse drag-to-scroll ref and states
   const sliderRef = useRef(null);
