@@ -192,7 +192,7 @@ describe('telegram-auth API handler', () => {
 
   it('should create a new user if profile does not exist and return magic link', async () => {
     const validData = generateValidTelegramData();
-    req.body = { telegramData: validData, redirectTo: 'https://example.com/callback' };
+    req.body = { telegramData: validData }; // Removing untrusted origin from test
 
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockCreateUser.mockResolvedValue({ data: { user: { id: 'new-user-id' } }, error: null });
@@ -219,7 +219,7 @@ describe('telegram-auth API handler', () => {
       type: 'magiclink',
       email: `tg_${validData.id}@hotstuff.kz`,
       options: {
-        redirectTo: 'https://example.com/callback'
+        redirectTo: 'https://test.supabase.co/auth/v1/callback'
       }
     });
 
@@ -259,6 +259,88 @@ describe('telegram-auth API handler', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ success: true, action_link: 'https://magic-link-2' });
+  });
+
+
+  it('should allow redirectTo if origin is trusted', async () => {
+    process.env.ALLOWED_ORIGINS = 'https://example.com';
+    const validData = generateValidTelegramData();
+    req.body = { telegramData: validData, redirectTo: 'https://example.com/callback?foo=bar' };
+
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockCreateUser.mockResolvedValue({ data: { user: { id: 'new-user-id' } }, error: null });
+    mockGenerateLink.mockResolvedValue({
+      data: { properties: { action_link: 'https://magic-link' } },
+      error: null
+    });
+
+    await handler(req, res);
+
+    expect(mockGenerateLink).toHaveBeenCalledWith({
+      type: 'magiclink',
+      email: `tg_${validData.id}@hotstuff.kz`,
+      options: {
+        redirectTo: 'https://example.com/callback?foo=bar'
+      }
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should ignore redirectTo if origin is NOT trusted', async () => {
+    process.env.ALLOWED_ORIGINS = 'https://example.com';
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const validData = generateValidTelegramData();
+    req.body = { telegramData: validData, redirectTo: 'https://evil.com/phishing' };
+
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockCreateUser.mockResolvedValue({ data: { user: { id: 'new-user-id' } }, error: null });
+    mockGenerateLink.mockResolvedValue({
+      data: { properties: { action_link: 'https://magic-link' } },
+      error: null
+    });
+
+    await handler(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith('[Telegram Auth] Blocked redirect to untrusted origin: https://evil.com');
+    expect(mockGenerateLink).toHaveBeenCalledWith({
+      type: 'magiclink',
+      email: `tg_${validData.id}@hotstuff.kz`,
+      options: {
+        redirectTo: 'https://test.supabase.co/auth/v1/callback' // Fallback to safe default
+      }
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    consoleSpy.mockRestore();
+  });
+
+  it('should ignore redirectTo if it is an invalid URL', async () => {
+    process.env.ALLOWED_ORIGINS = 'https://example.com';
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const validData = generateValidTelegramData();
+    req.body = { telegramData: validData, redirectTo: 'not-a-valid-url' };
+
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockCreateUser.mockResolvedValue({ data: { user: { id: 'new-user-id' } }, error: null });
+    mockGenerateLink.mockResolvedValue({
+      data: { properties: { action_link: 'https://magic-link' } },
+      error: null
+    });
+
+    await handler(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith('[Telegram Auth] Invalid redirectTo URL provided');
+    expect(mockGenerateLink).toHaveBeenCalledWith({
+      type: 'magiclink',
+      email: `tg_${validData.id}@hotstuff.kz`,
+      options: {
+        redirectTo: 'https://test.supabase.co/auth/v1/callback' // Fallback to safe default
+      }
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    consoleSpy.mockRestore();
   });
 
   it('should handle Supabase errors gracefully without leaking details', async () => {

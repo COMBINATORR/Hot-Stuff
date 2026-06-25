@@ -45,3 +45,8 @@
 ## 2024-06-23 - Add CheckoutPage tests
 **Learning:** Testing components with Framer Motion and complex state logic often requires fine-tuning element discovery to find semantic roles or exact text boundaries, especially when translations are mocked or components render elements asynchronously.
 **Action:** When selecting elements in a mocked test environment, try to use `getByRole` or specific parent selectors instead of generic text searches to avoid picking up duplicated static text or matching wrong spans (like `.btn-fluid-paint`).
+
+## 2024-06-25 - Open Redirect Vulnerability in Telegram Auth API
+**Vulnerability:** The `/api/telegram-auth.js` API endpoint directly used the `redirectTo` parameter from the client request payload without validation. An attacker could craft a payload with a malicious URL, and the generated magic link would redirect the user to that site, enabling phishing attacks.
+**Learning:** Never trust client-provided redirect URLs. If the redirect domain is not validated, attackers can abuse the application's authentication endpoints to legitimize phishing links (Open Redirect).
+**Prevention:** Always parse and validate redirect URLs against an explicitly allowed list of origins (e.g., using `ALLOWED_ORIGINS` environment variable) before passing them to authentication generation functions.
