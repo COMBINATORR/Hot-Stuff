@@ -29,3 +29,7 @@
 ## 2024-06-23 - Map Lookup Optimization in React Render
 **Learning:** Array `.find()` operations inside deeply nested React render cycles (like breadcrumbs generation) can become a performance bottleneck when dealing with larger state arrays (e.g., categories).
 **Action:** When computing derived state via `useMemo` that will be repeatedly queried by a unique key (like a slug or ID), pre-compute a `Map` and use `map.get(key)` for O(1) lookups instead of relying solely on arrays and O(N) linear search.
+
+## 2024-06-25 - Refactoring Large React Components
+**Learning:** Extracting sections of a monolithic React component into smaller sub-components drastically improves readability and maintainability. When the extracted sections require state or function props from the parent, carefully trace these dependencies to prevent rendering errors. Utilizing python scripts or `sed` can make bulk-moving JSX code safer and less prone to manual copy-paste errors.
+**Action:** When working on code health improvements involving large files, always verify exactly what the code does before breaking it out. Create a clear directory structure for sub-components (e.g. `src/components/ComponentName`) to keep the codebase organized. Ensure proper Prop drilling or context usage is maintained in the new structure.
