@@ -1,15 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TelegramLoginWidget from './TelegramLoginWidget';
 
 describe('TelegramLoginWidget', () => {
   beforeEach(() => {
-    // Clear any window modifications
+    // Clear any window modifications between tests
     Object.keys(window).forEach(key => {
       if (key.startsWith('__telegram_login_callback_')) {
         delete window[key];
       }
     });
+    vi.restoreAllMocks();
   });
 
   it('renders the container element', () => {
@@ -41,6 +42,23 @@ describe('TelegramLoginWidget', () => {
     expect(script.getAttribute('data-onauth')).toMatch(/^__telegram_login_callback_\d+\(user\)$/);
   });
 
+  it('registers global callback and handles missing onAuth safely', () => {
+    render(<TelegramLoginWidget />);
+
+    const container = document.getElementById('telegram-login-container');
+    const script = container.querySelector('script');
+    const dataOnAuth = script.getAttribute('data-onauth');
+    const callbackNameMatch = dataOnAuth.match(/^(__telegram_login_callback_\d+)\(user\)$/);
+    const callbackName = callbackNameMatch[1];
+
+    expect(typeof window[callbackName]).toBe('function');
+
+    // Should not throw if onAuth is not provided
+    expect(() => {
+      window[callbackName]({ id: 1 });
+    }).not.toThrow();
+  });
+
   it('handles the onAuth callback correctly', () => {
     const mockOnAuth = vi.fn();
     render(<TelegramLoginWidget onAuth={mockOnAuth} />);
@@ -57,10 +75,41 @@ describe('TelegramLoginWidget', () => {
 
     // Simulate Telegram calling the global function
     const mockUser = { id: 12345, first_name: 'Test' };
-    window[callbackName](mockUser);
+    act(() => {
+      window[callbackName](mockUser);
+    });
 
     expect(mockOnAuth).toHaveBeenCalledTimes(1);
     expect(mockOnAuth).toHaveBeenCalledWith(mockUser);
+  });
+
+  it('uses the latest onAuth callback after rerender without recreating the script', () => {
+    const mockOnAuth1 = vi.fn();
+    const mockOnAuth2 = vi.fn();
+
+    const { rerender } = render(<TelegramLoginWidget onAuth={mockOnAuth1} />);
+
+    const container = document.getElementById('telegram-login-container');
+    const script = container.querySelector('script');
+    const dataOnAuth = script.getAttribute('data-onauth');
+    const callbackNameMatch = dataOnAuth.match(/^(__telegram_login_callback_\d+)\(user\)$/);
+    const callbackName = callbackNameMatch[1];
+
+    // Re-render with new callback
+    rerender(<TelegramLoginWidget onAuth={mockOnAuth2} />);
+
+    // Call the global function
+    act(() => {
+      window[callbackName]({ id: 1 });
+    });
+
+    expect(mockOnAuth1).not.toHaveBeenCalled();
+    expect(mockOnAuth2).toHaveBeenCalledTimes(1);
+    expect(mockOnAuth2).toHaveBeenCalledWith({ id: 1 });
+
+    // The script should still be the same instance (no remount)
+    const newScript = container.querySelector('script');
+    expect(newScript).toBe(script);
   });
 
   it('cleans up global callback and script on unmount', () => {
@@ -83,30 +132,27 @@ describe('TelegramLoginWidget', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('updates the callback function without recreating script if only onAuth changes', () => {
-    const mockOnAuth1 = vi.fn();
-    const mockOnAuth2 = vi.fn();
+  it('handles script load error gracefully', () => {
+    // Intercept script creation to capture the script element
+    const originalCreateElement = document.createElement.bind(document);
+    let mockScript;
 
-    const { rerender } = render(<TelegramLoginWidget onAuth={mockOnAuth1} />);
+    vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
+      if (tagName === 'script') {
+        mockScript = originalCreateElement(tagName);
+        return mockScript;
+      }
+      return originalCreateElement(tagName);
+    });
 
-    const container = document.getElementById('telegram-login-container');
-    const script = container.querySelector('script');
-    const dataOnAuth = script.getAttribute('data-onauth');
-    const callbackNameMatch = dataOnAuth.match(/^(__telegram_login_callback_\d+)\(user\)$/);
-    const callbackName = callbackNameMatch[1];
+    render(<TelegramLoginWidget />);
 
-    // Re-render with new callback
-    rerender(<TelegramLoginWidget onAuth={mockOnAuth2} />);
+    expect(mockScript).toBeDefined();
 
-    // Call the global function
-    window[callbackName]({ id: 1 });
-
-    expect(mockOnAuth1).not.toHaveBeenCalled();
-    expect(mockOnAuth2).toHaveBeenCalledTimes(1);
-    expect(mockOnAuth2).toHaveBeenCalledWith({ id: 1 });
-
-    // The script should still be the same instance
-    const newScript = container.querySelector('script');
-    expect(newScript).toBe(script);
+    // Simulate error event on script — component should not crash
+    expect(() => {
+      const errorEvent = new Event('error');
+      mockScript.dispatchEvent(errorEvent);
+    }).not.toThrow();
   });
 });
