@@ -52,6 +52,26 @@ describe('supabaseClient helpers', () => {
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
   };
 
+
+  describe('Initialization errors', () => {
+    it('catches createClient errors and sets supabase to null', async () => {
+      stubEnvConfigured();
+
+      const supabaseJs = await import('@supabase/supabase-js');
+      supabaseJs.createClient.mockImplementationOnce(() => {
+        throw new Error('Test createClient error');
+      });
+
+      const supabaseClient = await import('./supabaseClient');
+
+      expect(supabaseClient.supabase).toBeNull();
+      expect(consoleErrorMock).toHaveBeenCalledWith(
+        '[Supabase] Ошибка инициализации клиента:',
+        expect.any(Error)
+      );
+    });
+  });
+
   describe('signInWithYandex', () => {
     it('calls signInWithOAuth with correct Yandex provider and options when configured', async () => {
       stubEnvConfigured();
@@ -201,6 +221,17 @@ describe('supabaseClient helpers', () => {
       mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('API error') });
 
       await expect(supabaseClient.calculateYandexDelivery({ address: 'test' })).rejects.toThrow('API error');
+    });
+
+    it('throws error with accurate payload handling if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      const mockError = new Error('Accurate mock error');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: mockError });
+
+      const testPayload = { address: '123 Fake St', weight: 5 };
+      await expect(supabaseClient.calculateYandexDelivery(testPayload)).rejects.toThrow('Accurate mock error');
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('yandex-delivery', { body: testPayload });
     });
   });
 });
