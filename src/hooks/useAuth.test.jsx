@@ -52,34 +52,17 @@ describe('useAuth', () => {
     vi.restoreAllMocks();
   });
 
-  it('initializes with null if no cached session in localStorage', async () => {
+  it('initializes with null initially', async () => {
     let result;
     await act(async () => {
       const hook = renderHook(() => useAuth());
       result = hook.result;
     });
 
-    expect(localStorage.getItem).toHaveBeenCalledWith('hs_auth_session');
     expect(result.current).toBeNull();
   });
 
-  it('initializes with cached session from localStorage', () => {
-    const cachedSession = { user: { id: '1', user_metadata: {} } };
-    localStorage.setItem('hs_auth_session', JSON.stringify(cachedSession));
 
-    // We cannot wrap renderHook inside act for this exact test if we want to catch the initial state
-    // because `act` will flush the `useEffect` that calls `getSession` and overwrites it.
-    // Let's defer the getSession resolve so we can check the state BEFORE it resolves.
-
-    let resolveGetSession;
-    const promise = new Promise((resolve) => { resolveGetSession = resolve; });
-    getSessionMock.mockReturnValue(promise);
-
-    const { result } = renderHook(() => useAuth());
-
-    expect(localStorage.getItem).toHaveBeenCalledWith('hs_auth_session');
-    expect(result.current).toEqual(cachedSession);
-  });
 
   it('calls supabase.auth.getSession on mount and processes session', async () => {
     const mockSession = { user: { id: '123', user_metadata: {} } };
@@ -96,7 +79,6 @@ describe('useAuth', () => {
     });
 
     expect(getSessionMock).toHaveBeenCalledTimes(1);
-    expect(localStorage.setItem).toHaveBeenCalledWith('hs_auth_session', JSON.stringify(mockSession));
   });
 
   it('subscribes to onAuthStateChange and updates when event fires', async () => {
@@ -128,16 +110,12 @@ describe('useAuth', () => {
     });
   });
 
-  it('clears session and localStorage when newSession is null', async () => {
+  it('clears session when newSession is null', async () => {
     let authStateCallback;
     onAuthStateChangeMock.mockImplementation((callback) => {
       authStateCallback = callback;
       return { data: { subscription: { unsubscribe: unsubscribeMock } } };
     });
-
-    // Start with a valid session in local storage
-    const cachedSession = { user: { id: '1', user_metadata: {} } };
-    localStorage.setItem('hs_auth_session', JSON.stringify(cachedSession));
 
     let result;
     await act(async () => {
@@ -152,8 +130,6 @@ describe('useAuth', () => {
     await waitFor(() => {
       expect(result.current).toBeNull();
     });
-
-    expect(localStorage.removeItem).toHaveBeenCalledWith('hs_auth_session');
   });
 
   it('extracts avatar_url from user_metadata', async () => {

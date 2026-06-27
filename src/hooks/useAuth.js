@@ -2,17 +2,7 @@ import { useState, useEffect, startTransition } from 'react';
 import { supabase } from '../lib/supabase';
 
 export function useAuth() {
-  const getSessionFromStorage = () => {
-    try {
-      const cached = localStorage.getItem('hs_auth_session');
-      if (cached) {
-        return JSON.parse(cached);
-      }
-    } catch (e) {
-      console.error('Failed to parse cached session:', e);
-    }
-    return null;
-  };
+  const getSessionFromStorage = () => null;
 
   const [session, setSession] = useState(getSessionFromStorage);
 
@@ -64,11 +54,7 @@ export function useAuth() {
       setSession(activeSession);
     });
 
-    try {
-      localStorage.setItem('hs_auth_session', JSON.stringify(activeSession));
-    } catch (e) {
-      console.error('Failed to cache session:', e);
-    }
+
   };
 
   useEffect(() => {
@@ -88,7 +74,7 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sbSession) => {
       // If signed out, remove the cached auth session
       if (_event === 'SIGNED_OUT') {
-        localStorage.removeItem('hs_auth_session');
+
         startTransition(() => {
           setSession(null);
         });

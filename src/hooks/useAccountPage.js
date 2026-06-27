@@ -354,18 +354,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const emailOrPhone = user.username ? `@${user.username}` : `tg_${user.id}`;
 
       // ── 1. Save to localStorage IMMEDIATELY ──
-      const authUser = {
-        emailOrPhone,
-        id: user.id,
-        firstName: user.first_name || '',
-        lastName: user.last_name || '',
-        username: user.username || '',
-        photoUrl: user.photo_url || '',
-        authDate: user.auth_date || '',
-        hash: user.hash || '',
-        isTelegram: true,
-      };
-      localStorage.setItem('hs_user', JSON.stringify(authUser));
+      localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone }));
 
       // ── 2. Update React state so the page re-renders to the account view ──
       const mockSessionUser = {
@@ -382,7 +371,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       setIsLoggedIn(true);
       setLoggedInUser(emailOrPhone);
       setSessionUser(mockSessionUser);
-      localStorage.setItem('hs_auth_session', JSON.stringify({ user: mockSessionUser }));
+
       window.dispatchEvent(new Event('hs_auth_change'));
 
       // ── 3. Optionally try the server-side Supabase session (fire-and-forget) ──
@@ -554,7 +543,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     setSessionUser(mockSessionUser);
 
     localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
-    localStorage.setItem('hs_auth_session', JSON.stringify({ user: mockSessionUser }));
+
     window.dispatchEvent(new Event('hs_auth_change'));
 
     if (!registeredUsers.includes(normalizedUser)) {
@@ -583,7 +572,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
     } finally {
       localStorage.removeItem('hs_user');
-      localStorage.removeItem('hs_auth_session');
+
       window.dispatchEvent(new Event('hs_auth_change'));
 
       const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
