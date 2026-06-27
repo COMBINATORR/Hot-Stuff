@@ -390,10 +390,10 @@ export default function QuizSection() {
   return (
     <>
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
-      <section className="w-full py-16 md:py-24 bg-black">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch border border-white/10 overflow-hidden bg-[#0A0A0A]">
+      <section className="w-full aspect-[3/4] md:h-[90vh] overflow-hidden bg-black border-t border-b border-white/5">
+        <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch">
           {/* Left Block: Image Card (No border, fills exactly top/left/bottom of parent card) */}
-          <div className="relative overflow-hidden flex flex-col justify-end aspect-[4/3] md:aspect-auto min-h-[400px] p-8 md:p-12">
+          <div className="relative overflow-hidden flex flex-col justify-end p-8 md:p-12 lg:p-16 h-full">
             <div className="absolute inset-0 z-0">
               <ResponsiveImage
                 src={logoQuizBg}
@@ -407,15 +407,15 @@ export default function QuizSection() {
               <span className="text-[10px] font-mono tracking-[0.25em] text-[#31A8FF] font-bold uppercase mb-2 block">
                 HOT STUFF EXPERT
               </span>
-              <h2 className="text-white text-2xl md:text-3xl font-black uppercase tracking-wider leading-none">
+              <h2 className="text-white text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-wider leading-none">
                 HOT STUFF QUIZ
               </h2>
             </div>
           </div>
 
           {/* Right Block: Content Card (Styled matching right half) */}
-          <div className="p-8 md:p-16 flex flex-col justify-center items-start text-left border-t md:border-t-0 md:border-l border-white/10">
-            <h2 className="text-white text-[28px] md:text-[34px] font-black uppercase tracking-wider mb-4 leading-tight font-sans">
+          <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center items-start text-left bg-[#0A0A0A] border-t md:border-t-0 md:border-l border-white/10 h-full">
+            <h2 className="text-white text-[28px] md:text-[34px] lg:text-[40px] font-black uppercase tracking-wider mb-4 leading-tight font-sans">
               {t('home.quiz.title')}
             </h2>
             <h3 className="text-white text-base md:text-lg font-bold mb-4 font-sans text-neutral-300">
