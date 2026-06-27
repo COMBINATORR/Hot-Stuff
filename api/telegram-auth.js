@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : ['http://localhost:3000', 'https://hotstuff.kz'];
+    : ['http://localhost:3000', 'https://hotstuffplay.com'];
   const origin = req.headers.origin;
   const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   res.setHeader('Access-Control-Allow-Origin', allowOrigin);
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
     }
   });
 
-  const email = `tg_${data.id}@hotstuff.kz`;
+  const email = `tg_${data.id}@hotstuffplay.com`;
   const name = `${data.first_name || ''} ${data.last_name || ''}`.trim() || data.username || `User_${data.id}`;
   const avatarUrl = data.photo_url || null;
 
@@ -129,7 +129,7 @@ export default async function handler(req, res) {
 
     // 4. Generate magic link for the user
 
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://hotstuff.kz').split(',').map(o => o.trim());
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://hotstuffplay.com').split(',').map(o => o.trim());
   let safeRedirectTo = `${supabaseUrl}/auth/v1/callback`;
 
   if (redirectTo) {

@@ -53,14 +53,14 @@ USING (true);
 CREATE POLICY "Allow admin write access to categories" 
 ON public.categories FOR ALL 
 TO authenticated 
-USING (auth.jwt() ->> 'email' = 'admin@hotstuff.kz')
-WITH CHECK (auth.jwt() ->> 'email' = 'admin@hotstuff.kz');
+USING (auth.jwt() ->> 'email' = 'admin@hotstuffplay.com')
+WITH CHECK (auth.jwt() ->> 'email' = 'admin@hotstuffplay.com');
 
 CREATE POLICY "Allow admin write access to subcategories" 
 ON public.subcategories FOR ALL 
 TO authenticated 
-USING (auth.jwt() ->> 'email' = 'admin@hotstuff.kz')
-WITH CHECK (auth.jwt() ->> 'email' = 'admin@hotstuff.kz');
+USING (auth.jwt() ->> 'email' = 'admin@hotstuffplay.com')
+WITH CHECK (auth.jwt() ->> 'email' = 'admin@hotstuffplay.com');
 
 -- 7. SEED DATA: INSERT CATEGORIES (ON CONFLICT DO UPDATE for idempotency)
 INSERT INTO public.categories (name, slug, description)

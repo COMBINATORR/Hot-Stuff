@@ -217,7 +217,7 @@ describe('telegram-auth API handler', () => {
 
     expect(mockFrom).toHaveBeenCalledWith('profiles');
     expect(mockCreateUser).toHaveBeenCalledWith({
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       email_confirm: true,
       user_metadata: {
         full_name: 'John Doe',
@@ -229,7 +229,7 @@ describe('telegram-auth API handler', () => {
     expect(mockUpdateUserById).not.toHaveBeenCalled();
     expect(mockGenerateLink).toHaveBeenCalledWith({
       type: 'magiclink',
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       options: {
         redirectTo: 'https://test.supabase.co/auth/v1/callback'
       }
@@ -263,7 +263,7 @@ describe('telegram-auth API handler', () => {
     expect(mockCreateUser).not.toHaveBeenCalled();
     expect(mockGenerateLink).toHaveBeenCalledWith({
       type: 'magiclink',
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       options: {
         redirectTo: 'https://test.supabase.co/auth/v1/callback' // Fallback
       }
@@ -290,7 +290,7 @@ describe('telegram-auth API handler', () => {
 
     expect(mockGenerateLink).toHaveBeenCalledWith({
       type: 'magiclink',
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       options: {
         redirectTo: 'https://example.com/callback?foo=bar'
       }
@@ -317,7 +317,7 @@ describe('telegram-auth API handler', () => {
     expect(consoleSpy).toHaveBeenCalledWith('[Telegram Auth] Blocked redirect to untrusted origin: https://evil.com');
     expect(mockGenerateLink).toHaveBeenCalledWith({
       type: 'magiclink',
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       options: {
         redirectTo: 'https://test.supabase.co/auth/v1/callback' // Fallback to safe default
       }
@@ -345,7 +345,7 @@ describe('telegram-auth API handler', () => {
     expect(consoleSpy).toHaveBeenCalledWith('[Telegram Auth] Invalid redirectTo URL provided');
     expect(mockGenerateLink).toHaveBeenCalledWith({
       type: 'magiclink',
-      email: `tg_${validData.id}@hotstuff.kz`,
+      email: `tg_${validData.id}@hotstuffplay.com`,
       options: {
         redirectTo: 'https://test.supabase.co/auth/v1/callback' // Fallback to safe default
       }

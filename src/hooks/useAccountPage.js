@@ -94,7 +94,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
   // Simple mock database of registered logins
   const MOCK_REGISTERED_USERS = useMemo(() => [
     'test@test.com',
-    'admin@hotstuff.kz',
+    'admin@hotstuffplay.com',
     '+77777777777',
     '87777777777'
   ], []);
@@ -109,7 +109,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
   const [savedAccounts, setSavedAccounts] = useState(() => {
     const saved = localStorage.getItem('hs_registered_users');
     const parsed = saved ? JSON.parse(saved).map(u => u.trim().toLowerCase()) : [];
-    return parsed.filter(email => !['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(email));
+    return parsed.filter(email => !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(email));
   });
 
 
@@ -230,7 +230,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
 
           // Add to saved accounts list if it's not a mock account
           const emailClean = email.trim().toLowerCase();
-          if (emailClean && !['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(emailClean)) {
+          if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {
             setSavedAccounts(prev => {
               if (prev.includes(emailClean)) return prev;
               return [...prev, emailClean];
@@ -330,7 +330,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
 
     // Directly log in on local side
     setTimeout(() => {
-      const email = `tg_${mockUser.id}@hotstuff.kz`;
+      const email = `tg_${mockUser.id}@hotstuffplay.com`;
       loginSuccess(email);
       setLoading(false);
       alert(t('account.welcome_test', { name: `${mockUser.first_name} ${mockUser.last_name}` }));
@@ -540,7 +540,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     const mockSessionUser = {
       email: normalizedUser,
       user_metadata: {
-        full_name: normalizedUser === 'admin@hotstuff.kz' ? 'Администратор' : 'Тестовый Пользователь',
+        full_name: normalizedUser === 'admin@hotstuffplay.com' ? 'Администратор' : 'Тестовый Пользователь',
         avatar_url: null
       }
     };
@@ -556,7 +556,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       localStorage.setItem('hs_registered_users', JSON.stringify(updatedList));
     }
 
-    if (!['test@test.com', 'admin@hotstuff.kz', '+77777777777', '87777777777'].includes(normalizedUser)) {
+    if (!['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(normalizedUser)) {
       setSavedAccounts(prev => {
         if (prev.includes(normalizedUser)) return prev;
         return [...prev, normalizedUser];
