@@ -1,88 +1,13 @@
-import CartDrawer from "./CartDrawer.jsx";
-import { useState, useEffect } from 'react';
+import { useHeaderLogic } from '../hooks/useHeaderLogic';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ResponsiveImage from './ResponsiveImage';
+import CategoryLink from './CategoryLink';
+import CartDrawer from './CartDrawer';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
-function CategoryLink({ category, onClick }) {
-  const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const subcategories = category.subcategories || [];
-  const hasSub = subcategories.length > 0;
-
-  return (
-    <div className="relative flex flex-col w-full">
-      {hasSub ? (
-        <>
-          <div className="flex justify-between items-center w-full py-1.5">
-            <span
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-white text-[11px] font-bold tracking-widest lowercase cursor-pointer hover:text-primary transition-colors text-left flex-1"
-            >
-              {t(`menu.${category.name.toLowerCase()}`, category.name)}
-            </span>
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-white hover:text-primary transition-colors p-1 focus:outline-none focus-visible:text-primary active:scale-90 rounded-[2px]"
-            >
-              <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                expand_more
-              </span>
-            </button>
-          </div>
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-                className="overflow-hidden pl-4 flex flex-col gap-2 border-l border-white/10 my-1 pb-2"
-              >
-                <Link
-                  to={`/catalog?cat=${category.slug}`}
-                  onClick={onClick}
-                  className="text-neutral-300 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
-                >
-                  {t('header.view_all', 'посмотреть все')}
-                </Link>
-                {subcategories.map((sub) => (
-                  <Link
-                    key={sub.slug}
-                    to={`/catalog?cat=${sub.slug}`}
-                    onClick={onClick}
-                    className="text-neutral-400 text-[10px] tracking-wider uppercase hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
-                  >
-                    {t(`menu.${sub.name.toLowerCase()}`, sub.name)}
-                  </Link>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      ) : (
-        <>
-          <Link
-            to={`/catalog?cat=${category.slug}`}
-            onClick={onClick}
-            className="text-white text-[11px] font-bold tracking-widest lowercase block w-full py-1.5 hover:text-primary transition-colors text-left focus:outline-none focus-visible:text-primary"
-          >
-            {t(`menu.${category.name.toLowerCase()}`, category.name)}
-          </Link>
-          {category.description && (
-            <span className="text-[10px] text-neutral-400 leading-normal block -mt-1 pb-2 font-normal font-sans text-left">
-              {category.description}
-            </span>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function Header({ 
   cartItems = [], 
@@ -94,160 +19,24 @@ export default function Header({
   onOpenFavorites
 }) {
   const { t, i18n } = useTranslation();
-  const [cartOpen, setCartOpen] = useState(false);
-  const [navOpen,  setNavOpen]  = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [tickerIndex, setTickerIndex] = useState(0);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categories, setCategories] = useState([]);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const pathname = location.pathname;
 
-  const session = useAuth();
-
-  // Localized Ticker items computed dynamically using t()
-  const tickerItems = [
-    { text: t('header.promo1', 'АКЦИИ ДЛЯ САМОНАСЛАЖДЕНИЯ: СКИДКИ ДО 50% + БЕСПЛАТНАЯ ИГРУШКА'), link: "/catalog" },
-    { text: t('header.promo2', 'БЕСПЛАТНАЯ ДОСТАВКА ПО ВСЕМУ КАЗАХСТАНУ ОТ 30 000 ₸'), link: "/delivery" },
-    { text: t('header.promo3', 'НОВИНКИ КАТЕГОРИИ WELLNESS УЖЕ В ПРОДАЖЕ'), link: "/catalog?cat=wellness" }
-  ];
-
-  const handleLangChange = (langCode) => {
-    i18n.changeLanguage(langCode);
-    setLangMenuOpen(false);
-    
-    // Parse current pathname
-    const parts = location.pathname.split('/');
-    if (['ru', 'kz', 'en'].includes(parts[1])) {
-      parts.splice(1, 1);
-    }
-    
-    let newPathname = parts.join('/');
-    if (newPathname === '') newPathname = '/';
-    
-    const prefix = langCode === 'kk' ? 'kz' : langCode;
-    localStorage.setItem('app_language', prefix);
-    
-    const targetPath = (prefix === 'ru' ? newPathname : `/${prefix}${newPathname === '/' ? '' : newPathname}`) + location.search + location.hash;
-    
-    navigate(targetPath);
-  };
-
-  const handleHeaderLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (err) {
-      console.error('[Header Logout Error]', err);
-      alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
-    } finally {
-      localStorage.removeItem('hs_user');
-      localStorage.removeItem('hs_auth_session');
-      window.dispatchEvent(new Event('hs_auth_change'));
-      navigate(getHomePath());
-    }
-  };
-
-  useEffect(() => {
-    async function loadCategories() {
-      // 1. Load instantly from localStorage if cached
-      const cached = localStorage.getItem('hs_categories');
-      if (cached) {
-        try {
-          setCategories(JSON.parse(cached));
-        } catch (e) {
-          console.error('[Header] Error parsing cached categories:', e);
-        }
-      }
-
-      // 2. Fetch fresh data in the background (SWR)
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('id, name, slug, description, subcategories(id, name, slug, description)')
-          .order('id', { ascending: true });
-        if (error) throw error;
-        
-        const processed = (data || []).map(cat => {
-          if (cat.subcategories) {
-            cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
-          }
-          return cat;
-        });
-        
-        setCategories(processed);
-        localStorage.setItem('hs_categories', JSON.stringify(processed));
-      } catch (err) {
-        console.error('[Header] Error loading categories:', err);
-      }
-    }
-    loadCategories();
-  }, []);
-
-  const getHomePath = () => {
-    const parts = pathname.split('/');
-    if (parts.length > 1 && ['ru', 'kz', 'en'].includes(parts[1])) {
-      return `/${parts[1]}`;
-    }
-    return '/';
-  };
-
-  const handleAccountClick = (e) => {
-    const isAccountPath = pathname === '/account' || pathname.endsWith('/account') || pathname.endsWith('/account/');
-    const hsUserExists = localStorage.getItem('hs_user') !== null;
-    
-    if (isAccountPath && !hsUserExists) {
-      e.preventDefault();
-      navigate(getHomePath());
-    }
-  };
-
-  const isLightPage = pathname.includes('/catalog');
-
-  // Switch promo ticker items
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTickerIndex((prev) => (prev + 1) % tickerItems.length);
-    }, 12000);
-    return () => clearInterval(timer);
-  }, [tickerIndex, tickerItems.length]);
-
+  const {
+    cartOpen, setCartOpen,
+    navOpen, setNavOpen,
+    langMenuOpen, setLangMenuOpen,
+    expandedCategory, setExpandedCategory,
+    navigate, pathname,
+    tickerIndex,
+    searchOpen, setSearchOpen,
+    searchQuery, setSearchQuery,
+    categories,
+    session, tickerItems,
+    handleLangChange, handleHeaderLogout, getHomePath,
+    handleAccountClick, isLightPage,
+    handleSearchSubmit, handleSearchTermClick,
+    handleNextTicker, handlePrevTicker, getLangLabel
+  } = useHeaderLogic({ i18n, t });
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
-
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-      setSearchOpen(false);
-      const prefix = i18n.language === 'ru' ? '' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}`;
-      navigate(`${prefix}/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
-
-  const handleSearchTermClick = (term) => {
-    setSearchOpen(false);
-    const prefix = i18n.language === 'ru' ? '' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}`;
-    navigate(`${prefix}/catalog?search=${encodeURIComponent(term)}`);
-  };
-
-  const handleNextTicker = () => {
-    setTickerIndex((prev) => (prev + 1) % tickerItems.length);
-  };
-
-  const handlePrevTicker = () => {
-    setTickerIndex((prev) => (prev - 1 + tickerItems.length) % tickerItems.length);
-  };
-
-  const getLangLabel = (lng) => {
-    if (!lng) return 'RU';
-    const l = lng.toLowerCase();
-    if (l === 'kk' || l === 'kz') return 'KZ';
-    if (l === 'en') return 'EN';
-    return 'RU';
-  };
-
   return (
     <>
       {/* Promo Ticker Bar */}

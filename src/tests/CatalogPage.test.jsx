@@ -122,4 +122,25 @@ describe('CatalogPage', () => {
       expect(screen.queryByText('catalog.filters_upper')).not.toBeInTheDocument();
     });
   });
+
+  it('handles invalid cached products in localStorage without crashing', async () => {
+    // Set invalid JSON in localStorage to trigger the parsing error for products
+    localStorage.setItem('hs_products', 'invalid_json_for_products{]');
+
+    // Spy on console.error
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      renderComponent();
+    });
+
+    // Check if error was logged
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to parse catalog products',
+      expect.any(Error)
+    );
+
+    // Clean up
+    consoleSpy.mockRestore();
+  });
 });

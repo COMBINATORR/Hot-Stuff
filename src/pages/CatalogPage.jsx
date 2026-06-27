@@ -55,6 +55,28 @@ export default function CatalogPage({ onAddToCart }) {
   const [expandedSidebarCats, setExpandedSidebarCats] = useState({ 'toys-women': true });
   const { categories, loading } = useCategories();
 
+  const [products, setProducts] = useState(ALL_PRODUCTS);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  // Load products from cache
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const cached = localStorage.getItem('hs_products');
+        if (cached) {
+          const data = JSON.parse(cached);
+          setProducts(data);
+        }
+      } catch (e) {
+        console.error('Failed to parse catalog products', e);
+      } finally {
+        setProductsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
+
+
   // Gift hint states
   const [showGiftBanner, setShowGiftBanner] = useState(false);
   const [giftProducts, setGiftProducts] = useState([]);
@@ -137,7 +159,7 @@ export default function CatalogPage({ onAddToCart }) {
     const searchValLower = searchVal.toLowerCase();
     const filterFn = categorySlugMap[activeCat];
 
-    const result = ALL_PRODUCTS.filter(p => {
+    const result = products.filter(p => {
       // 1.5 Sidebar Category (Only if not searching, or if cat matches)
       if (activeCat !== 'all' && activeCat !== 'popular') {
         if (activeCat === 'new') {
