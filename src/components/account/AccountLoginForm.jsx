@@ -86,7 +86,7 @@ export default function AccountLoginForm({
       )}
 
       {/* Image-accurate Disclaimer */}
-      <p className="text-[9.5px] text-black/90 leading-[1.6] text-center font-normal px-2 mt-4 max-w-[325px]">
+      <p className="text-[11px] text-zinc-400 leading-relaxed text-center font-normal px-2 mt-4 max-w-[325px]">
         {t('account.terms_text')}
       </p>
     </div>
