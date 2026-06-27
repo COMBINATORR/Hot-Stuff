@@ -17,7 +17,15 @@ const handlePanic = () => {
 };
 
 const FooterCard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const getLocalizedPath = (path: string) => {
+    const currentLang = i18n.language;
+    if (currentLang && currentLang !== 'ru' && ['kz', 'en'].includes(currentLang)) {
+      return `/${currentLang}${path}`;
+    }
+    return path;
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,10 +72,10 @@ const FooterCard = () => {
         <div className="space-y-6 text-left">
           <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">{t('footer.buyers')}</h4>
           <ul className="space-y-4">
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.size_guide')}</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.faq', 'FAQ')}</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.returns')}</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.support')}</Link></li>
+            <li><Link to={getLocalizedPath('/catalog')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.size_guide')}</Link></li>
+            <li><Link to={getLocalizedPath('/catalog')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.faq', 'FAQ')}</Link></li>
+            <li><Link to={getLocalizedPath('/legal?tab=return')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.returns')}</Link></li>
+            <li><Link to={getLocalizedPath('/catalog')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.support')}</Link></li>
           </ul>
         </div>
 
@@ -88,8 +96,8 @@ const FooterCard = () => {
         <div className="space-y-6 text-left">
           <h4 className="text-[14px] font-medium text-[#94A3B8] uppercase tracking-wider">{t('footer.legal_title')}</h4>
           <ul className="space-y-4">
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.privacy')}</Link></li>
-            <li><Link to="/catalog" className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.offer')}</Link></li>
+            <li><Link to={getLocalizedPath('/legal?tab=privacy')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.privacy')}</Link></li>
+            <li><Link to={getLocalizedPath('/legal?tab=terms')} className="text-[15px] font-medium text-neutral-300 hover:text-[#31A8FF] transition-colors block">{t('footer.offer')}</Link></li>
           </ul>
           <div className="flex gap-3 items-start mt-6 pt-6 border-t border-zinc-900">
             <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-yellow-400 text-black text-xs font-black rounded-[6px]">18+</div>
