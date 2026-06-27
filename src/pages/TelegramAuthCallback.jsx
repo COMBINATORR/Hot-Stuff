@@ -29,7 +29,6 @@ export default function TelegramAuthCallback() {
     const user = {
       emailOrPhone: username ? `@${username}` : `tg_${id}`,
       id,
-      hash,
       firstName: firstName || 'Пользователь',
       lastName: lastName || '',
       username: username || '',
