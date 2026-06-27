@@ -126,47 +126,18 @@ const FooterCard = () => {
   );
 };
 
-const GlassText = () => {
+const HugeBrandText = () => {
   return (
-    <div className="relative w-full flex items-center justify-center select-none pt-0 bg-transparent overflow-hidden my-4">
-      {/* Invisible SVG for Filter */}
-      <svg className="absolute w-0 h-0" aria-hidden="true" focusable="false">
-        <defs>
-          <filter id="glass-effect" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000000" floodOpacity="0.25" result="outer-shadow"/>
-            <feComponentTransfer in="SourceAlpha" result="alpha"><feFuncA type="linear" slope="1" /></feComponentTransfer>
-            <feOffset in="alpha" dx="0" dy="4" result="offset-white" />
-            <feGaussianBlur in="offset-white" stdDeviation="4" result="blur-white" />
-            <feComposite in="alpha" in2="blur-white" operator="out" result="inner-white-mask" />
-            <feFlood floodColor="#ffffff" floodOpacity="0.25" result="white-fill" />
-            <feComposite in="white-fill" in2="inner-white-mask" operator="in" result="inner-white-final" />
-            <feGaussianBlur in="alpha" stdDeviation="6" result="blur-black" />
-            <feComposite in="alpha" in2="blur-black" operator="out" result="inner-black-mask" />
-            <feFlood floodColor="#000000" floodOpacity="0.25" result="black-fill" />
-            <feComposite in="black-fill" in2="inner-black-mask" operator="in" result="inner-black-final" />
-            <feMerge>
-              <feMergeNode in="outer-shadow" />
-              <feMergeNode in="SourceGraphic" />
-              <feMergeNode in="inner-white-final" />
-              <feMergeNode in="inner-black-final" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
-      
-      {/* Motion Element with Filter applied */}
+    <div className="relative w-full flex items-center justify-center select-none bg-transparent overflow-hidden w-full max-w-[100vw] px-0 mt-8 mb-0">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }} 
-        whileInView={{ opacity: 1, scale: 1 }} 
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
         viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }} 
-        className="relative z-10 w-full flex justify-center py-8"
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} 
+        className="w-full flex justify-center"
       >
-        <h1 
-          className="text-[min(11vw,150px)] font-black tracking-normal leading-none select-none text-white px-4 font-sans-inter text-center uppercase whitespace-nowrap" 
-          style={{ filter: 'url(#glass-effect)' }}
-        >
-          hot stuff
+        <h1 className="text-[17vw] lg:text-[18vw] font-black tracking-tighter leading-none select-none text-white font-sans text-center uppercase whitespace-nowrap w-full">
+          HOT STUFF.
         </h1>
       </motion.div>
     </div>
@@ -175,9 +146,9 @@ const GlassText = () => {
 
 export default function Footer() {
   return (
-    <footer className="w-full flex flex-col items-center gap-0 relative z-10 pb-8 mt-12">
+    <footer className="w-full flex flex-col items-center gap-0 relative z-10 pb-4 mt-12">
       <FooterCard />
-      <GlassText />
+      <HugeBrandText />
     </footer>
   );
 }
