@@ -161,7 +161,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('[Telegram Auth API Error]', error);
+    console.error('[Telegram Auth API Error] An internal error occurred during authentication.');
     // 🛡️ Sentinel: Do not leak internal error details or stack traces to the client
     return res.status(500).json({ error: 'Internal server error during authentication' });
   }
