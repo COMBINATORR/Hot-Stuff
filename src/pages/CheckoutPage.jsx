@@ -124,8 +124,6 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
     if (payment === 'kaspi') {
       setIsCheckingOut(true);
       try {
-        console.log(`[Kaspi Checkout] Initiating invoice for ${total} ₸ (Order ID: ${generatedOrderId})`);
-        
         const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
           body: { 
             action: 'create', 
