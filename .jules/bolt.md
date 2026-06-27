@@ -36,3 +36,11 @@
 ## 2024-06-25 - Extracted repeated fetch to context provider
 **Learning:** Extracting repeated data fetching operations to a top-level Context provider drastically reduces the number of identical database/network requests. In this case, three independent components (`CatalogPage`, `PopularCategories`, and `Header`) were individually fetching the identical `categories` data from Supabase. Consolidating this into a `CategoriesContext` reduced 4 repeated data fetches down to 1.
 **Action:** Always identify shared data dependencies and hoist data loading logic to a common ancestor (like a Context provider) to prevent redundant API calls, dropping benchmarked fetching times from ~150ms to ~50ms.
+
+## 2024-05-24 - Array Filtering Optimization
+**Learning:** Manual `for` loops in hot paths like catalog filtering can be safely refactored to `Array.prototype.filter()` for improved readability without sacrificing performance, provided that short-circuiting is heavily utilized.
+**Action:** When writing `.filter()` callbacks, always place the computationally cheapest checks (booleans, strict equality on numbers/strings) at the top of the function and the most expensive checks (string `.toLowerCase()`, `.includes()`, or nested array `.some()`) at the bottom. This ensures the expensive logic is only executed for items that pass all other criteria.
+
+## 2026-06-26 - Optimize Breadcrumbs useEffect
+**Learning:** When an issue mentions a performance bug that is already fixed in the checked-out branch, look for other related optimizations (e.g., removing redundant Map rebuilding on route changes by adjusting useEffect dependencies) to still deliver a performance win.
+**Action:** Always verify if the codebase actually contains the bug described in the prompt; if not, find and fix related performance bottlenecks.

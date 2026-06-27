@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import ResponsiveImage from '../ResponsiveImage';
 import { ALL_PRODUCTS } from '../../data/products';
+import { secureRandom } from '../../lib/random';
 
 export default function Bestsellers({ onSelectPreview }) {
   const { t } = useTranslation();
@@ -42,7 +43,7 @@ export default function Bestsellers({ onSelectPreview }) {
             const localProduct = productsMap.get(p.id);
             return {
               ...p,
-              price: localProduct ? localProduct.price : (Math.floor(Math.random() * 101) + 100),
+              price: localProduct ? localProduct.price : (Math.floor(secureRandom() * 101) + 100),
               oldPrice: null
             };
           });
