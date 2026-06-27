@@ -403,8 +403,8 @@ export function useAccountPage({ t, lang, onAddToCart }) {
         .catch((err) => console.warn('[Telegram Proxy] optional server session failed:', err));
 
     } catch (err) {
-      console.error('[Telegram Auth Error]', err);
-      setError(err.message || t('account.err_telegram_fail', 'Не удалось войти через Telegram. Пожалуйста, попробуйте позже.'));
+      console.error('[Telegram login flow] Error:', err);
+      setError(t('account.auth_error', 'Произошла ошибка при авторизации'));
     } finally {
       setLoading(false);
     }
