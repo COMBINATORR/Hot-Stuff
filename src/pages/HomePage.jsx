@@ -4,7 +4,6 @@ import HomeHero from '../components/home/HomeHero';
 import TrustSection from '../components/home/TrustSection';
 import BrandIntro from '../components/home/BrandIntro';
 import CategoryBlocks from '../components/home/CategoryBlocks';
-import PromoBanner from '../components/home/PromoBanner';
 import QuizSection from '../components/home/QuizSection';
 import BrandQuote from '../components/home/BrandQuote';
 import NewsletterSection from '../components/home/NewsletterSection';
@@ -39,9 +38,6 @@ export default function HomePage({ onAddToCart }) {
 
       {/* 6. Блок преимуществ (спущен вниз) */}
       <TrustSection />
-
-      {/* 7. Промо баннер */}
-      <PromoBanner />
 
       {/* Подписка на рассылку */}
       <NewsletterSection />
