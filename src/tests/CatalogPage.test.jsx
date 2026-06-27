@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import CatalogPage from '../pages/CatalogPage';
+import { CategoriesProvider } from '../contexts/CategoriesContext';
 import { supabase } from '../lib/supabase';
 import { vi } from 'vitest';
 
@@ -48,7 +49,7 @@ describe('CatalogPage', () => {
     return render(
       <MemoryRouter initialEntries={initialEntries}>
         <Routes>
-          <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/catalog" element={<CategoriesProvider><CatalogPage /></CategoriesProvider>} />
         </Routes>
       </MemoryRouter>
     );

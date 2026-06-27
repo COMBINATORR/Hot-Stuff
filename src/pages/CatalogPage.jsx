@@ -12,6 +12,7 @@ import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductCard from '../components/catalog/ProductCard';
 import FilterDrawer from '../components/catalog/FilterDrawer';
 import CategorySidebar from '../components/catalog/CategorySidebar';
+import { useCategories } from '../contexts/CategoriesContext';
 
 
 const categorySlugMap = {
@@ -52,48 +53,7 @@ export default function CatalogPage({ onAddToCart }) {
   const [activeCat, setActiveCat] = useState(initialCat);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
   const [expandedSidebarCats, setExpandedSidebarCats] = useState({ 'toys-women': true });
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Load categories and subcategories from Supabase
-  useEffect(() => {
-    async function loadCategories() {
-      // 1. Load instantly from localStorage if cached
-      const cached = localStorage.getItem('hs_categories');
-      if (cached) {
-        try {
-          setCategories(JSON.parse(cached));
-          setLoading(false); // Turn off loading skeleton immediately since we have data!
-        } catch (e) {
-          console.error('[CatalogPage] Error parsing cached categories:', e);
-        }
-      }
-
-      // 2. Fetch fresh data in the background (SWR)
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('id, name, slug, description, subcategories(id, name, slug, description)')
-          .order('id', { ascending: true });
-        if (error) throw error;
-        
-        const processed = (data || []).map(cat => {
-          if (cat.subcategories) {
-            cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
-          }
-          return cat;
-        });
-        
-        setCategories(processed);
-        localStorage.setItem('hs_categories', JSON.stringify(processed));
-      } catch (err) {
-        console.error('[CatalogPage] Error loading categories:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadCategories();
-  }, []);
+  const { categories, loading } = useCategories();
 
   // Gift hint states
   const [showGiftBanner, setShowGiftBanner] = useState(false);

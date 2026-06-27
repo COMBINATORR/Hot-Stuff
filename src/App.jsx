@@ -13,6 +13,7 @@ import CookieBanner from './components/CookieBanner.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
 import FavoritesDrawer from './components/FavoritesDrawer.jsx';
 import ProductModal from './components/ProductModal.jsx';
+import { CategoriesProvider } from './contexts/CategoriesContext.jsx';
 
 function LanguageSync() {
   const location = useLocation();
@@ -114,6 +115,7 @@ function App() {
     <I18nextProvider i18n={i18n}>
       <HelmetProvider>
         <SecureProvider>
+          <CategoriesProvider>
           <BrowserRouter>
             <LanguageSync />
             <PanicButton />
@@ -164,6 +166,7 @@ function App() {
               />
             )}
           </BrowserRouter>
+          </CategoriesProvider>
         </SecureProvider>
       </HelmetProvider>
     </I18nextProvider>
