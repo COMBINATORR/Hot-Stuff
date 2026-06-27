@@ -137,7 +137,7 @@ const HugeBrandText = () => {
         className="w-full flex justify-center"
       >
         <h1 className="text-[17vw] lg:text-[18vw] font-black tracking-tighter leading-none select-none text-white font-sans text-center uppercase whitespace-nowrap w-full">
-          HOT STUFF.
+          HOT STUFF
         </h1>
       </motion.div>
     </div>
