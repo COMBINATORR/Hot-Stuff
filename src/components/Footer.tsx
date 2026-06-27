@@ -163,7 +163,7 @@ const GlassText = () => {
         className="relative z-10 w-full flex justify-center py-8"
       >
         <h1 
-          className="text-[min(18vw,300px)] font-black tracking-widest leading-none select-none text-white px-4 font-sans-inter text-center uppercase" 
+          className="text-[min(11vw,150px)] font-black tracking-normal leading-none select-none text-white px-4 font-sans-inter text-center uppercase whitespace-nowrap" 
           style={{ filter: 'url(#glass-effect)' }}
         >
           hot stuff
