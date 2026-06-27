@@ -1,9 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../data/products';
-import ResponsiveImage from '../components/ResponsiveImage';
 import { useTranslation } from 'react-i18next';
 import Breadcrumbs from '../components/Breadcrumbs';
+import ProductHero from '../components/product/ProductHero';
+import ProductRitual from '../components/product/ProductRitual';
+import ProductFeatures from '../components/product/ProductFeatures';
+import ProductSpecs from '../components/product/ProductSpecs';
+import ProductLifestyle from '../components/product/ProductLifestyle';
+import ProductCrossSell from '../components/product/ProductCrossSell';
+import ProductReviews from '../components/product/ProductReviews';
+
 
 export default function ProductPage({ onAddToCart }) {
   const { t, i18n } = useTranslation();
@@ -312,604 +319,78 @@ export default function ProductPage({ onAddToCart }) {
         <Breadcrumbs theme="dark" />
         
         {/* Hero Section */}
-        <section className="min-h-[700px] md:min-h-[850px] flex flex-col md:flex-row max-w-container-max mx-auto relative mt-4">
-          <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 md:py-20 z-10 text-left">
-            {product.isNew && (
-              <span className="text-[10px] font-black tracking-[0.25em] text-primary uppercase mb-3">{t('product.new_arrival', 'NEW ARRIVAL')}</span>
-            )}
-            <h1 className="font-sans font-black text-[36px] md:text-[56px] lg:text-[64px] text-white leading-tight uppercase tracking-tight mb-4">
-              {product.name}
-            </h1>
-            <p className="font-sans font-bold text-xs tracking-[0.15em] text-outline uppercase mb-6">{t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}</p>
-            
-            {/* Price Block */}
-            <div className="flex items-baseline gap-4 mb-10">
-              {product.oldPrice ? (
-                <>
-                  <span className="font-sans font-bold text-2xl text-primary">{product.price.toLocaleString('ru-KZ')} ₸</span>
-                  <span className="font-sans text-sm text-outline line-through">{product.oldPrice.toLocaleString('ru-KZ')} ₸</span>
-                  <span className="bg-primary text-on-primary text-[9px] font-black px-2 py-1 uppercase tracking-wider leading-none">
-                    {t('product.save', { amount: (product.oldPrice - product.price).toLocaleString('ru-KZ') })}
-                  </span>
-                </>
-              ) : (
-                <span className="font-sans font-bold text-2xl text-white">{product.price.toLocaleString('ru-KZ')} ₸</span>
-              )}
-            </div>
-
-            <p className="font-sans text-sm text-on-surface-variant leading-relaxed max-w-lg mb-10">
-              {t('product.tech_defaults.' + product.id, product.description)}
-            </p>
-
-            {/* Colors Selection */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="mb-10">
-                <span className="font-sans font-bold text-[10px] tracking-widest text-outline block mb-4 uppercase">{t('product.color_label', { color: selectedColor })}</span>
-                <div className="flex gap-5">
-                  {product.colors.map(color => (
-                    <button
-                      key={color.name}
-                      aria-label={color.name}
-                      onClick={() => setSelectedColor(color.name)}
-                      className={`relative w-9 h-9 rounded-full border-2 transition-all ring-1 ring-offset-2 ring-offset-black after:absolute after:-inset-1.5 after:content-[''] ${
-                        selectedColor === color.name 
-                          ? 'border-white ring-primary' 
-                          : 'border-transparent ring-transparent'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                    ></button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Quantity and Add to Cart */}
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-              <div className="flex items-center border border-white/10 h-[52px]">
-                <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
-                  onClick={() => setQty(q => Math.max(1, q - 1))}
-                  aria-label={t('common.decrease', 'Уменьшить')}
-                >−</button>
-                <span className="px-5 text-xs font-bold text-center min-w-[2.5rem] select-none">{qty}</span>
-                <button
-                  className="px-4 text-on-surface-variant hover:text-white transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-[2px]"
-                  onClick={() => setQty(q => q + 1)}
-                  aria-label={t('common.increase', 'Увеличить')}
-                >+</button>
-              </div>
-              
-              <button 
-                onClick={handleAdd}
-                className="bg-primary text-on-primary font-sans font-black text-xs tracking-[0.2em] uppercase h-[52px] px-12 hover:bg-[#ffe088] transition-colors duration-300 flex-1 md:flex-none"
-              >
-                {t('product.add_to_cart')}
-              </button>
-            </div>
-
-            {/* Kaspi Red Installments */}
-            <div className="w-full flex items-center gap-3 bg-neutral-900/40 p-4 border border-white/5 rounded-none mb-4">
-              <div className="flex-none bg-[#E11D48] text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-none uppercase font-sans">Kaspi Red</div>
-              <div className="text-left font-sans text-xs text-white/90">
-                {t('product.installment', { amount: Math.round(product.price / 3).toLocaleString('ru-KZ') })}
-              </div>
-            </div>
-
-            {/* Countdown Timer */}
-            <div className="w-full flex items-center gap-3 bg-primary/10 p-4 border border-primary/20 rounded-none mb-6">
-              <span className="material-symbols-outlined text-primary text-[18px]">alarm</span>
-              <div className="text-left font-sans text-xs text-white/95 text-balance">
-                {t('product.order_countdown', { time: formatTime(timeLeft) })}
-              </div>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="w-full grid grid-cols-3 gap-2.5 border-t border-white/10 pt-6 mt-2">
-              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
-                <span className="material-symbols-outlined text-[18px] text-primary mb-1">visibility_off</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.anon')}</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
-                <span className="material-symbols-outlined text-[18px] text-primary mb-1">verified_user</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.warranty_badge')}</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-2.5 rounded-none bg-neutral-900/20 border border-white/5">
-                <span className="material-symbols-outlined text-[18px] text-primary mb-1">shield</span>
-                <span className="text-[8px] font-black tracking-wider text-white uppercase">{t('product.safe')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Product image container with Gallery */}
-          <div className="flex-1 relative min-h-[400px] md:min-h-full flex flex-col md:flex-row items-center justify-center bg-surface-container-lowest p-6 md:p-12 gap-6">
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-background z-10 hidden md:block pointer-events-none"></div>
-            
-            {/* Gallery Thumbnails */}
-            {product.gallery && product.gallery.length > 1 && (
-              <div className="hidden md:flex md:flex-col gap-3 z-20 order-2 md:order-1">
-                {product.gallery.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`w-16 h-16 md:w-20 md:h-20 bg-neutral-900 border transition-all duration-300 overflow-hidden flex items-center justify-center ${
-                      activeImageIndex === idx ? 'border-primary scale-105' : 'border-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-contain p-1" />
-                  </button>
-                ))}
-              </div>
-            )}
-            
-            {/* Main Hero Image */}
-            <div className="w-full flex-1 max-h-[500px] md:max-h-[600px] flex flex-col items-center justify-center z-10 order-1 md:order-2">
-              
-              {displayMode === 'scale' ? (
-                <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-neutral-950/40 rounded-none border border-white/5 font-sans text-left min-h-[350px]">
-                  <p className="text-[10px] font-black tracking-widest text-primary uppercase mb-6 text-center">{t('product.size_comparison')}</p>
-                  
-                  <div className="flex items-end justify-center gap-8 md:gap-12 w-full h-56 pb-4">
-                    {/* Palm */}
-                    <div className="flex flex-col items-center gap-2 h-full justify-end">
-                      <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-2xl transition-all" style={{ height: `${18 * 8}px` }}>
-                        ✋
-                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">~18 {i18n.language === 'en' ? 'cm' : 'см'}</span>
-                      </div>
-                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">{t('product.palm')}</span>
-                    </div>
-
-                    {/* Product Device */}
-                    <div className="flex flex-col items-center gap-2 h-full justify-end">
-                      <div className="relative w-16 bg-primary/20 border-2 border-primary flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(242,202,80,0.2)]" style={{ height: `${deviceLength * 8}px` }}>
-                        {product.emoji || '🌸'}
-                        <span className="absolute -top-6 text-[11px] font-black text-primary">{deviceLength} {i18n.language === 'en' ? 'cm' : 'см'}</span>
-                      </div>
-                      <span className="text-[9px] font-black tracking-wider text-white uppercase text-center truncate max-w-[80px]">{product.name}</span>
-                    </div>
-
-                    {/* iPhone 15 */}
-                    <div className="flex flex-col items-center gap-2 h-full justify-end">
-                      <div className="relative w-12 bg-neutral-900 border border-white/10 flex items-center justify-center text-xl" style={{ height: `${14.6 * 8}px` }}>
-                        📱
-                        <span className="absolute -top-6 text-[10px] font-bold text-white/70">14.6 {i18n.language === 'en' ? 'cm' : 'см'}</span>
-                      </div>
-                      <span className="text-[8px] font-bold tracking-wider text-outline uppercase text-center">iPhone 15</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[9px] text-outline text-center leading-relaxed mt-4 max-w-xs text-balance">
-                    {t('product.size_note')}
-                  </p>
-                </div>
-              ) : (
-                <div 
-                  className="w-full flex items-center justify-center"
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                >
-                  <ResponsiveImage 
-                    src={product.gallery && product.gallery[activeImageIndex] ? product.gallery[activeImageIndex] : product.image} 
-                    alt={`${product.name} product shot`} 
-                    className="w-full h-full max-h-[400px] md:max-h-[500px] object-contain transition-all duration-500 hover:scale-105 select-none" 
-                    loading="eager"
-                  />
-                </div>
-              )}
-
-              {/* Mobile Swipe Indicator (Pagination Dots) */}
-              {displayMode === 'studio' && product.gallery && product.gallery.length > 1 && (
-                <div className="flex justify-center gap-2 mt-5 md:hidden z-20">
-                  {product.gallery.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveImageIndex(idx)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 border-none outline-none focus:outline-none p-0 cursor-pointer ${
-                        activeImageIndex === idx ? 'bg-primary w-4' : 'bg-white/25 hover:bg-white/40'
-                      }`}
-                      aria-label={`Go to image ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Toggle Display Mode */}
-              <div className="flex gap-4 mt-6 z-20">
-                <button
-                  onClick={() => setDisplayMode('studio')}
-                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 ${
-                    displayMode === 'studio'
-                      ? 'bg-white text-black border-white'
-                      : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
-                  }`}
-                >
-                  {t('product.studio_view')}
-                </button>
-                <button
-                  onClick={() => setDisplayMode('scale')}
-                  className={`px-4 py-1.5 font-sans font-bold text-[9px] tracking-widest uppercase border transition-all rounded-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-95 ${
-                    displayMode === 'scale'
-                      ? 'bg-white text-black border-white'
-                      : 'bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white'
-                  }`}
-                >
-                  {t('product.size_view')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <ProductHero
+          t={t}
+          i18n={i18n}
+          product={product}
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
+          qty={qty}
+          setQty={setQty}
+          handleAdd={handleAdd}
+          timeLeft={timeLeft}
+          formatTime={formatTime}
+          activeImageIndex={activeImageIndex}
+          setActiveImageIndex={setActiveImageIndex}
+          handleTouchStart={handleTouchStart}
+          handleTouchEnd={handleTouchEnd}
+          displayMode={displayMode}
+          setDisplayMode={setDisplayMode}
+          deviceLength={deviceLength}
+        />
 
         {/* The Ritual Section */}
-        <section className="min-h-[500px] md:min-h-[600px] flex flex-col md:flex-row max-w-container-max mx-auto mt-24">
-          <div className="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-16 order-2 md:order-1 bg-surface-container-low text-left">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white mb-6 uppercase">{t('product.magic_tech')}</h2>
-            <p className="font-sans text-sm md:text-base text-on-surface-variant max-w-lg leading-relaxed mb-6">
-              {getTechnologyDescription(product)}
-            </p>
-            <div className="w-16 h-[2px] bg-primary mt-4"></div>
-          </div>
-          <div className="flex-1 relative min-h-[350px] md:min-h-full order-1 md:order-2">
-            <img 
-              alt="Macro texture of product" 
-              className="absolute inset-0 w-full h-full object-cover" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm0netM0VEG4-KSXkwu2BgS1iXKGqAVsXjR0pG2uuNzv_s9-dxVvFRmdA1NZntDyit89lBQFNQCUlNGVAWWj-0Qxc7dy2aocCcHbDpbREYDw3Torhhx-NJOfEXJxW-b8xrCK3j36ajbHAFrUFxNkXCNd1uqhjHEjczESxjJviya9XE4U93F40tQH0oCmZyWEdudNk-hveqGOQkwTNRKt8q0x--mZVu6nSs2RMz5EhoKcehP4s7CIoNulqiGKuSH8NQ8YNdmfRdJSA"
-              loading="lazy"
-            />
-          </div>
-        </section>
+        <ProductRitual
+          t={t}
+          product={product}
+          getTechnologyDescription={getTechnologyDescription}
+        />
 
         {/* Features Icons */}
-        <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto border-b border-white/5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-            <div className="flex flex-col items-center text-center">
-              <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">water_drop</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.waterproof')}</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.waterproof_desc')}</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">spa</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.silicone')}</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.silicone_desc')}</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <span className="material-symbols-outlined text-4xl text-primary mb-6 font-light">battery_charging_full</span>
-              <h3 className="font-sans font-bold text-xs tracking-widest text-white uppercase mb-2">{t('product.usb')}</h3>
-              <p className="font-sans text-xs text-on-surface-variant max-w-xs leading-relaxed">{t('product.usb_desc')}</p>
-            </div>
-          </div>
-        </section>
+        <ProductFeatures t={t} />
 
         {/* Technical Specs */}
-        <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto bg-black text-left">
-          <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-center text-white mb-16 uppercase">{t('product.tech_specs')}</h2>
-          <div className="max-w-3xl mx-auto border-t border-white/10 font-sans text-sm">
-            <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_material')}</div>
-              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.material, 'material') || translateSpecValue('Безопасный медицинский силикон, ABS-пластик', 'material')}</div>
-            </div>
-            <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_runtime')}</div>
-              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.runtime, 'runtime') || translateSpecValue('До 2 часов непрерывного использования', 'runtime')}</div>
-            </div>
-            <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_modes')}</div>
-              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.modes, 'modes') || translateSpecValue('Множество настраиваемых паттернов', 'modes')}</div>
-            </div>
-            <div className="flex flex-col sm:flex-row py-6 border-b border-white/10">
-              <div className="w-full sm:w-1/3 font-bold text-outline uppercase tracking-wider mb-2 sm:mb-0">{t('product.spec_dimensions')}</div>
-              <div className="w-full sm:w-2/3 text-white">{translateSpecValue(product.specs?.dimensions, 'dimensions') || translateSpecValue('Эргономичный дизайн', 'dimensions')}</div>
-            </div>
-          </div>
-        </section>
+        <ProductSpecs
+          t={t}
+          product={product}
+          translateSpecValue={translateSpecValue}
+        />
 
         {/* Lifestyle Section */}
-        <section className="relative h-[600px] md:h-[750px] w-full flex items-center justify-center my-16">
-          <div className="absolute inset-0 bg-black/50 z-10"></div>
-          <img 
-            alt="Lifestyle shot on dark silk sheets" 
-            className="absolute inset-0 w-full h-full object-cover z-0" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEHeDiealyOW57R_zYXMkviBV4EUx0LiFb9N60NHhOB59AwTAMqQwQPDBj6sklNyCawZIK0GnB2JDJ_JUv9K4XL2yhlOP61fvYvj_nzBXEULPcng9i60iYDuVytTIVrNzwCmDJ0Oe1aLa-TCzE2kAv_ju7wK-hIq_rX8uGjTr8b6VIqSk86LEeDIQ1eRiDRgCyEPJx9KufEGPnHWPyoJPZz-D_lMxNcGiL6xHSiQ2b47ZxlcC3SNtc7YrWxEcJG7ly5cHwxhTR1QA"
-            loading="lazy"
-          />
-          <div className="z-20 text-center px-6">
-            <p className="font-sans font-black text-[32px] sm:text-[48px] md:text-[56px] text-white italic max-w-4xl mx-auto drop-shadow-2xl">
-              {t('product.magic_quote', '"The closest you can get to magic."')}
-            </p>
-          </div>
-        </section>
+        <ProductLifestyle t={t} />
 
         {/* Cross-Sell Grid */}
-        <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-left">
-          <div className="flex items-center justify-between mb-16">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase">{t('product.complete_ritual')}</h2>
-            <div className="hidden md:block h-px bg-white/10 flex-1 ml-12"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-            {/* Card 1 */}
-            <div className="group cursor-pointer bg-neutral-900 text-white transition-all duration-500 hover:-translate-y-2 border border-white/5">
-              <div className="aspect-square bg-neutral-950 relative overflow-hidden">
-                <img 
-                  alt="Personal Moisturizer" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-90" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqziSFCyLTp7ZLVXgrCSd1GePgC3HAKS0mYEaBM-cogjUvU_IbGOr54AhzAV7l17BSBJ8NToWG7P-Q90rpYo5VJ1jqo8fCDomA-W_8En_-faig-jbzpJ5AJIodEagawEFD8vfZML54fFo-Sn9JRKUbC5QzPZmS4zXpS3zcgjUbqGrP0C5ph9rNp6L5u9VBJjPoRmOBmKAOPQQBKi_EQvllMByBqf0tUmIufN2l5MnAyRhIebm3WCk-pYy9CmcRBs-_mXpPt5Gsjtg"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.moisturizer_name', 'Personal Moisturizer')}</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.moisturizer_desc')}</p>
-                <div className="font-sans font-bold text-lg mb-6 text-primary">12 500 ₸</div>
-                <button 
-                  onClick={() => handleCrossSellAdd('moisturizer', 'Personal Moisturizer', 12500)}
-                  className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
-                >
-                  {t('product.add_to_cart')}
-                </button>
-              </div>
-            </div>
-            {/* Card 2 */}
-            <div className="group cursor-pointer bg-neutral-900 text-white transition-all duration-500 hover:-translate-y-2 border border-white/5">
-              <div className="aspect-square bg-neutral-950 relative overflow-hidden">
-                <img 
-                  alt="Cleaning Spray" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-90" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmig59xczUoR-n2aVFxU9txL_56FEhxwyEgECdo2yXniir4QXBo1bxBWPcJctm2VSIeih2xnJmMlChC4VNROdjPoFBbxjpL7zErkfbsK7D3f7bFeaD6wOZckEKNOs9ePZNaP7TOJZ6L8vS2N6g90pjVD1ATcpbCRjle14oV7cgW7WxoDuWmc7ctiae-gTKrWMNuCsiGLgado_cEuxAO4H-cBYUKUyIjQmG0AFQJ7FHOpcY99mtq_Ak6Bw88XX9VFP91aEB2aqVauw"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.spray_name', 'Cleaning Spray')}</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.spray_desc')}</p>
-                <div className="font-sans font-bold text-lg mb-6 text-primary">8 900 ₸</div>
-                <button 
-                  onClick={() => handleCrossSellAdd('spray', 'Cleaning Spray', 8900)}
-                  className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
-                >
-                  {t('product.add_to_cart')}
-                </button>
-              </div>
-            </div>
-            {/* Card 3 */}
-            <div className="group cursor-pointer bg-neutral-900 text-white transition-all duration-500 hover:-translate-y-2 border border-white/5">
-              <div className="aspect-square bg-neutral-950 relative overflow-hidden">
-                <img 
-                  alt="Scented Candle" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-90" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmCMa-6UB3n17ENxC8klc0m-CCMwCLMksjHuQVb8I4mF-4GxB6NyhN0aFjfQFyPdTmmo4Ll3b-dtMUYbvPo7HN1cpkBWLq-gqa-1vxhWsS97tPE_YxriZOsQ7QcRwhGX6P8_XklTHxbIp6_xmqZWyNdsF3xwk1JRMeifaMH5SlRqvU0TTQ2R8Ro4og8Xvz3Vx7AfYIa6kzgxCJV9FKk9ojiZGkxh0kR-WbCQ60Bqu3y3l878T_M4FsrPDqtWZpAiBGJtAq55z7-pQ"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-8 text-center flex flex-col items-center">
-                <h3 className="font-sans font-bold text-xs tracking-widest uppercase mb-4 text-white">{t('product.crosssell.candle_name', 'Scented Candle')}</h3>
-                <p className="font-sans text-xs text-outline mb-6 line-clamp-2">{t('product.crosssell.candle_desc')}</p>
-                <div className="font-sans font-bold text-lg mb-6 text-primary">15 200 ₸</div>
-                <button 
-                  onClick={() => handleCrossSellAdd('candle', 'Scented Candle', 15200)}
-                  className="font-sans font-bold text-[10px] tracking-widest border border-white text-white px-8 py-3 uppercase hover:bg-white hover:text-black transition-colors duration-300"
-                >
-                  {t('product.add_to_cart')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <ProductCrossSell
+          t={t}
+          handleCrossSellAdd={handleCrossSellAdd}
+        />
 
         {/* Review Section */}
-        <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low text-left font-sans">
-          <div className="max-w-5xl mx-auto flex flex-col gap-16">
-            <h2 className="font-sans font-black text-[22px] md:text-[30px] tracking-[0.15em] text-white uppercase text-center">{t('product.reviews_title')}</h2>
-            
-            {/* Reviews Summary and Add Form Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              
-              {/* Left Column: Ratings Summary & Sub-criteria */}
-              <div className="space-y-8">
-                <div className="flex items-center gap-6">
-                  <div className="text-left">
-                    <p className="text-5xl font-black text-white leading-none">4.9</p>
-                    <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">{t('product.reviews_stars')}</p>
-                  </div>
-                  <div className="flex flex-col gap-1 text-primary">
-                    <div className="flex gap-1 text-lg">★★★★★</div>
-                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">{t('product.reviews_based', { count: reviewsList.length })}</p>
-                  </div>
-                </div>
-
-                {/* Sub-criteria progress bars */}
-                <div className="space-y-4 pt-6 border-t border-white/10">
-                  <h3 className="text-[10px] font-black tracking-widest text-white uppercase">{t('product.reviews_breakdown')}</h3>
-                  
-                  {/* Noise Level */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">{t('product.noise_level')}</span>
-                      <span className="text-white">9.2 / 10</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: '92%' }} />
-                    </div>
-                  </div>
-
-                  {/* Vibration Strength */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">{t('product.vibration_strength')}</span>
-                      <span className="text-white">9.5 / 10</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: '95%' }} />
-                    </div>
-                  </div>
-
-                  {/* Ergonomics */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold text-on-surface-variant">
-                      <span className="uppercase tracking-wider">{t('product.ergonomics')}</span>
-                      <span className="text-white">9.8 / 10</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: '98%' }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Write a Review Form */}
-              <div className="bg-neutral-900/40 p-6 md:p-8 border border-white/5 rounded-none">
-                <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6">{t('product.write_review')}</h3>
-                <form onSubmit={handleSubmitReview} className="space-y-6">
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">{t('product.form_name')}</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={formName}
-                      onChange={e => setFormName(e.target.value)}
-                      placeholder={t('product.form_name_placeholder')}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
-                    />
-                  </div>
-
-                  {/* Dropdowns Row */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_age')}</label>
-                      <select 
-                        value={formAge} 
-                        onChange={e => setFormAge(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
-                      >
-                        <option value="18-24">18-24</option>
-                        <option value="25-34">25-34</option>
-                        <option value="35-44">35-44</option>
-                        <option value="45+">45+</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_exp')}</label>
-                      <select 
-                        value={formExp} 
-                        onChange={e => setFormExp(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
-                      >
-                        <option value="Новичок">{t('home.quiz.exp_new')}</option>
-                        <option value="Средний">{t('home.quiz.exp_mid')}</option>
-                        <option value="Сексперт">{t('home.quiz.exp_pro')}</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-[9px] font-bold tracking-wider text-outline uppercase">{t('product.form_sens')}</label>
-                      <select 
-                        value={formSens} 
-                        onChange={e => setFormSens(e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 px-2.5 py-2.5 text-[10px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none"
-                      >
-                        <option value="Низкая">{i18n.language === 'en' ? 'Low' : i18n.language === 'kk' ? 'Төмен' : 'Низкая'}</option>
-                        <option value="Нормальная">{i18n.language === 'en' ? 'Normal' : i18n.language === 'kk' ? 'Қалыпты' : 'Нормальная'}</option>
-                        <option value="Высокая">{i18n.language === 'en' ? 'High' : i18n.language === 'kk' ? 'Жоғары' : 'Высокая'}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Character Sliders */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>{t('product.form_noise', { noise: formNoise })}</span>
-                      <input 
-                        type="range" min="1" max="10" 
-                        value={formNoise} onChange={e => setFormNoise(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>{t('product.form_vib', { vib: formStrength })}</span>
-                      <input 
-                        type="range" min="1" max="10" 
-                        value={formStrength} onChange={e => setFormStrength(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] font-bold text-outline uppercase tracking-wider">
-                      <span>{t('product.form_ergo', { ergo: formErgo })}</span>
-                      <input 
-                        type="range" min="1" max="10" 
-                        value={formErgo} onChange={e => setFormErgo(parseInt(e.target.value))}
-                        className="accent-primary w-24 h-1 bg-neutral-800 rounded-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Review Text */}
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold tracking-wider text-outline uppercase">{t('product.form_review')}</label>
-                    <textarea 
-                      required
-                      value={formText}
-                      onChange={e => setFormText(e.target.value)}
-                      placeholder={t('product.form_placeholder')}
-                      rows={3}
-                      className="w-full bg-neutral-950 border border-white/10 px-4 py-2.5 text-[16px] text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors rounded-none resize-none"
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="w-full bg-primary text-on-primary font-sans font-black text-[10px] tracking-[0.2em] py-3.5 uppercase hover:bg-[#ffe088] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] transition-all rounded-none"
-                  >
-                    {t('product.form_submit')}
-                  </button>
-                </form>
-              </div>
-
-            </div>
-
-            {/* Bottom Reviews List Stack */}
-            <div className="space-y-6 pt-12 border-t border-white/10">
-              <h3 className="text-sm font-black tracking-widest text-white uppercase mb-6 text-left">{t('product.reviews_list_title', { count: reviewsList.length })}</h3>
-              
-              <div className="space-y-6">
-                {reviewsList.map(rev => (
-                  <div key={rev.id} className="p-6 md:p-8 bg-neutral-900/20 border border-white/5 rounded-none space-y-4">
-                    {/* Review Header Metadata */}
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div className="text-left">
-                        <p className="text-sm font-bold text-white uppercase">{rev.author}</p>
-                        <p className="text-[9px] text-outline mt-1 font-bold">{rev.date}</p>
-                      </div>
-                      
-                      {/* Profile Badges */}
-                      <div className="flex flex-wrap gap-2">
-                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          {t('product.rev_age', { age: rev.age })}
-                        </span>
-                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          {t('product.rev_exp', { exp: getExperienceTranslation(rev.experience) })}
-                        </span>
-                        <span className="bg-neutral-900 text-primary border border-primary/20 text-[8px] font-black tracking-widest uppercase py-1 px-3 rounded-full">
-                          {t('product.rev_sens', { sens: getSensitivityTranslation(rev.sensitivity) })}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Review text */}
-                    <p className="text-xs text-white/80 leading-relaxed font-sans font-normal text-left">{getReviewTextTranslation(rev.id, rev.text)}</p>
-
-                    {/* Review sub-ratings */}
-                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-[9px] text-outline font-bold tracking-wider uppercase pt-4 border-t border-white/5">
-                      <span>{t('product.rev_noise', { noise: rev.noise })}</span>
-                      <span>{t('product.rev_vib', { vib: rev.strength })}</span>
-                      <span>{t('product.rev_ergo', { ergo: rev.ergo })}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </section>
+        <ProductReviews
+          t={t}
+          i18n={i18n}
+          reviewsList={reviewsList}
+          handleSubmitReview={handleSubmitReview}
+          formName={formName}
+          setFormName={setFormName}
+          formAge={formAge}
+          setFormAge={setFormAge}
+          formExp={formExp}
+          setFormExp={setFormExp}
+          formSens={formSens}
+          setFormSens={setFormSens}
+          formNoise={formNoise}
+          setFormNoise={setFormNoise}
+          formStrength={formStrength}
+          setFormStrength={setFormStrength}
+          formErgo={formErgo}
+          setFormErgo={setFormErgo}
+          formText={formText}
+          setFormText={setFormText}
+          getExperienceTranslation={getExperienceTranslation}
+          getSensitivityTranslation={getSensitivityTranslation}
+          getReviewTextTranslation={getReviewTextTranslation}
+        />
       </main>
 
       {/* Mobile Sticky CTA Bar */}

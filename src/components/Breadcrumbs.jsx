@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 
+const productsById = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 export default function Breadcrumbs({ theme = 'dark' }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
@@ -111,7 +113,7 @@ export default function Breadcrumbs({ theme = 'dark' }) {
     });
 
     const productId = parseInt(steps[1], 10);
-    const product = ALL_PRODUCTS.find(p => p.id === productId);
+    const product = productsById.get(productId);
 
     if (product) {
       // Определяем родительскую категорию
