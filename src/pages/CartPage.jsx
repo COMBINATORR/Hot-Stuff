@@ -277,7 +277,6 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
       const orderId = `HS-${Date.now()}`;
       const amount = total;
       
-      console.log(`[Kaspi Checkout] Requesting invoice for ${amount} ₸ (Order ID: ${orderId})`);
       
       const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
         body: { amount, orderId }
@@ -286,7 +285,6 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
       if (error) throw error;
       
       if (data && data.paymentUrl) {
-        console.log('[Kaspi Checkout] Redirecting to payment URL:', data.paymentUrl);
         window.location.href = data.paymentUrl;
       } else {
         throw new Error(t('header.payment_url_error', 'Не удалось получить ссылку на оплату от сервера'));
