@@ -63,9 +63,6 @@ describe('CatalogPage', () => {
     // Check if fetch was called
     expect(supabase.from).toHaveBeenCalledWith('categories');
 
-    // Wait for the products to render (since ALL_PRODUCTS has 3 items, but only women toys are shown by default)
-    // "toys-women" category function in CatalogPage.jsx matches p.category === 'vibrators' && p.categoryLabel !== 'АНАЛЬНЫЕ ПРОБКИ'
-    // This should match 'Vibrator 1'
     await waitFor(() => {
       expect(screen.getByText('Vibrator 1')).toBeInTheDocument();
     });
