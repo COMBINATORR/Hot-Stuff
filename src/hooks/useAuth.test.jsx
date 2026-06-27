@@ -199,6 +199,23 @@ describe('useAuth', () => {
     });
   });
 
+
+  it('logs an error when supabase.auth.getSession throws during initial session check', async () => {
+    const mockError = new Error('Session fetch failed');
+    getSessionMock.mockResolvedValueOnce({ data: { session: null }, error: mockError });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      renderHook(() => useAuth());
+    });
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Auth initialization error:', mockError);
+    });
+
+    consoleSpy.mockRestore();
+  });
+
   it('unsubscribes on unmount', async () => {
     let unmountFn;
     await act(async () => {

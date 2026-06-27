@@ -73,9 +73,16 @@ export function useAuth() {
 
   useEffect(() => {
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session: sbSession } }) => {
-      processAndSetSession(sbSession);
-    });
+    const initAuth = async () => {
+      try {
+        const { data: { session: sbSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        processAndSetSession(sbSession);
+      } catch (e) {
+        console.error('Auth initialization error:', e);
+      }
+    };
+    initAuth();
 
     // Listen to Supabase auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sbSession) => {
@@ -97,9 +104,16 @@ export function useAuth() {
         processAndSetSession(currentMock);
       } else {
         // If mock session was deleted, check if there's still a Supabase session
-        supabase.auth.getSession().then(({ data: { session: sbSession } }) => {
-          processAndSetSession(sbSession);
-        });
+        const initAuth = async () => {
+      try {
+        const { data: { session: sbSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        processAndSetSession(sbSession);
+      } catch (e) {
+        console.error('Auth initialization error:', e);
+      }
+    };
+    initAuth();
       }
     };
 
