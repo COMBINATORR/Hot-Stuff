@@ -390,32 +390,43 @@ export default function QuizSection() {
   return (
     <>
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
-      <section className="bg-black py-16 md:py-24">
-        <div className="container-hs grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-          {/* Left Column: Image with sharp corners (brand rule) */}
-          <div className="w-full aspect-[4/3] md:aspect-square overflow-hidden rounded-none border border-white/10">
-            <ResponsiveImage
-              src={logoQuizBg}
-              alt={t('home.quiz.title')}
-              className="w-full h-full object-cover brightness-95"
-              loading="lazy"
-            />
+      <section className="w-full py-16 md:py-24 bg-black">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+          {/* Left Block: Symmetrical Image Card with Border */}
+          <div className="relative border border-white/10 overflow-hidden flex flex-col justify-end aspect-[4/3] md:aspect-auto min-h-[400px] bg-[#0d0d0d] p-8">
+            <div className="absolute inset-0 z-0">
+              <ResponsiveImage
+                src={logoQuizBg}
+                alt={t('home.quiz.title')}
+                className="w-full h-full object-cover opacity-60"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+            </div>
+            <div className="relative z-10 text-left">
+              <span className="text-[10px] font-mono tracking-[0.25em] text-[#31A8FF] font-bold uppercase mb-2 block">
+                HOT STUFF EXPERT
+              </span>
+              <h2 className="text-white text-2xl md:text-3xl font-black uppercase tracking-wider leading-none">
+                HOT STUFF QUIZ
+              </h2>
+            </div>
           </div>
 
-          {/* Right Column: Text & CTA */}
-          <div className="flex flex-col items-start text-left max-w-xl">
-            <h2 className="text-white text-[32px] sm:text-[40px] md:text-[48px] font-black leading-tight mb-6 uppercase tracking-wider font-sans">
+          {/* Right Block: Content Card with matching Border */}
+          <div className="border border-white/10 bg-[#0A0A0A] p-8 md:p-12 flex flex-col justify-center items-start text-left">
+            <h2 className="text-white text-[28px] md:text-[34px] font-black uppercase tracking-wider mb-4 leading-tight font-sans">
               {t('home.quiz.title')}
             </h2>
-            <h3 className="text-white text-base sm:text-lg md:text-xl font-bold mb-4 font-sans">
+            <h3 className="text-white text-base md:text-lg font-bold mb-4 font-sans text-neutral-300">
               {t('home.quiz.subtitle')}
             </h3>
-            <p className="text-white/60 text-xs sm:text-sm md:text-base leading-relaxed mb-8">
+            <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-8 max-w-md">
               {t('home.quiz.desc')}
             </p>
             <button
               onClick={() => { setQuizAnswers({}); setSelectedStimulation({ clitoris: false, penis: false }); setQuizStep(1); setQuizOpen(true); }}
-              className="border border-white hover:bg-white hover:text-black text-white font-sans font-bold text-xs sm:text-sm tracking-[0.2em] py-3 px-10 rounded-full transition-all bg-transparent cursor-pointer"
+              className="border border-white hover:bg-white hover:text-black text-white font-sans font-bold text-xs sm:text-sm tracking-[0.2em] py-3.5 px-8 rounded-full transition-all bg-transparent cursor-pointer"
             >
               {t('home.quiz.start')}
             </button>

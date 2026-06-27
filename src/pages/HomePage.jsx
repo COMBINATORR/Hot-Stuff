@@ -1,48 +1,52 @@
 import React, { useState } from 'react';
 
-
 import HomeHero from '../components/home/HomeHero';
 import TrustSection from '../components/home/TrustSection';
 import BrandIntro from '../components/home/BrandIntro';
-import PopularCategories from '../components/home/PopularCategories';
-import Bestsellers from '../components/home/Bestsellers';
+import CategoryBlocks from '../components/home/CategoryBlocks';
 import PromoBanner from '../components/home/PromoBanner';
 import QuizSection from '../components/home/QuizSection';
 import BrandQuote from '../components/home/BrandQuote';
 import NewsletterSection from '../components/home/NewsletterSection';
 
 import ProductPreviewModal from '../components/ProductPreviewModal';
-import HotspotsLookbook from '../components/HotspotsLookbook';
 
 export default function HomePage({ onAddToCart }) {
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
 
-  // Lock scroll when quiz modal is active is now handled inside QuizSection
-
   return (
     <div className="page-enter">
+      {/* 1. Главный блок с видео */}
       <HomeHero />
 
-      <TrustSection />
-
+      {/* Вводный текст бренда */}
       <BrandIntro />
 
-      <PopularCategories />
+      {/* 2. Блоки категорий Часть 1: Классика и Раздельный блок 50/50 */}
+      <CategoryBlocks part={1} />
 
-      <Bestsellers onSelectPreview={setSelectedPreviewProduct} />
+      {/* 3. Блок категорий Часть 2: Эротика */}
+      <CategoryBlocks part={2} />
 
-      {/* ═══ HOTSPOTS LOOKBOOK ═══ */}
-      <HotspotsLookbook onAddToCart={onAddToCart} onSelectQuickView={setSelectedPreviewProduct} />
-
-      <PromoBanner />
-
+      {/* 4. Квиз (размещен между категориями) */}
       <QuizSection />
 
+      {/* 5. Блоки категорий Часть 3: Для пар, Анальные, БДСМ, Лубриканты, Магазин */}
+      <CategoryBlocks part={3} />
+
+      {/* Цитата бренда */}
       <BrandQuote />
 
+      {/* 6. Блок преимуществ (спущен вниз) */}
+      <TrustSection />
+
+      {/* 7. Промо баннер */}
+      <PromoBanner />
+
+      {/* Подписка на рассылку */}
       <NewsletterSection />
 
-      {/* Product Preview Modal */}
+      {/* Модальное окно просмотра товара */}
       <ProductPreviewModal 
         product={selectedPreviewProduct}
         isOpen={!!selectedPreviewProduct}
