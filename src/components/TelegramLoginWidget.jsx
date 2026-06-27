@@ -39,7 +39,9 @@ export default function TelegramLoginWidget({
 
     // 2) Clean up old widget content.
     if (containerRef.current) {
-      containerRef.current.innerHTML = '';
+      while (containerRef.current.firstChild) {
+        containerRef.current.removeChild(containerRef.current.firstChild);
+      }
     }
 
     // 3) Create the <script> element exactly as Telegram requires.
@@ -64,7 +66,9 @@ export default function TelegramLoginWidget({
     return () => {
       delete window[callbackName];
       if (currentContainer) {
-        currentContainer.innerHTML = '';
+        while (currentContainer.firstChild) {
+          currentContainer.removeChild(currentContainer.firstChild);
+        }
       }
     };
   }, [botName, size, radius]);

@@ -198,40 +198,27 @@ export default function CatalogPage({ onAddToCart }) {
     const searchValLower = searchVal.toLowerCase();
     const filterFn = categorySlugMap[activeCat];
 
-    let result = [];
-
-    for (let i = 0; i < products.length; i++) {
-      const p = products[i];
-
-      // 1. Search Query
-      if (searchValLower) {
-        if (!(p.name.toLowerCase().includes(searchValLower) ||
-            p.categoryLabel.toLowerCase().includes(searchValLower) ||
-            p.description.toLowerCase().includes(searchValLower))) {
-          continue;
-        }
-      }
-
+    const result = products.filter(p => {
       // 1.5 Sidebar Category (Only if not searching, or if cat matches)
       if (activeCat !== 'all' && activeCat !== 'popular') {
         if (activeCat === 'new') {
-          if (!p.isNew) continue;
+          if (!p.isNew) return false;
         } else {
           if (filterFn) {
-            if (!filterFn(p)) continue;
+            if (!filterFn(p)) return false;
           } else {
             if (!(p.category === activeCat ||
                 p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
-              continue;
+              return false;
             }
           }
         }
       }
 
-      // 2. Stimulation Zone
-      if (selectedStimulations.length > 0) {
-        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
-          continue;
+      // 4. Specials (Discount only)
+      if (onlyDiscounted) {
+        if (!(p.oldPrice && p.oldPrice > p.price)) {
+          return false;
         }
       }
 
@@ -243,25 +230,34 @@ export default function CatalogPage({ onAddToCart }) {
           if (range === 'high') return p.price > 120000;
           return true;
         });
-        if (!matchRange) continue;
+        if (!matchRange) return false;
       }
 
-      // 4. Specials (Discount only)
-      if (onlyDiscounted) {
-        if (!(p.oldPrice && p.oldPrice > p.price)) {
-          continue;
+      // 2. Stimulation Zone
+      if (selectedStimulations.length > 0) {
+        if (!(p.stimulation && p.stimulation.some(s => selectedStimulations.includes(s)))) {
+          return false;
         }
       }
 
       // 5. Features / Technologies
       if (selectedFeatures.length > 0) {
         if (!(p.features && p.features.some(f => selectedFeatures.includes(f)))) {
-          continue;
+          return false;
         }
       }
 
-      result.push(p);
-    }
+      // 1. Search Query
+      if (searchValLower) {
+        if (!(p.name.toLowerCase().includes(searchValLower) ||
+            p.categoryLabel.toLowerCase().includes(searchValLower) ||
+            p.description.toLowerCase().includes(searchValLower))) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     // 6. Sorting
     if (sortBy === 'price-asc') {
