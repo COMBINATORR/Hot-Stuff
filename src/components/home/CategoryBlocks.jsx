@@ -31,7 +31,7 @@ const CATEGORIES = [
       en: 'View collection',
       kk: 'Коллекцияны көру'
     },
-    image: 'https://images.unsplash.com/photo-1518388489816-43b922df659e?q=80&w=1200&auto=format&fit=crop',
+    image: '/images/toys_for_women.png',
     link: '/catalog?cat=toys-women'
   },
   {
@@ -46,7 +46,7 @@ const CATEGORIES = [
       en: 'View collection',
       kk: 'Коллекцияны көру'
     },
-    image: 'https://images.unsplash.com/photo-1610419266380-0a13dff63ad4?q=80&w=1200&auto=format&fit=crop',
+    image: '/images/toys_for_men.png',
     link: '/catalog?cat=toys-men'
   },
   {

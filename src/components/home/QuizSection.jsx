@@ -391,17 +391,17 @@ export default function QuizSection() {
     <>
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
       <section className="w-full py-16 md:py-24 bg-black">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-          {/* Left Block: Symmetrical Image Card with Border */}
-          <div className="relative border border-white/10 overflow-hidden flex flex-col justify-end aspect-[4/3] md:aspect-auto min-h-[400px] bg-[#0d0d0d] p-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch border border-white/10 overflow-hidden bg-[#0A0A0A]">
+          {/* Left Block: Image Card (No border, fills exactly top/left/bottom of parent card) */}
+          <div className="relative overflow-hidden flex flex-col justify-end aspect-[4/3] md:aspect-auto min-h-[400px] p-8 md:p-12">
             <div className="absolute inset-0 z-0">
               <ResponsiveImage
                 src={logoQuizBg}
                 alt={t('home.quiz.title')}
-                className="w-full h-full object-cover opacity-60"
+                className="w-full h-full object-cover opacity-70"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             </div>
             <div className="relative z-10 text-left">
               <span className="text-[10px] font-mono tracking-[0.25em] text-[#31A8FF] font-bold uppercase mb-2 block">
@@ -413,8 +413,8 @@ export default function QuizSection() {
             </div>
           </div>
 
-          {/* Right Block: Content Card with matching Border */}
-          <div className="border border-white/10 bg-[#0A0A0A] p-8 md:p-12 flex flex-col justify-center items-start text-left">
+          {/* Right Block: Content Card (Styled matching right half) */}
+          <div className="p-8 md:p-16 flex flex-col justify-center items-start text-left border-t md:border-t-0 md:border-l border-white/10">
             <h2 className="text-white text-[28px] md:text-[34px] font-black uppercase tracking-wider mb-4 leading-tight font-sans">
               {t('home.quiz.title')}
             </h2>
