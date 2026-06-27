@@ -53,6 +53,7 @@ export default function TelegramLoginWidget({
     script.setAttribute('data-radius', String(radius));
     script.setAttribute('data-request-access', 'write');
     script.setAttribute('data-userpic', 'false');
+    script.setAttribute('data-width', 'match-parent');
     // ↓ KEY: use callback mode, not redirect mode.
     script.setAttribute('data-onauth', `${callbackName}(user)`);
 
@@ -78,7 +79,7 @@ export default function TelegramLoginWidget({
     <div
       ref={containerRef}
       id="telegram-login-container"
-      className="flex justify-center items-center min-h-[44px]"
+      className="w-full flex justify-center items-center min-h-[44px]"
     />
   );
 }

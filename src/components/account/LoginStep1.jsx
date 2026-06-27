@@ -151,9 +151,6 @@ export default function LoginStep1({
       <form onSubmit={handleIdentifierSubmit} className="w-full flex flex-col text-left">
         {/* Input block */}
         <div className="flex flex-col mb-4">
-          <label className="text-[13px] text-neutral-500 font-normal ml-3 mb-1.5 leading-none">
-            {t('account.email', 'Email')}
-          </label>
           <input
             type="email"
             name="email"
@@ -161,7 +158,7 @@ export default function LoginStep1({
             required
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            placeholder={t('account.email', 'Email')}
+            placeholder={t('account.email_placeholder', 'Введите ваш Email')}
             className="w-full h-12 bg-white border border-neutral-200 rounded-xl px-4 text-[15px] text-black placeholder-neutral-400 outline-none transition-all focus:border-black/70 font-normal"
             disabled={loading}
           />
