@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -27,12 +27,14 @@ export default function CartDrawer({ isOpen, onClose, items = [], setItems, onUp
     }
   });
 
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const FREE_SHIPPING_THRESHOLD = 30000;
-  const progressPercent = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
-
-  const discountAmount = appliedPromo ? subtotal * 0.15 : 0;
-  const finalTotal = subtotal - discountAmount;
+  const { subtotal, progressPercent, discountAmount, finalTotal } = useMemo(() => {
+    const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const FREE_SHIPPING_THRESHOLD = 30000;
+    const progress = Math.min((sub / FREE_SHIPPING_THRESHOLD) * 100, 100);
+    const discount = appliedPromo ? sub * 0.15 : 0;
+    const total = sub - discount;
+    return { subtotal: sub, progressPercent: progress, discountAmount: discount, finalTotal: total };
+  }, [items, appliedPromo]);
 
   // Build locale-aware checkout path
   const checkoutPath = i18n.language === 'ru' ? '/checkout' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/checkout`;

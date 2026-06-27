@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -105,14 +105,16 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   if (!product) return null;
 
   // Process colors
-  const colorsList = product.colors?.map(c => {
-    if (typeof c === 'object') return c;
-    const hex = c.toLowerCase();
-    return { hex, label: COLOR_LABEL_MAP[hex] || 'CUSTOM COLOR' };
-  }) || [];
-
-  const activeColorObject = colorsList.find(c => c.hex.toLowerCase() === selectedColor.toLowerCase());
-  const activeColorName = activeColorObject ? activeColorObject.label : '';
+  const { colorsList, activeColorObject, activeColorName } = useMemo(() => {
+    const list = product.colors?.map(c => {
+      if (typeof c === 'object') return c;
+      const hex = c.toLowerCase();
+      return { hex, label: COLOR_LABEL_MAP[hex] || 'CUSTOM COLOR' };
+    }) || [];
+    const activeObj = list.find(c => c.hex.toLowerCase() === selectedColor.toLowerCase());
+    const activeName = activeObj ? activeObj.label : '';
+    return { colorsList: list, activeColorObject: activeObj, activeColorName: activeName };
+  }, [product.colors, selectedColor]);
 
   // Pricing calculations
   const oldPriceValue = product.oldPrice || Math.round(product.price * 1.32);

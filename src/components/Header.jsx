@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useHeaderLogic } from '../hooks/useHeaderLogic';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -36,7 +37,9 @@ export default function Header({
     handleSearchSubmit, handleSearchTermClick,
     handleNextTicker, handlePrevTicker, getLangLabel
   } = useHeaderLogic({ i18n, t });
-  const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
+  const cartCount = useMemo(() => {
+    return cartItems.reduce((s, i) => s + i.qty, 0);
+  }, [cartItems]);
   return (
     <>
       {/* Promo Ticker Bar */}
