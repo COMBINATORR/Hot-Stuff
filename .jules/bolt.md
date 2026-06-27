@@ -48,3 +48,7 @@
 ## 2026-06-26 - Optimize Breadcrumbs useEffect
 **Learning:** When an issue mentions a performance bug that is already fixed in the checked-out branch, look for other related optimizations (e.g., removing redundant Map rebuilding on route changes by adjusting useEffect dependencies) to still deliver a performance win.
 **Action:** Always verify if the codebase actually contains the bug described in the prompt; if not, find and fix related performance bottlenecks.
+
+## 2024-05-19 - Testing React hook error paths synchronously
+**Learning:** When testing a React hook's `catch` block that handles synchronous operations (like `localStorage.setItem` before a fetch), using `vi.spyOn(Storage.prototype, 'setItem')` to throw an error is a very reliable way to force the code path into the catch block.
+**Action:** Use this mocking strategy in the future to simulate local side-effect failures within hook testing.
