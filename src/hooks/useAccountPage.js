@@ -287,6 +287,13 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     };
   }, []);
 
+  const getOAuthRedirectUrl = () => {
+    if (isLocalHost()) {
+      return window.location.origin + window.location.pathname;
+    }
+    return 'https://hotstuffplay.com' + window.location.pathname;
+  };
+
   const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
@@ -294,7 +301,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + window.location.pathname
+          redirectTo: getOAuthRedirectUrl()
         }
       });
       if (error) throw error;
@@ -410,7 +417,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'custom:yandex',
         options: {
-          redirectTo: window.location.origin + window.location.pathname,
+          redirectTo: getOAuthRedirectUrl(),
           scopes: 'login:email login:info login:avatar login:birthday login:default_phone',
           queryParams: {
             force_confirm: 'yes'
