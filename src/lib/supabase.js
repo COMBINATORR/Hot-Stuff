@@ -29,16 +29,18 @@ if (!isConfigured) {
 }
 
 // Создаем инстанс клиента. В случае отсутствия конфигурации используем заглушки, чтобы избежать критической ошибки при инициализации.
-export const supabase = createClient(
-  isConfigured ? supabaseUrl : 'https://placeholder-project.supabase.co',
-  isConfigured ? supabaseAnonKey : 'placeholder-anon-key',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: 'hs-supabase-auth-token',
-      flowType: 'implicit'
-    }
-  }
-);
+export const supabase = isConfigured
+  ? createClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          storageKey: 'hs-supabase-auth-token',
+          flowType: 'implicit'
+        }
+      }
+    )
+  : null;

@@ -52,6 +52,7 @@ export default function TelegramLoginWidget({
     script.setAttribute('data-size', size);
     script.setAttribute('data-radius', String(radius));
     script.setAttribute('data-request-access', 'write');
+    script.setAttribute('data-userpic', 'false');
     // ↓ KEY: use callback mode, not redirect mode.
     script.setAttribute('data-onauth', `${callbackName}(user)`);
 

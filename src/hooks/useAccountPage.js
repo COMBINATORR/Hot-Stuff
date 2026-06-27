@@ -331,8 +331,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       last_name: 'Иванов',
       username: 'tg_test_user',
       photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      auth_date: Math.floor(Date.now() / 1000),
-      hash: 'mock_hash'
+      auth_date: Math.floor(Date.now() / 1000)
     };
 
     // Directly log in on local side
