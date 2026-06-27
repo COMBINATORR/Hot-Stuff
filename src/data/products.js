@@ -1,3 +1,4 @@
+import { secureRandom } from '../lib/random';
 import noirSilhouetteDress from '../assets/images/products/noir_silhouette_dress.png';
 import etherealSilkWrap from '../assets/images/products/ethereal_silk_wrap.png';
 import goldTrimmedBoots from '../assets/images/products/gold_trimmed_boots.png';
@@ -186,6 +187,6 @@ export const ALL_PRODUCTS = [
   }
 ].map(p => ({
   ...p,
-  price: Math.floor(Math.random() * 101) + 100,
+  price: Math.floor(secureRandom() * 101) + 100,
   oldPrice: null
 }));

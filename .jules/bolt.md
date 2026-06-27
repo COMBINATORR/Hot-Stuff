@@ -37,6 +37,10 @@
 **Learning:** Instantiating a `Map` over a static dataset inside a React component or effect hook causes unnecessary allocations on every render or execution, leading to performance degradation. In benchmarking, creating it inside a loop vs outside resulted in a ~87% time increase.
 **Action:** Move static data structure initialization outside of React component definitions so they are created only once per module load.
 
+## 2024-05-24 - Array Filtering Optimization
+**Learning:** Manual `for` loops in hot paths like catalog filtering can be safely refactored to `Array.prototype.filter()` for improved readability without sacrificing performance, provided that short-circuiting is heavily utilized.
+**Action:** When writing `.filter()` callbacks, always place the computationally cheapest checks (booleans, strict equality on numbers/strings) at the top of the function and the most expensive checks (string `.toLowerCase()`, `.includes()`, or nested array `.some()`) at the bottom. This ensures the expensive logic is only executed for items that pass all other criteria.
+
 ## 2026-06-26 - Optimize Breadcrumbs useEffect
 **Learning:** When an issue mentions a performance bug that is already fixed in the checked-out branch, look for other related optimizations (e.g., removing redundant Map rebuilding on route changes by adjusting useEffect dependencies) to still deliver a performance win.
 **Action:** Always verify if the codebase actually contains the bug described in the prompt; if not, find and fix related performance bottlenecks.
