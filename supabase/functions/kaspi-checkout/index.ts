@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
 
       if (!apiKey || apiKey === "placeholder" || apiKey.startsWith("mock")) {
         return new Response(
-          JSON.stringify({ error: "KASPI_API_KEY is not configured for verifying real payments" }),
+          JSON.stringify({ error: "Payment verification unavailable" }),
           {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
