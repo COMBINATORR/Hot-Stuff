@@ -30,7 +30,11 @@ Deno.serve(async (req) => {
   try {
     // 1. Get credentials from environment variables
     const apiKey = Deno.env.get("KASPI_API_KEY");
-    const merchantId = Deno.env.get("KASPI_MERCHANT_ID") || "oqg3hrij";
+    const merchantId = Deno.env.get("KASPI_MERCHANT_ID");
+
+    if (!merchantId) {
+      throw new Error("Configuration error: KASPI_MERCHANT_ID is not configured");
+    }
 
     // 2. Parse request body
     const body = await req.json().catch(() => ({}));
