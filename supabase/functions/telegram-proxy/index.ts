@@ -73,24 +73,41 @@ Deno.serve(async (req) => {
       secretKeyBuffer,
       { name: "HMAC", hash: "SHA-256" },
       false,
-      ["sign"]
+      ["verify"]
     );
 
-    // Compute HMAC-SHA256 of checkString
+    // Prepare bytes for verification
     const checkStringBytes = new TextEncoder().encode(checkString);
-    const signatureBuffer = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      checkStringBytes
-    );
 
-    // Convert signature to hex string
-    const signatureArray = new Uint8Array(signatureBuffer);
-    const hmac = Array.from(signatureArray)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    // Convert client hash (hex) to Uint8Array for constant-time verification
+    const hexToBytes = (hex: string) => {
+      const bytes = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < hex.length; i += 2) {
+        bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+      }
+      return bytes;
+    };
 
-    if (hmac !== hash) {
+    // Ensure hash is valid hex string to avoid NaN bytes
+    const isValidHex = /^[0-9a-fA-F]+$/.test(hash) && hash.length % 2 === 0;
+
+    let isValidSignature = false;
+    if (isValidHex) {
+      const hashBytes = hexToBytes(hash);
+      try {
+        // crypto.subtle.verify uses constant-time comparison
+        isValidSignature = await crypto.subtle.verify(
+          "HMAC",
+          key,
+          hashBytes,
+          checkStringBytes
+        );
+      } catch (e) {
+        isValidSignature = false;
+      }
+    }
+
+    if (!isValidSignature) {
       console.warn("Telegram authentication signature check failed. Hash mismatch.");
       return new Response(JSON.stringify({ error: "Data integrity check failed. Hash mismatch." }), {
         status: 401,
