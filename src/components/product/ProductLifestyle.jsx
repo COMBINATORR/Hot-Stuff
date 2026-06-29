@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function ProductLifestyle({ t }) {
   return (
     <>
@@ -18,8 +16,6 @@ export default function ProductLifestyle({ t }) {
             </p>
           </div>
         </section>
-
-
     </>
   );
 }
