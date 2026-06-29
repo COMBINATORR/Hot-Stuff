@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   // Check if authentication date is too old (expired in 24 hours)
   const authDate = parseInt(data.auth_date, 10);
   const now = Math.floor(Date.now() / 1000);
-  if (now - authDate > 86400) {
+  if (Number.isNaN(authDate) || now - authDate > 86400) {
     return res.status(401).json({ error: 'Authentication data has expired' });
   }
 

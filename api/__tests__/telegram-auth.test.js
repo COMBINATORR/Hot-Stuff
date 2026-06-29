@@ -192,6 +192,23 @@ describe('telegram-auth API handler', () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'Authentication data has expired' });
   });
 
+  it('should return 401 if authentication date is invalid (NaN)', async () => {
+    const validData = generateValidTelegramData();
+    validData.auth_date = 'invalid_date';
+
+    // Recompute hash because we changed auth_date
+    const { hash: oldHash, ...dataWithoutHash } = validData;
+    const checkString = Object.keys(dataWithoutHash).sort().map(k => `${k}=${dataWithoutHash[k]}`).join('\n');
+    const secretKey = crypto.createHash('sha256').update(process.env.TELEGRAM_BOT_TOKEN).digest();
+    validData.hash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
+
+    req.body = { telegramData: validData };
+    await handler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Authentication data has expired' });
+  });
+
   it('should return 500 if Supabase URL or Service Role Key is missing', async () => {
     delete process.env.VITE_SUPABASE_URL;
     const validData = generateValidTelegramData();
