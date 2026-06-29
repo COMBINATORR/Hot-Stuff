@@ -54,17 +54,6 @@ Deno.serve(async (req) => {
 
       console.log(`Checking status for invoice: ${invoiceId}`);
 
-      // Handle mock invoices
-      if (invoiceId.startsWith("mock-")) {
-        return new Response(
-          JSON.stringify({ success: true, status: "paid", provider: "kaspi-direct" }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
       if (!apiKey || apiKey === "placeholder" || apiKey.startsWith("mock")) {
         return new Response(
           JSON.stringify({ error: "Payment verification unavailable" }),
