@@ -101,9 +101,9 @@ Deno.serve(async (req) => {
   // Endpoint to retrieve logs for debugging
   if (url.pathname.endsWith("/logs")) {
     const authHeader = req.headers.get("Authorization");
-    const expectedKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const expectedKey = Deno.env.get("LOG_ACCESS_KEY");
 
-    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== expectedKey) {
+    if (!expectedKey || !authHeader || authHeader.replace(/^Bearer\s+/i, "") !== expectedKey) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
