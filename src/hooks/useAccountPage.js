@@ -335,10 +335,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
   }, []);
 
   const getOAuthRedirectUrl = () => {
-    if (isLocalHost()) {
-      return window.location.origin + window.location.pathname;
-    }
-    return 'https://hotstuffplay.com' + window.location.pathname;
+    return window.location.origin + window.location.pathname;
   };
 
   const handleGoogleLogin = async () => {
