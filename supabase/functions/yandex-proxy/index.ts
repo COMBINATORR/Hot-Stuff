@@ -76,15 +76,6 @@ async function addLog(message: string, detail?: unknown) {
   if (logs.length > 50) {
     logs.pop();
   }
-
-  // Also send to RequestCatcher for robust retrieval (unawaited to avoid blocking)
-  fetch("https://hotstuff-yandex.requestcatcher.com/log", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(logEntry),
-  }).catch(() => {
-    // Fail silently for webhook logger
-  });
 }
 
 Deno.serve(async (req) => {
