@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const SorayaWaveSvg = ({ color }) => (
   <svg viewBox="0 0 200 320" className="w-full h-full max-h-[300px] drop-shadow-lg">
     <circle cx="100" cy="160" r="100" fill={color} opacity="0.04" />
