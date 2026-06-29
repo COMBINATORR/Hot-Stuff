@@ -101,15 +101,42 @@ export function useAccountPage({ t, lang, onAddToCart }) {
 
   const [registeredUsers, setRegisteredUsers] = useState(() => {
     const saved = localStorage.getItem('hs_registered_users');
-    const parsed = saved ? JSON.parse(saved) : [];
+    let parsed = [];
+    if (saved) {
+      try {
+        const temp = JSON.parse(saved);
+        parsed = Array.isArray(temp) ? temp.map(u => typeof u === 'string' ? u.trim().toLowerCase() : u.email.trim().toLowerCase()) : [];
+      } catch (e) {
+        console.error(e);
+      }
+    }
     const all = [...new Set([...MOCK_REGISTERED_USERS, ...parsed])];
     return all.map(u => u.trim().toLowerCase());
   });
 
   const [savedAccounts, setSavedAccounts] = useState(() => {
     const saved = localStorage.getItem('hs_registered_users');
-    const parsed = saved ? JSON.parse(saved).map(u => u.trim().toLowerCase()) : [];
-    return parsed.filter(email => !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(email));
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => {
+          if (typeof item === 'string') {
+            return { email: item.trim().toLowerCase(), avatar_url: null };
+          }
+          if (item && typeof item === 'object' && item.email) {
+            return {
+              email: item.email.trim().toLowerCase(),
+              avatar_url: item.avatar_url || null
+            };
+          }
+          return null;
+        }).filter(item => item && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(item.email));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
   });
 
 
@@ -215,25 +242,45 @@ export function useAccountPage({ t, lang, onAddToCart }) {
             ''
           ).trim().toLowerCase();
 
+          let avatar_url = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null;
+          const meta = session.user.user_metadata || {};
+          if (!avatar_url && meta.default_avatar_id) {
+            avatar_url = `https://avatars.yandex.net/get-yapic/${meta.default_avatar_id}/islands-200`;
+          } else if (!avatar_url && meta.avatar_id) {
+            avatar_url = `https://avatars.yandex.net/get-yapic/${meta.avatar_id}/islands-200`;
+          }
+
           setIsLoggedIn(true);
           setLoggedInUser(email);
           setSessionUser(session.user);
-          localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email }));
+          localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email, avatar_url }));
 
-          // Add to registered users list safely
-          setRegisteredUsers(prev => {
-            if (!email || prev.includes(email)) return prev;
-            const next = [...prev, email];
-            localStorage.setItem('hs_registered_users', JSON.stringify(next));
-            return next;
-          });
+          // Add to registered users list safely as structured objects
+          const savedStr = localStorage.getItem('hs_registered_users');
+          let savedList = [];
+          if (savedStr) {
+            try {
+              const temp = JSON.parse(savedStr);
+              savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          if (email && !savedList.some(item => item.email.trim().toLowerCase() === email)) {
+            savedList.push({ email, avatar_url });
+            localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+          }
+
+          setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
 
           // Add to saved accounts list if it's not a mock account
           const emailClean = email.trim().toLowerCase();
           if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {
             setSavedAccounts(prev => {
-              if (prev.includes(emailClean)) return prev;
-              return [...prev, emailClean];
+              if (prev.some(item => item.email === emailClean)) {
+                return prev.map(item => item.email === emailClean ? { ...item, avatar_url: avatar_url || item.avatar_url } : item);
+              }
+              return [...prev, { email: emailClean, avatar_url }];
             });
           }
         } else {
@@ -301,7 +348,11 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getOAuthRedirectUrl()
+          redirectTo: getOAuthRedirectUrl(),
+          queryParams: {
+            prompt: 'select_account',
+            access_type: 'offline'
+          }
         }
       });
       if (error) throw error;
@@ -337,7 +388,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     // Directly log in on local side
     setTimeout(() => {
       const email = `tg_${mockUser.id}@hotstuffplay.com`;
-      loginSuccess(email);
+      loginSuccess(email, mockUser.photo_url);
       setLoading(false);
       alert(t('account.welcome_test', { name: `${mockUser.first_name} ${mockUser.last_name}` }));
     }, 800);
@@ -353,7 +404,11 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const emailOrPhone = user.username ? `@${user.username}` : `tg_${user.id}`;
 
       // ── 1. Save to localStorage IMMEDIATELY ──
-      localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone }));
+      localStorage.setItem('hs_user', JSON.stringify({
+        emailOrPhone,
+        avatar_url: user.photo_url || null,
+        displayName
+      }));
 
       // ── 2. Update React state so the page re-renders to the account view ──
       const mockSessionUser = {
@@ -370,6 +425,34 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       setIsLoggedIn(true);
       setLoggedInUser(emailOrPhone);
       setSessionUser(mockSessionUser);
+
+      // Add to registered users list safely as structured objects
+      const savedStr = localStorage.getItem('hs_registered_users');
+      let savedList = [];
+      if (savedStr) {
+        try {
+          const temp = JSON.parse(savedStr);
+          savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (emailOrPhone && !savedList.some(item => item.email.trim().toLowerCase() === emailOrPhone.trim().toLowerCase())) {
+        savedList.push({ email: emailOrPhone, avatar_url: user.photo_url || null });
+        localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+      }
+
+      setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
+
+      const emailClean = emailOrPhone.trim().toLowerCase();
+      if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {
+        setSavedAccounts(prev => {
+          if (prev.some(item => item.email === emailClean)) {
+            return prev.map(item => item.email === emailClean ? { ...item, avatar_url: user.photo_url || item.avatar_url } : item);
+          }
+          return [...prev, { email: emailClean, avatar_url: user.photo_url || null }];
+        });
+      }
 
       window.dispatchEvent(new Event('hs_auth_change'));
 
@@ -526,7 +609,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     }
   };
 
-  const loginSuccess = (userVal) => {
+  const loginSuccess = (userVal, avatarUrl = null) => {
     const normalizedUser = userVal.trim().toLowerCase();
     setIsLoggedIn(true);
     setLoggedInUser(normalizedUser);
@@ -536,25 +619,39 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       email: normalizedUser,
       user_metadata: {
         full_name: normalizedUser === 'admin@hotstuffplay.com' ? 'Администратор' : 'Тестовый Пользователь',
-        avatar_url: null
+        avatar_url: avatarUrl
       }
     };
     setSessionUser(mockSessionUser);
 
-    localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser }));
+    localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser, avatar_url: avatarUrl }));
 
     window.dispatchEvent(new Event('hs_auth_change'));
 
-    if (!registeredUsers.includes(normalizedUser)) {
-      const updatedList = [...registeredUsers, normalizedUser];
-      setRegisteredUsers(updatedList);
-      localStorage.setItem('hs_registered_users', JSON.stringify(updatedList));
+    // Safely add as structured object to hs_registered_users
+    const savedStr = localStorage.getItem('hs_registered_users');
+    let savedList = [];
+    if (savedStr) {
+      try {
+        const temp = JSON.parse(savedStr);
+        savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+      } catch (e) {
+        console.error(e);
+      }
     }
+    if (!savedList.some(item => item.email.trim().toLowerCase() === normalizedUser)) {
+      savedList.push({ email: normalizedUser, avatar_url: avatarUrl });
+      localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+    }
+
+    setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
 
     if (!['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(normalizedUser)) {
       setSavedAccounts(prev => {
-        if (prev.includes(normalizedUser)) return prev;
-        return [...prev, normalizedUser];
+        if (prev.some(item => item.email === normalizedUser)) {
+          return prev.map(item => item.email === normalizedUser ? { ...item, avatar_url: avatarUrl || item.avatar_url } : item);
+        }
+        return [...prev, { email: normalizedUser, avatar_url: avatarUrl }];
       });
     }
   };

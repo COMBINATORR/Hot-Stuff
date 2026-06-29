@@ -25,49 +25,68 @@ export default function LoginStep1({
             {t('account.login_as')}
           </span>
           <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-1">
-            {savedAccounts.map((email) => (
-              <div
-                key={email}
-                className="group flex items-center justify-between w-full h-12 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl px-4 transition-all duration-300 cursor-pointer"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier(email);
-                    loginSuccess(email);
-                  }}
-                  className="flex items-center gap-3 flex-1 h-full text-left bg-transparent border-none p-0 outline-none cursor-pointer"
+            {savedAccounts.map((account) => {
+              const email = typeof account === 'string' ? account : account.email;
+              const avatarUrl = typeof account === 'object' ? account?.avatar_url : null;
+              return (
+                <div
+                  key={email}
+                  className="group flex items-center justify-between w-full h-12 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl px-4 transition-all duration-300 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[20px] text-neutral-400 group-hover:text-black transition-colors">
-                    account_circle
-                  </span>
-                  <span className="text-[14px] text-black font-medium truncate max-w-[200px]">
-                    {email}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Delete from saved accounts list
-                    setSavedAccounts(prev => {
-                      const next = prev.filter(x => x !== email);
-                      const savedList = localStorage.getItem('hs_registered_users');
-                      const parsedList = savedList ? JSON.parse(savedList) : [];
-                      const nextParsed = parsedList.filter(x => x.trim().toLowerCase() !== email);
-                      localStorage.setItem('hs_registered_users', JSON.stringify(nextParsed));
-                      return next;
-                    });
-                    // Also remove from registeredUsers state
-                    setRegisteredUsers(prev => prev.filter(x => x !== email));
-                  }}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-neutral-200/50 transition-all cursor-pointer border-none bg-transparent outline-none"
-                  title={t('account.delete_from_list', 'Удалить из списка')}
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIdentifier(email);
+                      if (avatarUrl) {
+                        loginSuccess(email, avatarUrl);
+                      } else {
+                        loginSuccess(email);
+                      }
+                    }}
+                    className="flex items-center gap-3 flex-1 h-full text-left bg-transparent border-none p-0 outline-none cursor-pointer"
+                  >
+                    {avatarUrl ? (
+                      <img 
+                        src={avatarUrl} 
+                        alt="Avatar" 
+                        className="w-[24px] h-[24px] rounded-full object-cover border border-neutral-200"
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-[20px] text-neutral-400 group-hover:text-black transition-colors">
+                        account_circle
+                      </span>
+                    )}
+                    <span className="text-[14px] text-black font-medium truncate max-w-[200px]">
+                      {email}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Delete from saved accounts list
+                      setSavedAccounts(prev => {
+                        const next = prev.filter(x => (typeof x === 'string' ? x : x.email) !== email);
+                        const savedList = localStorage.getItem('hs_registered_users');
+                        const parsedList = savedList ? JSON.parse(savedList) : [];
+                        const nextParsed = parsedList.filter(x => {
+                          const curEmail = typeof x === 'string' ? x : x.email;
+                          return curEmail.trim().toLowerCase() !== email;
+                        });
+                        localStorage.setItem('hs_registered_users', JSON.stringify(nextParsed));
+                        return next;
+                      });
+                      // Also remove from registeredUsers state
+                      setRegisteredUsers(prev => prev.filter(x => x !== email));
+                    }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-neutral-200/50 transition-all cursor-pointer border-none bg-transparent outline-none"
+                    title={t('account.delete_from_list', 'Удалить из списка')}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
           <div className="relative flex items-center justify-center my-4 w-full">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">

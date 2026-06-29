@@ -2,7 +2,28 @@ import { useState, useEffect, startTransition } from 'react';
 import { supabase } from '../lib/supabase';
 
 export function useAuth() {
-  const getSessionFromStorage = () => null;
+  const getSessionFromStorage = () => {
+    const raw = localStorage.getItem('hs_user');
+    if (raw) {
+      try {
+        const saved = JSON.parse(raw);
+        if (saved && saved.emailOrPhone) {
+          return {
+            user: {
+              email: saved.emailOrPhone,
+              user_metadata: {
+                full_name: saved.displayName || saved.emailOrPhone,
+                avatar_url: saved.avatar_url || null,
+              }
+            }
+          };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  };
 
   const [session, setSession] = useState(getSessionFromStorage);
 
