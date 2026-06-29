@@ -1,4 +1,3 @@
-import React from 'react';
 import ResponsiveImage from '../ResponsiveImage';
 
 export default function ProductHero({
