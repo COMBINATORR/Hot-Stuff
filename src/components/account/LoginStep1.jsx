@@ -107,9 +107,7 @@ export default function LoginStep1({
           className="w-full h-12 bg-white hover:bg-neutral-50 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-center gap-3 transition-all cursor-pointer text-[14px] text-neutral-800 font-medium active:scale-98"
           disabled={loading}
         >
-          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
-            <path d="M14.654 20.893H16.892L16.892 3.107H11.517C6.732 3.107 4.298 6.302 4.298 9.947C4.298 13.593 6.732 16.666 11.517 16.666H14.153L14.153 14.288H11.664C8.423 14.288 6.643 12.277 6.643 9.947C6.643 7.618 8.423 5.485 11.664 5.485H14.153V10.153L9.695 20.893H12.01L14.654 13.974V20.893Z" fill="#FC3F1D"/>
-          </svg>
+          <img src="/yandex-logo-eng.svg" alt="Yandex" className="w-5 h-5 flex-shrink-0 object-contain" />
           <span>{t('account.yandex', 'Войти через Яндекс')}</span>
         </button>
 
