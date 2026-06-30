@@ -121,8 +121,11 @@ describe('CatalogPage', () => {
   });
 
   it('handles invalid cached products in localStorage without crashing', async () => {
-    // Set invalid JSON in localStorage to trigger the parsing error for products
-    localStorage.setItem('hs_products', 'invalid_json_for_products{]');
+    // Mock localStorage.getItem to return invalid JSON
+    const getItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => {
+      if (key === 'hs_products') return '{bad json}';
+      return null;
+    });
 
     // Spy on console.error
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -137,7 +140,13 @@ describe('CatalogPage', () => {
       expect.any(Error)
     );
 
+    // Assert that the component still loads without crashing
+    await waitFor(() => {
+      expect(screen.getByText('Vibrator 1')).toBeInTheDocument();
+    });
+
     // Clean up
     consoleSpy.mockRestore();
+    getItemSpy.mockRestore();
   });
 });
