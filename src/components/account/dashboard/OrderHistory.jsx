@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../../../data/products';
 
+const PRODUCTS_MAP = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+
 export function OrderHistory({ orderHistory, t, lang, isPrivate, handleAddWishlistItem }) {
   return (
     <div className="p-6 md:p-8 bg-neutral-50 border border-black/5 rounded-[28px] space-y-4 lg:col-span-2">
@@ -33,7 +35,7 @@ export function OrderHistory({ orderHistory, t, lang, isPrivate, handleAddWishli
                 {order.canRepeat && (
                   <button
                     onClick={() => {
-                      const prod = ALL_PRODUCTS.find(p => p.id === order.productId);
+                      const prod = PRODUCTS_MAP.get(order.productId);
                       if (prod) handleAddWishlistItem(prod);
                     }}
                     className="text-[9px] font-black tracking-wider text-black hover:text-primary uppercase mt-1.5 transition-colors block cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:underline"
