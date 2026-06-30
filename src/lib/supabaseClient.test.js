@@ -175,7 +175,7 @@ describe('supabaseClient helpers', () => {
       mockFunctionsInvoke.mockResolvedValue({ data: { status: 'ok' }, error: null });
 
       const result = await supabaseClient.createKaspiPayment({ amount: 100 });
-      expect(mockFunctionsInvoke).toHaveBeenCalledWith('kaspi-pay', { body: { amount: 100 } });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('kaspi-payment', { body: { amount: 100 } });
       expect(result).toEqual({ status: 'ok' });
     });
 
@@ -193,6 +193,16 @@ describe('supabaseClient helpers', () => {
       mockFunctionsInvoke.mockResolvedValue({ data: null, error: new Error('Network error') });
 
       await expect(supabaseClient.createKaspiPayment({ amount: 100 })).rejects.toThrow('Network error');
+    });
+    it('throws error with accurate payload handling if edge function returns error', async () => {
+      stubEnvConfigured();
+      const supabaseClient = await import('./supabaseClient');
+      const mockError = new Error('Accurate mock error');
+      mockFunctionsInvoke.mockResolvedValue({ data: null, error: mockError });
+
+      const testPayload = { amount: 150 };
+      await expect(supabaseClient.createKaspiPayment(testPayload)).rejects.toThrow('Accurate mock error');
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('kaspi-payment', { body: testPayload });
     });
   });
 

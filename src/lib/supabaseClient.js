@@ -70,7 +70,7 @@ export const signOut = authGuard(() => supabase.auth.signOut());
 
 export const createKaspiPayment = async (payload) => {
   if (!supabase) return { error: 'Supabase not configured' };
-  const { data, error } = await supabase.functions.invoke('kaspi-pay', { body: payload });
+  const { data, error } = await supabase.functions.invoke('kaspi-payment', { body: payload });
   if (error) throw error;
   return data;
 };
