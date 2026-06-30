@@ -23,6 +23,60 @@ describe('CheckoutPage', () => {
     vi.clearAllMocks();
   });
 
+  it('handles Kaspi polling errors gracefully without crashing', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Initial call to create invoice
+    mockInvoke.mockResolvedValueOnce({
+      data: { paymentUrl: 'https://pay.kaspi.kz/123', invoiceNumber: 'INV-123', provider: 'apipay' },
+      error: null
+    });
+
+    render(
+      <MemoryRouter>
+        <CheckoutPage cartItems={mockCartItems} setCartItems={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    // Fill form
+    fireEvent.change(screen.getByPlaceholderText('checkout.first_name_placeholder'), { target: { value: 'John' } });
+    fireEvent.change(screen.getByPlaceholderText('+7 (777) 777-77-77'), { target: { value: '+77777777777' } });
+
+    // Submit
+    const submitBtns = screen.getAllByRole('button');
+    const submitBtn = submitBtns[submitBtns.length - 1];
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
+
+    // Wait for the invoice_sent step to render
+    await waitFor(() => {
+      expect(screen.getByText('checkout.invoice_sent')).toBeInTheDocument();
+    });
+
+    // Next call is polling, simulate error
+    const mockError = new Error('Network error');
+    mockInvoke.mockRejectedValueOnce(mockError);
+
+    // Advance timer to trigger polling
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(mockInvoke).toHaveBeenCalledWith('kaspi-checkout', expect.objectContaining({
+      body: { action: 'status', invoiceId: 'INV-123' }
+    }));
+
+    // Wait for error to be logged
+    await waitFor(() => {
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Kaspi Polling Error]', mockError);
+    });
+
+    consoleWarnSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
   it('renders checkout form initially', () => {
     render(
       <MemoryRouter>
