@@ -92,12 +92,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
   const navigate = useNavigate();
 
   // Simple mock database of registered logins
-  const MOCK_REGISTERED_USERS = useMemo(() => [
-    'test@test.com',
-    'admin@hotstuffplay.com',
-    '+77777777777',
-    '87777777777'
-  ], []);
+  const MOCK_REGISTERED_USERS = useMemo(() => [], []);
 
   const [registeredUsers, setRegisteredUsers] = useState(() => {
     const saved = localStorage.getItem('hs_registered_users');
@@ -542,14 +537,6 @@ export function useAccountPage({ t, lang, onAddToCart }) {
 
     if (!validateEmail(cleanedVal)) {
       setError(t('account.err_email_invalid', 'Неверный формат почты. Пример: test@mail.ru'));
-      return;
-    }
-
-    // Allow fast-path bypass ONLY for mock/testing accounts when typed manually.
-    // Real user accounts must always go through OTP verification when typed manually for safety.
-    const isMock = MOCK_REGISTERED_USERS.includes(cleanedVal);
-    if (isMock) {
-      loginSuccess(cleanedVal);
       return;
     }
 
