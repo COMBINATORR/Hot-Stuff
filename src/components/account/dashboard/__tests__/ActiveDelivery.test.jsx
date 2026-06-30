@@ -4,15 +4,20 @@ import { ActiveDelivery } from '../ActiveDelivery';
 
 describe('ActiveDelivery Component', () => {
   // Fix the mock to handle objects properly
-  const mockT = (key, defaultText) => {
-    if (typeof defaultText === 'string') {
-      return defaultText;
+  const mockT = (key, options) => {
+    if (typeof options === 'string') {
+      return options;
     }
-    if (typeof defaultText === 'object' && defaultText !== null) {
-        // e.g. t('account.delivery_order_num', { num: order.number })
-        if (key === 'account.delivery_order_num' && defaultText.num) {
-            return `Заказ №${defaultText.num}`;
-        }
+    if (typeof options === 'object' && options !== null) {
+      let text = options.defaultValue || key;
+      if (key === 'account.delivery_order_num' && options.num) {
+        return `Заказ №${options.num}`;
+      }
+      return Object.entries(options).reduce((acc, [k, v]) => {
+        return typeof v === 'string' || typeof v === 'number'
+          ? acc.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v)
+          : acc;
+      }, text);
     }
     return key;
   };
