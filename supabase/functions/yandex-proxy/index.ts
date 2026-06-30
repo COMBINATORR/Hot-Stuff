@@ -247,10 +247,6 @@ Deno.serve(async (req) => {
       normalizedData.email = normalizedData.default_email;
     } else if (normalizedData.emails && normalizedData.emails.length > 0) {
       normalizedData.email = normalizedData.emails[0];
-    } else {
-      // Fallback for phone-only Yandex accounts or missing app email permissions
-      const identifier = normalizedData.id || normalizedData.login || Math.random().toString(36).substring(2);
-      normalizedData.email = `yandex_${identifier}@yandex.ru`;
     }
 
     if (normalizedData.email) {
