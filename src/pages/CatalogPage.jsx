@@ -267,6 +267,20 @@ export default function CatalogPage({ onAddToCart }) {
     setOnlyDiscounted(false);
   };
 
+  // Cache the slug-to-name resolution map
+  const slugToNameMap = useMemo(() => {
+    const map = new Map();
+    for (const cat of categories) {
+      map.set(cat.slug, cat.name);
+      if (cat.subcategories) {
+        for (const sub of cat.subcategories) {
+          map.set(sub.slug, sub.name);
+        }
+      }
+    }
+    return map;
+  }, [categories]);
+
   // Dynamically map page titles
   const pageTitle = useMemo(() => {
     const searchVal = params.get('search');
@@ -275,14 +289,9 @@ export default function CatalogPage({ onAddToCart }) {
     if (activeCat === 'all' || activeCat === 'popular') return t('catalog.popular');
     if (activeCat === 'new') return t('catalog.new');
 
-    // Find category or subcategory name from the loaded list
-    for (const cat of categories) {
-      if (cat.slug === activeCat) return t('menu.' + cat.name.toLowerCase(), cat.name);
-      if (cat.subcategories) {
-        for (const sub of cat.subcategories) {
-          if (sub.slug === activeCat) return t('menu.' + sub.name.toLowerCase(), sub.name);
-        }
-      }
+    const foundName = slugToNameMap.get(activeCat);
+    if (foundName) {
+      return t('menu.' + foundName.toLowerCase(), foundName);
     }
 
     // Fallbacks for compatibility
@@ -291,7 +300,7 @@ export default function CatalogPage({ onAddToCart }) {
     if (activeCat === 'couples') return t('catalog.couples');
 
     return activeCat;
-  }, [activeCat, params, categories, t]);
+  }, [activeCat, params, slugToNameMap, t]);
 
   return (
     <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
