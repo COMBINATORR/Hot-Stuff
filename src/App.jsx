@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider, useTranslation } from 'react-i18next';
@@ -46,7 +46,30 @@ function ConditionalFooter() {
 }
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState({});
+  const cartItemsArray = useMemo(() => Object.values(cartItems), [cartItems]);
+
+  const handleSetCartItems = useCallback((action) => {
+    if (typeof action === 'function') {
+      setCartItems(prev => {
+        const prevArray = Object.values(prev);
+        const nextArray = action(prevArray);
+        const nextObj = {};
+        nextArray.forEach(item => {
+          nextObj[`${item.id}-${item.variant}`] = item;
+        });
+        return nextObj;
+      });
+    } else if (Array.isArray(action)) {
+      const nextObj = {};
+      action.forEach(item => {
+        nextObj[`${item.id}-${item.variant}`] = item;
+      });
+      setCartItems(nextObj);
+    } else {
+      setCartItems(action);
+    }
+  }, []);
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('hs_favorites');
@@ -66,49 +89,66 @@ function App() {
 
   const addToCart = useCallback((item) => {
     setCartItems(prev => {
-      const existing = prev.find(i => i.id === item.id && i.variant === item.variant);
+      const key = `${item.id}-${item.variant}`;
+      const existing = prev[key];
       if (existing) {
-        return prev.map(i =>
-          i.id === item.id && i.variant === item.variant
-            ? { ...i, qty: i.qty + (item.qty || 1) }
-            : i
-        );
+        return {
+          ...prev,
+          [key]: { ...existing, qty: existing.qty + (item.qty || 1) }
+        };
       }
-      return [...prev, { ...item, qty: item.qty || 1 }];
+      return {
+        ...prev,
+        [key]: { ...item, qty: item.qty || 1 }
+      };
     });
   }, []);
 
   const handleAddToCart = useCallback((product, selectedColor, size) => {
     const variantName = [selectedColor?.name, size].filter(Boolean).join(' / ') || 'Default';
     setCartItems(prev => {
-      const existing = prev.find(i => i.id === product.id && i.variant === variantName);
+      const key = `${product.id}-${variantName}`;
+      const existing = prev[key];
       if (existing) {
-        return prev.map(i =>
-          i.id === product.id && i.variant === variantName
-            ? { ...i, qty: i.qty + 1 }
-            : i
-        );
+        return {
+          ...prev,
+          [key]: { ...existing, qty: existing.qty + 1 }
+        };
       }
-      return [...prev, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        variant: variantName,
-        qty: 1
-      }];
+      return {
+        ...prev,
+        [key]: {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          variant: variantName,
+          qty: 1
+        }
+      };
     });
     setIsCartOpen(true);
   }, []);
 
   const updateQty = useCallback((id, variant, qty) => {
-    setCartItems(prev =>
-      prev.map(i => i.id === id && i.variant === variant ? { ...i, qty: Math.max(1, qty) } : i)
-    );
+    setCartItems(prev => {
+      const key = `${id}-${variant}`;
+      if (!prev[key]) return prev;
+      return {
+        ...prev,
+        [key]: { ...prev[key], qty: Math.max(1, qty) }
+      };
+    });
   }, []);
 
   const removeItem = useCallback((id, variant) => {
-    setCartItems(prev => prev.filter(i => !(i.id === id && i.variant === variant)));
+    setCartItems(prev => {
+      const key = `${id}-${variant}`;
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }, []);
 
   return (
@@ -120,7 +160,7 @@ function App() {
             <LanguageSync />
             <PanicButton />
             <Header
-              cartItems={cartItems}
+              cartItems={cartItemsArray}
               onUpdateQty={updateQty}
               onRemove={removeItem}
               onAddToCart={addToCart}
@@ -130,8 +170,8 @@ function App() {
             />
             <main className="min-h-screen pb-20 md:pb-0">
               <AppRouter
-                cartItems={cartItems}
-                setCartItems={setCartItems}
+                cartItems={cartItemsArray}
+                setCartItems={handleSetCartItems}
                 onAddToCart={handleAddToCart}
                 onUpdateQty={updateQty}
                 onRemove={removeItem}
@@ -148,8 +188,10 @@ function App() {
             <CartDrawer 
               isOpen={isCartOpen}
               onClose={() => setIsCartOpen(false)}
-              items={cartItems}
-              setItems={setCartItems}
+              items={cartItemsArray}
+              setItems={handleSetCartItems}
+              onUpdateQty={updateQty}
+              onRemove={removeItem}
             />
             <FavoritesDrawer 
               isOpen={isFavoritesOpen}
