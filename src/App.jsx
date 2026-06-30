@@ -66,13 +66,11 @@ function App() {
 
   const addToCart = useCallback((item) => {
     setCartItems(prev => {
-      const existing = prev.find(i => i.id === item.id && i.variant === item.variant);
-      if (existing) {
-        return prev.map(i =>
-          i.id === item.id && i.variant === item.variant
-            ? { ...i, qty: i.qty + (item.qty || 1) }
-            : i
-        );
+      const existingIndex = prev.findIndex(i => i.id === item.id && i.variant === item.variant);
+      if (existingIndex >= 0) {
+        const nextCart = [...prev];
+        nextCart[existingIndex] = { ...nextCart[existingIndex], qty: nextCart[existingIndex].qty + (item.qty || 1) };
+        return nextCart;
       }
       return [...prev, { ...item, qty: item.qty || 1 }];
     });
@@ -81,13 +79,11 @@ function App() {
   const handleAddToCart = useCallback((product, selectedColor, size) => {
     const variantName = [selectedColor?.name, size].filter(Boolean).join(' / ') || 'Default';
     setCartItems(prev => {
-      const existing = prev.find(i => i.id === product.id && i.variant === variantName);
-      if (existing) {
-        return prev.map(i =>
-          i.id === product.id && i.variant === variantName
-            ? { ...i, qty: i.qty + 1 }
-            : i
-        );
+      const existingIndex = prev.findIndex(i => i.id === product.id && i.variant === variantName);
+      if (existingIndex >= 0) {
+        const nextCart = [...prev];
+        nextCart[existingIndex] = { ...nextCart[existingIndex], qty: nextCart[existingIndex].qty + 1 };
+        return nextCart;
       }
       return [...prev, {
         id: product.id,
