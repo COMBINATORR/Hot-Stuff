@@ -132,7 +132,7 @@ const CartEmptyState = React.memo(() => {
 });
 
 
-const CartOrderSummary = React.memo(({ items, subtotal, delivery, total, checkoutPath, onKaspiCheckout, isCheckingOut }) => {
+const CartOrderSummary = React.memo(({ items, subtotal, delivery, total, checkoutPath, onKaspiCheckout, isCheckingOut, checkoutError }) => {
   const { t } = useTranslation();
   return (
     <aside className="lg:col-span-1 bg-neutral-950 border border-white/5 p-6 sm:p-8 space-y-6 sticky top-28 rounded-none">
@@ -160,6 +160,11 @@ const CartOrderSummary = React.memo(({ items, subtotal, delivery, total, checkou
         )}
       </div>
 
+      {checkoutError && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs p-3 font-sans" data-testid="checkout-error">
+          {checkoutError}
+        </div>
+      )}
       <div className="flex justify-between items-baseline border-t border-white/10 pt-4 text-white">
         <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">{t('cart.to_pay')}</span>
         <span className="text-xl font-extrabold text-white">{total.toLocaleString('ru-KZ')} ₸</span>
@@ -363,6 +368,7 @@ export default function CartPage({ cartItems = [], onUpdateQty, onRemove, lang }
                 checkoutPath={checkoutPath}
                 onKaspiCheckout={handleKaspiCheckout}
                 isCheckingOut={isCheckingOut}
+                checkoutError={checkoutError}
               />
             </div>
           )}
