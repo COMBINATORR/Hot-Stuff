@@ -38,7 +38,11 @@ export default function Header({
     handleNextTicker, handlePrevTicker, getLangLabel
   } = useHeaderLogic({ i18n, t });
   const cartCount = useMemo(() => {
-    return cartItems.reduce((s, i) => s + i.qty, 0);
+    let count = 0;
+    for (let i = 0, len = cartItems.length; i < len; i++) {
+      count += cartItems[i].qty;
+    }
+    return count;
   }, [cartItems]);
   return (
     <>
