@@ -155,6 +155,34 @@ describe('CartPage', () => {
     });
   });
 
+    it('handles Kaspi checkout initialization error (missing paymentUrl)', async () => {
+    mockInvoke.mockResolvedValueOnce({
+      data: { someOtherField: true },
+      error: null
+    });
+
+    render(
+      <HelmetProvider>
+      <MemoryRouter>
+        <CartPage cartItems={mockCartItems} />
+      </MemoryRouter>
+      </HelmetProvider>
+    );
+
+    const kaspiButton = screen.getByText('cart.kaspi').closest('button');
+
+    await act(async () => {
+      fireEvent.click(kaspiButton);
+    });
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('header.payment_failed');
+    });
+
+    // Check that error message is rendered
+    expect(screen.getByTestId('checkout-error')).toBeInTheDocument();
+  });
+
   it('handles Kaspi checkout error', async () => {
     mockInvoke.mockRejectedValueOnce(new Error('Network error'));
 
@@ -175,5 +203,8 @@ describe('CartPage', () => {
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith('header.payment_failed');
     });
+
+    // Check that error message is rendered
+    expect(screen.getByTestId('checkout-error')).toBeInTheDocument();
   });
 });
