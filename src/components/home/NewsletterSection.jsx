@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ResponsiveImage from '../ResponsiveImage';
 import logoNewsletterBg from '../../assets/images/newsletter_bg.png';
