@@ -102,10 +102,11 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     }
   }, [isOpen, isMobile]);
 
-  if (!product) return null;
-
   // Process colors
   const { colorsList, activeColorObject, activeColorName } = useMemo(() => {
+    if (!product) {
+      return { colorsList: [], activeColorObject: null, activeColorName: '' };
+    }
     const list = product.colors?.map(c => {
       if (typeof c === 'object') return c;
       const hex = c.toLowerCase();
@@ -114,7 +115,9 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     const activeObj = list.find(c => c.hex.toLowerCase() === selectedColor.toLowerCase());
     const activeName = activeObj ? activeObj.label : '';
     return { colorsList: list, activeColorObject: activeObj, activeColorName: activeName };
-  }, [product.colors, selectedColor]);
+  }, [product?.colors, selectedColor]);
+
+  if (!product) return null;
 
   // Pricing calculations
   const oldPriceValue = product.oldPrice || Math.round(product.price * 1.32);
