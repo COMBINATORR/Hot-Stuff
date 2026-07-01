@@ -216,7 +216,7 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link to={cat.link} className="inline-block bg-black/80 backdrop-blur-md hover:bg-white text-white hover:text-black transition-colors duration-300 px-6 sm:px-8 py-3 sm:py-4 rounded-full uppercase tracking-widest text-[9px] sm:text-[10px] font-bold shadow-2xl border border-white/20 hover:border-white">
+              <Link to={cat.link} className="inline-block bg-black/80 backdrop-blur-md hover:bg-white text-white hover:text-black transition-colors duration-300 px-6 sm:px-8 py-3 sm:py-4 rounded-full uppercase tracking-widest text-[9px] sm:text-[10px] font-bold border border-white/20 hover:border-white">
                 {buttonText}
               </Link>
             </motion.div>
