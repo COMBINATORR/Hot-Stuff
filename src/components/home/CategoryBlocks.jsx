@@ -203,8 +203,7 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
               whileInView={{ y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className={`font-sans font-bold uppercase tracking-tight text-white drop-shadow-xl max-w-2xl lg:max-w-4xl leading-[1.05] ${isSplit ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl'}`}
-              style={{ textShadow: "0 4px 30px rgba(0,0,0,0.6)" }}
+              className={`font-sans font-bold uppercase tracking-tight text-white max-w-2xl lg:max-w-4xl leading-[1.05] ${isSplit ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl'}`}
             >
               {title}
             </motion.h2>
