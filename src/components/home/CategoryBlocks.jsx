@@ -1,7 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+import category1Webm from '../../assets/category-1.webm';
+import category1Mp4 from '../../assets/category-1.mp4';
 
 const CATEGORIES = [
   {
@@ -17,6 +20,8 @@ const CATEGORIES = [
       kk: 'Коллекцияны көру'
     },
     image: 'https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?q=80&w=1200&auto=format&fit=crop',
+    videoWebm: category1Webm,
+    videoMp4: category1Mp4,
     link: '/catalog?cat=lingerie-classic'
   },
   {
@@ -145,18 +150,45 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
   const currentLang = lang || 'ru';
   const title = cat.title[currentLang] || cat.title['ru'];
   const buttonText = cat.buttonText[currentLang] || cat.buttonText['ru'];
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   return (
     <div className={`relative w-full overflow-hidden ${isSplit ? 'aspect-[3/4] md:h-[80vh]' : 'aspect-[3/4] md:h-[90vh]'}`}>
-      {/* Background Image */}
+      {/* Background Image/Video */}
       <div className="absolute inset-0 w-full h-full z-0">
-        <img 
-          src={cat.image} 
-          alt={title} 
-          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-          referrerPolicy="no-referrer"
-          loading="lazy"
-        />
+        {cat.videoWebm || cat.videoMp4 ? (
+          <>
+            <img 
+              src={cat.image} 
+              alt={title} 
+              className="w-full h-full object-cover absolute inset-0 -z-20"
+            />
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              poster={cat.image}
+              onPlay={() => setIsVideoLoaded(true)}
+              className={`w-full h-full object-cover absolute inset-0 -z-10 transition-opacity duration-1000 ${
+                isVideoLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {cat.videoWebm && <source src={cat.videoWebm} type="video/webm" />}
+              {cat.videoMp4 && <source src={cat.videoMp4} type="video/mp4" />}
+              <img src={cat.image} alt={title} className="w-full h-full object-cover" />
+            </video>
+          </>
+        ) : (
+          <img 
+            src={cat.image} 
+            alt={title} 
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+            referrerPolicy="no-referrer"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-black/20" />
       </div>
       
