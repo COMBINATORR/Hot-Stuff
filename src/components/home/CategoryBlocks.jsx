@@ -244,7 +244,7 @@ export default function CategoryBlocks({ part = 1 }) {
           <CategoryBlock key={cat.id} cat={cat} lang={lang} />
         ))}
         {/* Block 2: Split 50/50 Toys Women & Men */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-black/10 border-t border-b border-white/5">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-0">
           <CategoryBlock cat={splitItems[0]} lang={lang} isSplit={true} />
           <CategoryBlock cat={splitItems[1]} lang={lang} isSplit={true} />
         </div>

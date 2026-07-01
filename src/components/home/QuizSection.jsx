@@ -390,7 +390,7 @@ export default function QuizSection() {
   return (
     <>
       {/* ═══ QUIZ SECTION ══════════════════════════ */}
-      <section className="w-full aspect-[3/4] md:h-[90vh] overflow-hidden bg-black border-t border-b border-white/5">
+      <section className="w-full aspect-[3/4] md:h-[90vh] overflow-hidden bg-black">
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch">
           {/* Left Block: Image Card (No border, fills exactly top/left/bottom of parent card) */}
           <div className="relative overflow-hidden flex flex-col justify-end p-8 md:p-12 lg:p-16 h-full">
@@ -398,23 +398,14 @@ export default function QuizSection() {
               <ResponsiveImage
                 src={logoQuizBg}
                 alt={t('home.quiz.title')}
-                className="w-full h-full object-cover opacity-70"
+                className="w-full h-full object-cover opacity-80"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-            </div>
-            <div className="relative z-10 text-left">
-              <span className="text-[10px] font-mono tracking-[0.25em] text-[#31A8FF] font-bold uppercase mb-2 block">
-                HOT STUFF EXPERT
-              </span>
-              <h2 className="text-white text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-wider leading-none">
-                HOT STUFF QUIZ
-              </h2>
             </div>
           </div>
 
           {/* Right Block: Content Card (Styled matching right half) */}
-          <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center items-start text-left bg-[#0A0A0A] border-t md:border-t-0 md:border-l border-white/10 h-full">
+          <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center items-start text-left bg-[#0A0A0A] h-full">
             <h2 className="text-white text-[28px] md:text-[34px] lg:text-[40px] font-black uppercase tracking-wider mb-4 leading-tight font-sans">
               {t('home.quiz.title')}
             </h2>
