@@ -10,6 +10,7 @@ import Footer from './components/Footer.tsx';
 import SecureProvider from './components/SecureProvider.jsx';
 import PanicButton from './components/PanicButton.jsx';
 import CookieBanner from './components/CookieBanner.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
 import FavoritesDrawer from './components/FavoritesDrawer.jsx';
 import ProductModal from './components/ProductModal.jsx';
@@ -159,6 +160,7 @@ function App() {
           <BrowserRouter>
             <LanguageSync />
             <PanicButton />
+            <ScrollToTop />
             <Header
               cartItems={cartItemsArray}
               onUpdateQty={updateQty}
