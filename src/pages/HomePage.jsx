@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 
 import HomeHero from '../components/home/HomeHero';
 import TrustSection from '../components/home/TrustSection';
-import BrandIntro from '../components/home/BrandIntro';
+import BrandQuote from '../components/home/BrandQuote';
 import CategoryBlocks from '../components/home/CategoryBlocks';
 import QuizSection from '../components/home/QuizSection';
-import BrandQuote from '../components/home/BrandQuote';
 import NewsletterSection from '../components/home/NewsletterSection';
 
 import ProductPreviewModal from '../components/ProductPreviewModal';
@@ -18,8 +17,8 @@ export default function HomePage({ onAddToCart }) {
       {/* 1. Главный блок с видео */}
       <HomeHero />
 
-      {/* Вводный текст бренда */}
-      <BrandIntro />
+      {/* Цитата бренда (Философия) */}
+      <BrandQuote />
 
       {/* 2. Блоки категорий Часть 1: Классика и Раздельный блок 50/50 */}
       <CategoryBlocks part={1} />
@@ -32,9 +31,6 @@ export default function HomePage({ onAddToCart }) {
 
       {/* 5. Блоки категорий Часть 3: Для пар, Анальные, БДСМ, Лубриканты, Магазин */}
       <CategoryBlocks part={3} />
-
-      {/* Цитата бренда */}
-      <BrandQuote />
 
       {/* 6. Блок преимуществ (спущен вниз) */}
       <TrustSection />
