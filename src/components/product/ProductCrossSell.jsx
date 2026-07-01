@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function ProductCrossSell({ t, handleCrossSellAdd }) {
   return (
     <>
@@ -78,8 +76,6 @@ export default function ProductCrossSell({ t, handleCrossSellAdd }) {
             </div>
           </div>
         </section>
-
-
     </>
   );
 }
