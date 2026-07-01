@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import category1Webm from '../../assets/category-1.webm';
 import category1Mp4 from '../../assets/category-1.mp4';
+import category1Poster from '../../assets/category-1-poster.webp';
 
 const CATEGORIES = [
   {
@@ -22,6 +23,7 @@ const CATEGORIES = [
     image: 'https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?q=80&w=1200&auto=format&fit=crop',
     videoWebm: category1Webm,
     videoMp4: category1Mp4,
+    videoPoster: category1Poster,
     link: '/catalog?cat=lingerie-classic'
   },
   {
@@ -159,7 +161,7 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
         {cat.videoWebm || cat.videoMp4 ? (
           <>
             <img 
-              src={cat.image} 
+              src={cat.videoPoster || cat.image} 
               alt={title} 
               className="w-full h-full object-cover absolute inset-0 -z-20"
             />
@@ -169,7 +171,7 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
               muted
               playsInline
               preload="auto"
-              poster={cat.image}
+              poster={cat.videoPoster || cat.image}
               onPlay={() => setIsVideoLoaded(true)}
               className={`w-full h-full object-cover absolute inset-0 -z-10 transition-opacity duration-1000 ${
                 isVideoLoaded ? 'opacity-100' : 'opacity-0'
@@ -177,7 +179,7 @@ function CategoryBlock({ cat, lang, isSplit = false }) {
             >
               {cat.videoWebm && <source src={cat.videoWebm} type="video/webm" />}
               {cat.videoMp4 && <source src={cat.videoMp4} type="video/mp4" />}
-              <img src={cat.image} alt={title} className="w-full h-full object-cover" />
+              <img src={cat.videoPoster || cat.image} alt={title} className="w-full h-full object-cover" />
             </video>
           </>
         ) : (
