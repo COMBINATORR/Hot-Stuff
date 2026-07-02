@@ -180,4 +180,20 @@ describe('App', () => {
 
     expect(queryByTestId('mock-product-modal')).not.toBeInTheDocument();
   });
+
+  it('handles favorites localStorage fallback on error', () => {
+    // Mock localStorage.getItem to throw an error
+    const originalGetItem = localStorage.getItem;
+    localStorage.getItem = vi.fn().mockImplementation(() => {
+      throw new Error('Simulated localStorage error');
+    });
+
+    const { getByTestId } = render(<App />);
+
+    // In case of error, it should default to empty array
+    expect(getByTestId('favorites-count').textContent).toBe('0');
+
+    // Restore original
+    localStorage.getItem = originalGetItem;
+  });
 });
