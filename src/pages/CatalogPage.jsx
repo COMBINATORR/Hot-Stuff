@@ -1,10 +1,8 @@
-import { useState, useMemo, useEffect, memo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { createPortal } from 'react-dom';
 
-import { supabase } from '../lib/supabase';
 import { ALL_PRODUCTS } from '../data/products';
 import Breadcrumbs from '../components/Breadcrumbs';
 import ProductPreviewModal from '../components/ProductPreviewModal';
