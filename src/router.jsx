@@ -70,10 +70,15 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
           
           // Update registered users list
           const saved = localStorage.getItem('hs_registered_users');
-          const parsed = saved ? JSON.parse(saved) : [];
-          const normalizedList = parsed.map(u => u.trim().toLowerCase());
-          if (!normalizedList.includes(email)) {
-            localStorage.setItem('hs_registered_users', JSON.stringify([...normalizedList, email]));
+          if (saved) {
+             const parsed = JSON.parse(saved);
+             const normalizedList = parsed.map(u => (typeof u === 'string' ? u : u.email).trim().toLowerCase());
+             if (!normalizedList.includes(email)) {
+               parsed.push({ email, avatar_url: null });
+               localStorage.setItem('hs_registered_users', JSON.stringify(parsed));
+             }
+          } else {
+             localStorage.setItem('hs_registered_users', JSON.stringify([{ email, avatar_url: null }]));
           }
         }
       } catch (err) {
@@ -91,10 +96,15 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
 
         // Update registered users list in localStorage
         const saved = localStorage.getItem('hs_registered_users');
-        const parsed = saved ? JSON.parse(saved) : [];
-        const normalizedList = parsed.map(u => u.trim().toLowerCase());
-        if (!normalizedList.includes(email)) {
-          localStorage.setItem('hs_registered_users', JSON.stringify([...normalizedList, email]));
+        if (saved) {
+           const parsed = JSON.parse(saved);
+           const normalizedList = parsed.map(u => (typeof u === 'string' ? u : u.email).trim().toLowerCase());
+           if (!normalizedList.includes(email)) {
+             parsed.push({ email, avatar_url: null });
+             localStorage.setItem('hs_registered_users', JSON.stringify(parsed));
+           }
+        } else {
+           localStorage.setItem('hs_registered_users', JSON.stringify([{ email, avatar_url: null }]));
         }
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('hs_user');
