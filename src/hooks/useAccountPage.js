@@ -1,32 +1,17 @@
-import { useState, useEffect, useMemo, startTransition } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAccountSession } from './useAccountSession';
+import { useAccountAuthHandlers } from './useAccountAuthHandlers';
 
 export function useAccountPage({ t, lang, onAddToCart }) {
-    const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
   const [password, setPassword] = useState('');
   const [code, setCode] = useState(['', '', '', '', '', '']); // 6 digit code inputs
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const savedUser = localStorage.getItem('hs_user');
-    return !!savedUser;
-  });
-  const [isSessionLoading, setIsSessionLoading] = useState(true);
-  const [loggedInUser, setLoggedInUser] = useState(() => {
-    const savedUser = localStorage.getItem('hs_user');
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        return parsed.emailOrPhone;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
-  });
 
   // SMS OTP verification states
   const [countdown, setCountdown] = useState(0);
@@ -43,97 +28,21 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     tier: 'HOT STUFF START',
     toNextLevel: 50000
   });
-  const [sessionUser, setSessionUser] = useState(null);
-
-  const getDisplayAvatar = () => {
-    if (!sessionUser) return null;
-    const meta = sessionUser.user_metadata || {};
-    if (meta.avatar_url) return meta.avatar_url;
-    if (meta.picture) return meta.picture;
-    if (meta.default_avatar_id) {
-      return `https://avatars.yandex.net/get-yapic/${meta.default_avatar_id}/islands-200`;
-    }
-    if (meta.avatar_id) {
-      return `https://avatars.yandex.net/get-yapic/${meta.avatar_id}/islands-200`;
-    }
-    return null;
-  };
-
-  const getDisplayName = () => {
-    if (!sessionUser) return t('account.title', 'Личный кабинет');
-    const meta = sessionUser.user_metadata || {};
-    return (
-      meta.real_name ||
-      meta.display_name ||
-      meta.full_name ||
-      meta.name ||
-      (meta.first_name || meta.last_name
-        ? `${meta.first_name || ''} ${meta.last_name || ''}`.trim()
-        : '') ||
-      meta.login ||
-      meta.username ||
-      t('account.title', 'Личный кабинет')
-    );
-  };
-
-  const getDisplayEmailOrPhone = () => {
-    if (!sessionUser) return loggedInUser || '';
-    return (
-      sessionUser.email ||
-      sessionUser.user_metadata?.email ||
-      sessionUser.user_metadata?.default_email ||
-      sessionUser.user_metadata?.login ||
-      sessionUser.user_metadata?.username ||
-      loggedInUser ||
-      ''
-    );
-  };
 
   const navigate = useNavigate();
 
   // Simple mock database of registered logins
   const MOCK_REGISTERED_USERS = useMemo(() => [], []);
 
-  const [registeredUsers, setRegisteredUsers] = useState(() => {
-    const saved = localStorage.getItem('hs_registered_users');
-    let parsed = [];
-    if (saved) {
-      try {
-        const temp = JSON.parse(saved);
-        parsed = Array.isArray(temp) ? temp.map(u => typeof u === 'string' ? u.trim().toLowerCase() : u.email.trim().toLowerCase()) : [];
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    const all = [...new Set([...MOCK_REGISTERED_USERS, ...parsed])];
-    return all.map(u => u.trim().toLowerCase());
-  });
-
-  const [savedAccounts, setSavedAccounts] = useState(() => {
-    const saved = localStorage.getItem('hs_registered_users');
-    if (!saved) return [];
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        return parsed.map(item => {
-          if (typeof item === 'string') {
-            return { email: item.trim().toLowerCase(), avatar_url: null };
-          }
-          if (item && typeof item === 'object' && item.email) {
-            return {
-              email: item.email.trim().toLowerCase(),
-              avatar_url: item.avatar_url || null
-            };
-          }
-          return null;
-        }).filter(item => item && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(item.email));
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return [];
-  });
-
+  const {
+    isLoggedIn, setIsLoggedIn,
+    isSessionLoading, setIsSessionLoading,
+    loggedInUser, setLoggedInUser,
+    sessionUser, setSessionUser,
+    registeredUsers, setRegisteredUsers,
+    savedAccounts, setSavedAccounts,
+    getDisplayAvatar, getDisplayName, getDisplayEmailOrPhone
+  } = useAccountSession({ t, MOCK_REGISTERED_USERS });
 
   // Countdown timer for resending OTP
   useEffect(() => {
@@ -143,37 +52,6 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     }, 1000);
     return () => clearInterval(timer);
   }, [countdown]);
-
-  // ── Restore Telegram (or any) session from localStorage on mount ──
-  useEffect(() => {
-    if (isLoggedIn) return; // already logged in, nothing to do
-
-    const raw = localStorage.getItem('hs_user');
-    if (!raw) return;
-
-    try {
-      const saved = JSON.parse(raw);
-      if (!saved || !saved.emailOrPhone) return;
-
-      // Rebuild minimal sessionUser so the dashboard renders correctly
-      const restoredSessionUser = {
-        email: saved.emailOrPhone,
-        user_metadata: {
-          full_name: (saved.firstName ? (saved.lastName ? saved.firstName + ' ' + saved.lastName : saved.firstName) : (saved.lastName || saved.emailOrPhone)),
-          first_name: saved.firstName || '',
-          last_name: saved.lastName || '',
-          username: saved.username || '',
-          avatar_url: saved.photoUrl || null,
-        },
-      };
-
-      setIsLoggedIn(true);
-      setLoggedInUser(saved.emailOrPhone);
-      setSessionUser(restoredSessionUser);
-    } catch (e) {
-      console.warn('[AccountPage] failed to restore session from localStorage', e);
-    }
-  }, []);
 
   // Validation
   const validateEmail = (val) => {
@@ -329,351 +207,23 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     };
   }, []);
 
-  const getOAuthRedirectUrl = () => {
-    return window.location.origin + window.location.pathname;
+  const {
+    handleGoogleLogin, isLocalHost, handleLocalTelegramLogin,
+    handleTelegramLoginSuccess, handleYandexClick, triggerOtpSend,
+    handleVerifySubmit, loginSuccess, handleLogout,
+    handleIdentifierSubmit: _handleIdentifierSubmit
+  } = useAccountAuthHandlers({
+    t, navigate, lang,
+    identifier, code,
+    setIsLoggedIn, setLoggedInUser, setSessionUser, setRegisteredUsers, setSavedAccounts,
+    setError, setLoading, setCountdown, setCode, setStep,
+    setIsSessionLoading, setIdentifier, setPassword,
+    validateEmail
+  });
+
+  const handleIdentifierSubmit = (e) => {
+    return _handleIdentifierSubmit(e, setIsRegistered);
   };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: getOAuthRedirectUrl(),
-          queryParams: {
-            prompt: 'select_account',
-            access_type: 'offline'
-          }
-        }
-      });
-      if (error) throw error;
-    } catch (err) {
-      console.error('[Google OAuth Error]', err);
-      let errMsg = err.message || t('account.auth_error_google', 'Ошибка авторизации через Google');
-      if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
-        errMsg = t('account.google_provider_error', 'Провайдер Google не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, перейдите в Supabase Dashboard -> Authentication -> Providers -> Google и активируйте его.');
-      }
-      setError(errMsg);
-      setLoading(false);
-    }
-  };
-
-  const isLocalHost = () => {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '3000';
-  };
-
-  const handleLocalTelegramLogin = () => {
-    setError('');
-    setLoading(true);
-
-    // Mock Telegram user data
-    const mockUser = {
-      id: 12345678,
-      first_name: 'Иван',
-      last_name: 'Иванов',
-      username: 'tg_test_user',
-      photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      auth_date: Math.floor(Date.now() / 1000)
-    };
-
-    // Directly log in on local side
-    setTimeout(() => {
-      const email = `tg_${mockUser.id}@hotstuffplay.com`;
-      loginSuccess(email, mockUser.photo_url);
-      setLoading(false);
-      alert(t('account.welcome_test', { name: `${mockUser.first_name} ${mockUser.last_name}` }));
-    }, 800);
-  };
-
-  const handleTelegramLoginSuccess = (user) => {
-    setError('');
-    setLoading(true);
-
-    try {
-      // Build a display identifier from the Telegram user object
-      const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Telegram User';
-      const emailOrPhone = user.username ? `@${user.username}` : `tg_${user.id}`;
-
-      // ── 1. Save to localStorage IMMEDIATELY ──
-      localStorage.setItem('hs_user', JSON.stringify({
-        emailOrPhone,
-        avatar_url: user.photo_url || null,
-        displayName
-      }));
-
-      // ── 2. Update React state so the page re-renders to the account view ──
-      const mockSessionUser = {
-        email: emailOrPhone,
-        user_metadata: {
-          full_name: displayName,
-          first_name: user.first_name || '',
-          last_name: user.last_name || '',
-          username: user.username || '',
-          avatar_url: user.photo_url || null,
-        },
-      };
-
-      setIsLoggedIn(true);
-      setLoggedInUser(emailOrPhone);
-      setSessionUser(mockSessionUser);
-
-      // Add to registered users list safely as structured objects
-      const savedStr = localStorage.getItem('hs_registered_users');
-      let savedList = [];
-      if (savedStr) {
-        try {
-          const temp = JSON.parse(savedStr);
-          savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      if (emailOrPhone && !savedList.some(item => item.email.trim().toLowerCase() === emailOrPhone.trim().toLowerCase())) {
-        savedList.push({ email: emailOrPhone, avatar_url: user.photo_url || null });
-        localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
-      }
-
-      setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
-
-      const emailClean = emailOrPhone.trim().toLowerCase();
-      if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {
-        setSavedAccounts(prev => {
-          if (prev.some(item => item.email === emailClean)) {
-            return prev.map(item => item.email === emailClean ? { ...item, avatar_url: user.photo_url || item.avatar_url } : item);
-          }
-          return [...prev, { email: emailClean, avatar_url: user.photo_url || null }];
-        });
-      }
-
-      window.dispatchEvent(new Event('hs_auth_change'));
-
-      // ── 3. Optionally try the server-side Supabase session (fire-and-forget) ──
-      fetch('https://xmuaaxirlcbpbtftmrik.supabase.co/functions/v1/telegram-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramData: user }),
-      })
-        .then((r) => r.json())
-        .then((result) => {
-          if (result?.session?.access_token && result?.session?.refresh_token) {
-            supabase.auth.setSession({
-              access_token: result.session.access_token,
-              refresh_token: result.session.refresh_token,
-            });
-          }
-        })
-        .catch((err) => console.warn('[Telegram Proxy] optional server session failed:', err));
-
-    } catch (err) {
-      console.error('[Telegram login flow] Error:', err);
-      setError(t('account.auth_error', 'Произошла ошибка при авторизации'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleYandexClick = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'custom:yandex',
-        options: {
-          redirectTo: getOAuthRedirectUrl(),
-          scopes: 'login:email login:info login:avatar login:birthday login:default_phone',
-          queryParams: {
-            force_confirm: 'yes'
-          }
-        }
-      });
-      if (error) throw error;
-    } catch (err) {
-      console.error('[Yandex OAuth Error]', err);
-      let errMsg = err.message || t('account.auth_error_yandex', 'Ошибка авторизации через Яндекс');
-      if (errMsg.includes('provider is not enabled') || errMsg.includes('Unsupported provider')) {
-        errMsg = t('account.yandex_provider_error', 'Провайдер Яндекс не включен в настройках авторизации вашего проекта Supabase. Пожалуйста, активируйте провайдер Yandex в Supabase Dashboard.');
-      }
-      setError(errMsg);
-      setLoading(false);
-    }
-  };
-
-  const triggerOtpSend = async (emailVal) => {
-    setError('');
-    setLoading(true);
-
-    try {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: emailVal
-      });
-
-      if (otpError) {
-        console.warn('[Supabase OTP Send Error]', otpError);
-      }
-
-      setCountdown(60);
-      setCode(['', '', '', '', '', '']); // Reset 6 digit code
-      setStep(2);
-    } catch (err) {
-      console.warn('[Supabase OTP Send Exception]', err);
-      setCountdown(60);
-      setCode(['', '', '', '', '', '']);
-      setStep(2);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleIdentifierSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    const cleanedVal = identifier.trim().toLowerCase();
-
-    if (!cleanedVal) {
-      setError(t('account.err_email', 'Пожалуйста, введите Email'));
-      return;
-    }
-
-    if (!validateEmail(cleanedVal)) {
-      setError(t('account.err_email_invalid', 'Неверный формат почты. Пример: test@mail.ru'));
-      return;
-    }
-
-    // Otherwise, standard secure login: send OTP via Supabase
-    setIsRegistered(false);
-    await triggerOtpSend(cleanedVal);
-  };
-
-  const handleVerifySubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const enteredCode = code.join('').trim();
-    if (enteredCode.length < 6) {
-      setError(t('account.err_otp_digits', 'Пожалуйста, введите все 6 цифр кода'));
-      setLoading(false);
-      return;
-    }
-
-    // Verify via real Supabase
-    try {
-      let { data, error: verifyError } = await supabase.auth.verifyOtp({
-        email: identifier.trim().toLowerCase(),
-        token: enteredCode,
-        type: 'email'
-      });
-
-      if (verifyError) {
-        // Fallback for new user signups
-        const signupResult = await supabase.auth.verifyOtp({
-          email: identifier.trim().toLowerCase(),
-          token: enteredCode,
-          type: 'signup'
-        });
-
-        if (signupResult.error) {
-          throw verifyError;
-        }
-
-        data = signupResult.data;
-      }
-
-      if (data?.user) {
-        loginSuccess(data.user.email);
-      } else {
-        throw new Error(t('account.err_user_not_found', 'Не удалось подтвердить код. Пользователь не найден.'));
-      }
-    } catch (err) {
-      console.error('[Supabase Verify Error]', err);
-      setError(err.message || t('account.err_otp_invalid', 'Неверный код подтверждения. Пожалуйста, попробуйте еще раз.'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loginSuccess = (userVal, avatarUrl = null) => {
-    const normalizedUser = userVal.trim().toLowerCase();
-    setIsLoggedIn(true);
-    setLoggedInUser(normalizedUser);
-
-    // Set a simulated sessionUser for mock login flow
-    const mockSessionUser = {
-      email: normalizedUser,
-      user_metadata: {
-        full_name: normalizedUser === 'admin@hotstuffplay.com' ? 'Администратор' : 'Тестовый Пользователь',
-        avatar_url: avatarUrl
-      }
-    };
-    setSessionUser(mockSessionUser);
-
-    localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: normalizedUser, avatar_url: avatarUrl }));
-
-    window.dispatchEvent(new Event('hs_auth_change'));
-
-    // Safely add as structured object to hs_registered_users
-    const savedStr = localStorage.getItem('hs_registered_users');
-    let savedList = [];
-    if (savedStr) {
-      try {
-        const temp = JSON.parse(savedStr);
-        savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    if (!savedList.some(item => item.email.trim().toLowerCase() === normalizedUser)) {
-      savedList.push({ email: normalizedUser, avatar_url: avatarUrl });
-      localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
-    }
-
-    setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
-
-    if (!['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(normalizedUser)) {
-      setSavedAccounts(prev => {
-        if (prev.some(item => item.email === normalizedUser)) {
-          return prev.map(item => item.email === normalizedUser ? { ...item, avatar_url: avatarUrl || item.avatar_url } : item);
-        }
-        return [...prev, { email: normalizedUser, avatar_url: avatarUrl }];
-      });
-    }
-  };
-
-  const handleLogout = async () => {
-    startTransition(() => {
-      setLoading(true);
-    });
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (err) {
-      console.error('[Logout Error]', err);
-      alert(t('account.logout_err_alert', 'Произошла ошибка при выходе из системы. Сессия будет закрыта локально.'));
-    } finally {
-      localStorage.removeItem('hs_user');
-
-      window.dispatchEvent(new Event('hs_auth_change'));
-
-      const targetPath = lang && lang !== 'ru' ? `/${lang}` : '/';
-      navigate(targetPath);
-
-      setTimeout(() => {
-        startTransition(() => {
-          setIsLoggedIn(false);
-          setLoggedInUser(null);
-          setSessionUser(null);
-          setStep(1);
-          setIdentifier('');
-          setPassword('');
-          setCode(['', '', '', '', '', '']);
-          setError('');
-          setLoading(false);
-        });
-      }, 500);
-    }
-  };
-
 
   const handleTogglePrivate = () => {
     setIsPrivate(prev => {
