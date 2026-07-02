@@ -1,5 +1,49 @@
 import { useState, useEffect } from 'react';
 
+// Create a simple module-level cache to prevent re-parsing during rapid component mounts
+let cachedParsedStr = null;
+let cachedParsedArray = null;
+let cachedParsedAccounts = null;
+let cachedParsedUsers = null;
+
+function getParsedRegisteredUsers() {
+  const saved = localStorage.getItem('hs_registered_users');
+  if (!saved) return { parsedUsers: [], parsedAccounts: [] };
+
+  if (saved === cachedParsedStr) {
+    return { parsedUsers: cachedParsedUsers, parsedAccounts: cachedParsedAccounts };
+  }
+
+  try {
+    const temp = JSON.parse(saved);
+    if (Array.isArray(temp)) {
+      cachedParsedStr = saved;
+      cachedParsedArray = temp;
+
+      cachedParsedAccounts = temp.map(item => {
+        if (typeof item === 'string') {
+          return { email: item.trim().toLowerCase(), avatar_url: null };
+        }
+        if (item && typeof item === 'object' && item.email) {
+          return {
+            email: item.email.trim().toLowerCase(),
+            avatar_url: item.avatar_url || null
+          };
+        }
+        return null;
+      }).filter(item => item && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(item.email));
+
+      cachedParsedUsers = temp.map(u => typeof u === 'string' ? u.trim().toLowerCase() : u.email.trim().toLowerCase());
+
+      return { parsedUsers: cachedParsedUsers, parsedAccounts: cachedParsedAccounts };
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  return { parsedUsers: [], parsedAccounts: [] };
+}
+
 export function useAccountSession({ t, MOCK_REGISTERED_USERS }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const savedUser = localStorage.getItem('hs_user');
@@ -22,43 +66,14 @@ export function useAccountSession({ t, MOCK_REGISTERED_USERS }) {
   const [sessionUser, setSessionUser] = useState(null);
 
   const [registeredUsers, setRegisteredUsers] = useState(() => {
-    const saved = localStorage.getItem('hs_registered_users');
-    let parsed = [];
-    if (saved) {
-      try {
-        const temp = JSON.parse(saved);
-        parsed = Array.isArray(temp) ? temp.map(u => typeof u === 'string' ? u.trim().toLowerCase() : u.email.trim().toLowerCase()) : [];
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    const all = [...new Set([...MOCK_REGISTERED_USERS, ...parsed])];
+    const { parsedUsers } = getParsedRegisteredUsers();
+    const all = [...new Set([...MOCK_REGISTERED_USERS, ...parsedUsers])];
     return all.map(u => u.trim().toLowerCase());
   });
 
   const [savedAccounts, setSavedAccounts] = useState(() => {
-    const saved = localStorage.getItem('hs_registered_users');
-    if (!saved) return [];
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        return parsed.map(item => {
-          if (typeof item === 'string') {
-            return { email: item.trim().toLowerCase(), avatar_url: null };
-          }
-          if (item && typeof item === 'object' && item.email) {
-            return {
-              email: item.email.trim().toLowerCase(),
-              avatar_url: item.avatar_url || null
-            };
-          }
-          return null;
-        }).filter(item => item && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(item.email));
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return [];
+    const { parsedAccounts } = getParsedRegisteredUsers();
+    return parsedAccounts;
   });
 
   const getDisplayAvatar = () => {
