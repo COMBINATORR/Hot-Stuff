@@ -10,13 +10,16 @@ describe('ActiveDelivery Component', () => {
     }
     if (typeof options === 'object' && options !== null) {
       let text = options.defaultValue || key;
-      if (key === 'account.delivery_order_num' && options.num) {
-        return `Заказ №${options.num}`;
-      }
       return Object.entries(options).reduce((acc, [k, v]) => {
-        return typeof v === 'string' || typeof v === 'number'
-          ? acc.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v)
-          : acc;
+        if (typeof v === 'string' || typeof v === 'number') {
+          if (acc.includes(`{{${k}}}`)) {
+            return acc.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+          }
+          if (k !== 'defaultValue') {
+            return `${acc} ${v}`;
+          }
+        }
+        return acc;
       }, text);
     }
     return key;
