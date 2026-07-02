@@ -19,12 +19,16 @@ const mockCartItems = [
 ];
 
 describe('CheckoutPage', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('handles Kaspi polling errors gracefully without crashing', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ['setTimeout', 'clearTimeout'] });
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     // Initial call to create invoice
@@ -61,7 +65,7 @@ describe('CheckoutPage', () => {
 
     // Advance timer to trigger polling
     await act(async () => {
-      vi.advanceTimersByTime(5000);
+      await vi.advanceTimersByTimeAsync(5000);
     });
 
     expect(mockInvoke).toHaveBeenCalledWith('kaspi-checkout', expect.objectContaining({
@@ -74,7 +78,6 @@ describe('CheckoutPage', () => {
     });
 
     consoleWarnSpy.mockRestore();
-    vi.useRealTimers();
   });
 
   it('renders checkout form initially', () => {

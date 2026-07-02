@@ -74,22 +74,34 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       return;
     }
 
-    const intervalId = setInterval(async () => {
+    let timerId;
+    let isMounted = true;
+
+    const poll = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('kaspi-checkout', {
           body: { action: 'status', invoiceId }
         });
 
         if (!error && data && data.status === 'paid') {
-          clearInterval(intervalId);
           setStep('delivery_address');
+          isMounted = false; // Stop polling
         }
       } catch (err) {
         console.warn('[Kaspi Polling Error]', err);
+      } finally {
+        if (isMounted) {
+          timerId = setTimeout(poll, 5000);
+        }
       }
-    }, 5000);
+    };
 
-    return () => clearInterval(intervalId);
+    timerId = setTimeout(poll, 5000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timerId);
+    };
   }, [step, invoiceId, provider]);
 
   // Form input validation
