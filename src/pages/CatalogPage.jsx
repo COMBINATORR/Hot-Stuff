@@ -87,10 +87,13 @@ export default function CatalogPage({ onAddToCart }) {
     const refParam = params.get('ref');
 
     if (giftParam && refParam === 'anonymous') {
-      const productIds = giftParam.split(',').map(id => parseInt(id, 10));
+      const idStrings = giftParam.split(',');
       const addedList = [];
 
-      productIds.forEach(id => {
+      for (let i = 0; i < idStrings.length; i++) {
+        const id = parseInt(idStrings[i], 10);
+        if (Number.isNaN(id)) continue;
+
         const product = productsMap.get(id);
         if (product) {
           addedList.push(product);
@@ -106,7 +109,7 @@ export default function CatalogPage({ onAddToCart }) {
             });
           }
         }
-      });
+      }
 
       if (addedList.length > 0) {
         setGiftProducts(addedList);
