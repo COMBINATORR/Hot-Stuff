@@ -20,7 +20,9 @@ vi.mock('../lib/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn(() => ({
-        order: vi.fn()
+        order: vi.fn(() => ({
+          order: vi.fn()
+        }))
       }))
     }))
   }
@@ -34,12 +36,14 @@ describe('CatalogPage', () => {
     // Default mock implementation for Supabase
     supabase.from.mockReturnValue({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
-          data: [
-            { id: 1, name: 'Women Toys', slug: 'toys-women', subcategories: [] },
-            { id: 2, name: 'Men Toys', slug: 'toys-men', subcategories: [] }
-          ],
-          error: null
+        order: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({
+            data: [
+              { id: 1, name: 'Women Toys', slug: 'toys-women', subcategories: [] },
+              { id: 2, name: 'Men Toys', slug: 'toys-men', subcategories: [] }
+            ],
+            error: null
+          })
         })
       })
     });

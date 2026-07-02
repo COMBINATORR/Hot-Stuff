@@ -31,16 +31,12 @@ export function CategoriesProvider({ children }) {
         const { data, error } = await supabase
           .from('categories')
           .select('id, name, slug, description, subcategories(id, name, slug, description)')
-          .order('id', { ascending: true });
+          .order('id', { ascending: true })
+          .order('id', { foreignTable: 'subcategories', ascending: true });
 
         if (error) throw error;
 
-        const processed = (data || []).map(cat => {
-          if (cat.subcategories) {
-            cat.subcategories.sort((a, b) => Number(a.id) - Number(b.id));
-          }
-          return cat;
-        });
+        const processed = data || [];
 
         if (isMounted) {
           setCategories(processed);
