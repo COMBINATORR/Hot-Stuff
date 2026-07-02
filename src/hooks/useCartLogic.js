@@ -13,13 +13,33 @@ export function useCartLogic({ items = [], setItems, onClose, onUpdateQty, onRem
 
   const handleUpdateQty = onUpdateQty || ((id, variant, qty) => {
     if (setItems) {
-      setItems(prev => prev.map(i => i.id === id && i.variant === variant ? { ...i, qty: Math.max(1, qty) } : i));
+      setItems(prev => {
+        const next = new Array(prev.length);
+        for (let idx = 0; idx < prev.length; idx++) {
+          const i = prev[idx];
+          if (i.id === id && i.variant === variant) {
+            next[idx] = { ...i, qty: Math.max(1, qty) };
+          } else {
+            next[idx] = i;
+          }
+        }
+        return next;
+      });
     }
   });
 
   const handleRemove = onRemove || ((id, variant) => {
     if (setItems) {
-      setItems(prev => prev.filter(i => !(i.id === id && i.variant === variant)));
+      setItems(prev => {
+        const next = [];
+        for (let idx = 0; idx < prev.length; idx++) {
+          const i = prev[idx];
+          if (!(i.id === id && i.variant === variant)) {
+            next.push(i);
+          }
+        }
+        return next;
+      });
     }
   });
 
