@@ -79,6 +79,28 @@ describe('SessionSecurity', () => {
 
       expect(mockSetLoading).toHaveBeenCalledWith(false);
     });
+    it('handles unexpected exceptions during sign out', async () => {
+      const mockException = new Error('Network error');
+      supabase.auth.signOut.mockRejectedValueOnce(mockException);
+      renderComponent();
+
+      const logoutBtn = screen.getByText('Выйти на других устройствах');
+
+      await act(async () => {
+        fireEvent.click(logoutBtn);
+      });
+
+      expect(mockSetLoading).toHaveBeenCalledWith(true);
+      expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'others' });
+
+      await waitFor(() => {
+        expect(console.error).toHaveBeenCalledWith(mockException);
+        expect(window.alert).toHaveBeenCalledWith('Ошибка: Network error');
+      });
+
+      expect(mockSetLoading).toHaveBeenCalledWith(false);
+    });
+
 
     it('handles sign out errors', async () => {
       const mockError = new Error('Sign out failed');
