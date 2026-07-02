@@ -7,7 +7,8 @@ export function useAccountAuthHandlers({
   setIsLoggedIn, setLoggedInUser, setSessionUser, setRegisteredUsers, setSavedAccounts,
   setError, setLoading, setCountdown, setCode, setStep,
   setIsSessionLoading, setIdentifier, setPassword,
-  validateEmail
+  validateEmail,
+  registeredUsers
 }) {
 
   const getOAuthRedirectUrl = () => {
@@ -34,22 +35,23 @@ export function useAccountAuthHandlers({
     window.dispatchEvent(new Event('hs_auth_change'));
 
     // Safely add as structured object to hs_registered_users
-    const savedStr = localStorage.getItem('hs_registered_users');
-    let savedList = [];
-    if (savedStr) {
-      try {
-        const temp = JSON.parse(savedStr);
-        savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
-      } catch (e) {
-        console.error(e);
+    if (normalizedUser && !registeredUsers.includes(normalizedUser)) {
+      const savedStr = localStorage.getItem('hs_registered_users');
+      let savedList = [];
+      if (savedStr) {
+        try {
+          const temp = JSON.parse(savedStr);
+          savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+        } catch (e) {
+          console.error(e);
+        }
       }
+      if (!savedList.some(item => item.email.trim().toLowerCase() === normalizedUser)) {
+        savedList.push({ email: normalizedUser, avatar_url: avatarUrl });
+        localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+      }
+      setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
     }
-    if (!savedList.some(item => item.email.trim().toLowerCase() === normalizedUser)) {
-      savedList.push({ email: normalizedUser, avatar_url: avatarUrl });
-      localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
-    }
-
-    setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
 
     if (!['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(normalizedUser)) {
       setSavedAccounts(prev => {
@@ -147,22 +149,24 @@ export function useAccountAuthHandlers({
       setSessionUser(mockSessionUser);
 
       // Add to registered users list safely as structured objects
-      const savedStr = localStorage.getItem('hs_registered_users');
-      let savedList = [];
-      if (savedStr) {
-        try {
-          const temp = JSON.parse(savedStr);
-          savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
-        } catch (e) {
-          console.error(e);
+      const emailCleanPhone = emailOrPhone ? emailOrPhone.trim().toLowerCase() : '';
+      if (emailCleanPhone && !registeredUsers.includes(emailCleanPhone)) {
+        const savedStr = localStorage.getItem('hs_registered_users');
+        let savedList = [];
+        if (savedStr) {
+          try {
+            const temp = JSON.parse(savedStr);
+            savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+          } catch (e) {
+            console.error(e);
+          }
         }
+        if (!savedList.some(item => item.email.trim().toLowerCase() === emailCleanPhone)) {
+          savedList.push({ email: emailCleanPhone, avatar_url: user.photo_url || null });
+          localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+        }
+        setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
       }
-      if (emailOrPhone && !savedList.some(item => item.email.trim().toLowerCase() === emailOrPhone.trim().toLowerCase())) {
-        savedList.push({ email: emailOrPhone, avatar_url: user.photo_url || null });
-        localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
-      }
-
-      setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
 
       const emailClean = emailOrPhone.trim().toLowerCase();
       if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAccountSession } from './useAccountSession';
@@ -129,25 +129,26 @@ export function useAccountPage({ t, lang, onAddToCart }) {
           localStorage.setItem('hs_user', JSON.stringify({ emailOrPhone: email, avatar_url }));
 
           // Add to registered users list safely as structured objects
-          const savedStr = localStorage.getItem('hs_registered_users');
-          let savedList = [];
-          if (savedStr) {
-            try {
-              const temp = JSON.parse(savedStr);
-              savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
-            } catch (e) {
-              console.error(e);
+          const emailClean = email ? email.trim().toLowerCase() : '';
+          if (emailClean && !registeredUsers.includes(emailClean)) {
+            const savedStr = localStorage.getItem('hs_registered_users');
+            let savedList = [];
+            if (savedStr) {
+              try {
+                const temp = JSON.parse(savedStr);
+                savedList = Array.isArray(temp) ? temp.map(item => typeof item === 'string' ? { email: item, avatar_url: null } : item) : [];
+              } catch (e) {
+                console.error(e);
+              }
             }
+            if (!savedList.some(item => item.email.trim().toLowerCase() === emailClean)) {
+              savedList.push({ email: emailClean, avatar_url });
+              localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
+            }
+            setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
           }
-          if (email && !savedList.some(item => item.email.trim().toLowerCase() === email)) {
-            savedList.push({ email, avatar_url });
-            localStorage.setItem('hs_registered_users', JSON.stringify(savedList));
-          }
-
-          setRegisteredUsers(savedList.map(item => item.email.trim().toLowerCase()));
 
           // Add to saved accounts list if it's not a mock account
-          const emailClean = email.trim().toLowerCase();
           if (emailClean && !['test@test.com', 'admin@hotstuffplay.com', '+77777777777', '87777777777'].includes(emailClean)) {
             setSavedAccounts(prev => {
               if (prev.some(item => item.email === emailClean)) {
@@ -218,7 +219,8 @@ export function useAccountPage({ t, lang, onAddToCart }) {
     setIsLoggedIn, setLoggedInUser, setSessionUser, setRegisteredUsers, setSavedAccounts,
     setError, setLoading, setCountdown, setCode, setStep,
     setIsSessionLoading, setIdentifier, setPassword,
-    validateEmail
+    validateEmail,
+    registeredUsers
   });
 
   const handleIdentifierSubmit = (e) => {
