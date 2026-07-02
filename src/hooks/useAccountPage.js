@@ -159,7 +159,7 @@ export function useAccountPage({ t, lang, onAddToCart }) {
       const restoredSessionUser = {
         email: saved.emailOrPhone,
         user_metadata: {
-          full_name: [saved.firstName, saved.lastName].filter(Boolean).join(' ') || saved.emailOrPhone,
+          full_name: (saved.firstName ? (saved.lastName ? saved.firstName + ' ' + saved.lastName : saved.firstName) : (saved.lastName || saved.emailOrPhone)),
           first_name: saved.firstName || '',
           last_name: saved.lastName || '',
           username: saved.username || '',
