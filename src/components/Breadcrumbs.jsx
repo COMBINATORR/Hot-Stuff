@@ -12,6 +12,7 @@ export default function Breadcrumbs({ theme = 'dark' }) {
 
   // Слушатель для обновления хлебных крошек при изменении категории в кэше
   const [categories, setCategories] = useState([]);
+  const lastCachedRef = React.useRef(null);
 
   // Предварительно вычисляем Map для быстрого поиска подкатегорий (O(1) вместо O(N*M))
   const { categoriesBySlug, subcategoriesBySlug, subcategoriesByName } = useMemo(() => {
@@ -30,9 +31,10 @@ export default function Breadcrumbs({ theme = 'dark' }) {
 
   useEffect(() => {
     const cached = localStorage.getItem('hs_categories');
-    if (cached) {
+    if (cached && cached !== lastCachedRef.current) {
       try {
         setCategories(JSON.parse(cached));
+        lastCachedRef.current = cached;
       } catch (e) {
         console.error(e);
       }
