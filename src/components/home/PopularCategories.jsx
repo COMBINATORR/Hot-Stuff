@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../lib/supabase';
 import { useCategories } from '../../contexts/CategoriesContext';
 import ResponsiveImage from '../ResponsiveImage';
 
