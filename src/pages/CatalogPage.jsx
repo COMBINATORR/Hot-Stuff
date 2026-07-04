@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { ALL_PRODUCTS } from '../data/products';
+import { supabase } from '../lib/supabase';
 import Breadcrumbs from '../components/Breadcrumbs';
 import ProductPreviewModal from '../components/ProductPreviewModal';
 

@@ -5,15 +5,19 @@ import { CategoriesProvider, useCategories } from './CategoriesContext';
 import { supabase } from '../lib/supabase';
 
 // Mock supabase client
-vi.mock('../lib/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        order: vi.fn(),
+vi.mock('../lib/supabase', () => {
+  const orderMock = vi.fn();
+  orderMock.mockImplementation(() => ({ order: orderMock }));
+  return {
+    supabase: {
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          order: orderMock,
+        })),
       })),
-    })),
-  },
-}));
+    },
+  };
+});
 
 // Test component to consume context
 const TestComponent = () => {
@@ -41,7 +45,8 @@ describe('CategoriesContext', () => {
 
   it('provides initial loading state', () => {
     // Setup a delayed promise so we can observe the loading state
-    const orderMock = vi.fn().mockReturnValue(new Promise(() => {}));
+    const promise = new Promise(() => {});
+    const orderMock = vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue(promise) });
     const selectMock = vi.fn().mockReturnValue({ order: orderMock });
     supabase.from.mockReturnValue({ select: selectMock });
 
@@ -63,7 +68,8 @@ describe('CategoriesContext', () => {
     localStorage.setItem('hs_categories', JSON.stringify(cachedData));
 
     // Setup network fetch to take some time to ensure we see cached data first
-    const orderMock = vi.fn().mockReturnValue(new Promise(resolve => setTimeout(() => resolve({ data: [], error: null }), 100)));
+    const promise = new Promise(resolve => setTimeout(() => resolve({ data: [], error: null }), 100));
+    const orderMock = vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue(promise) });
     const selectMock = vi.fn().mockReturnValue({ order: orderMock });
     supabase.from.mockReturnValue({ select: selectMock });
 
@@ -84,7 +90,7 @@ describe('CategoriesContext', () => {
       {
         id: '2',
         name: 'Cat 2',
-        subcategories: [{ id: '10' }, { id: '2' }]
+        subcategories: [{ id: '2' }, { id: '10' }]
       },
       {
         id: '1',
@@ -93,7 +99,8 @@ describe('CategoriesContext', () => {
       }
     ];
 
-    const orderMock = vi.fn().mockResolvedValue({ data: mockData, error: null });
+    const promise = Promise.resolve({ data: mockData, error: null });
+    const orderMock = vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue(promise) });
     const selectMock = vi.fn().mockReturnValue({ order: orderMock });
     supabase.from.mockReturnValue({ select: selectMock });
 
@@ -125,7 +132,8 @@ describe('CategoriesContext', () => {
   it('handles errors from Supabase fetching', async () => {
     const mockError = new Error('Network error');
 
-    const orderMock = vi.fn().mockResolvedValue({ data: null, error: mockError });
+    const promise = Promise.resolve({ data: null, error: mockError });
+    const orderMock = vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue(promise) });
     const selectMock = vi.fn().mockReturnValue({ order: orderMock });
     supabase.from.mockReturnValue({ select: selectMock });
 
@@ -148,7 +156,8 @@ describe('CategoriesContext', () => {
 
     // We should fallback to network fetch if cache fails
     const mockData = [{ id: '1', name: 'Fresh Data', subcategories: null }];
-    const orderMock = vi.fn().mockResolvedValue({ data: mockData, error: null });
+    const promise = Promise.resolve({ data: mockData, error: null });
+    const orderMock = vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue(promise) });
     const selectMock = vi.fn().mockReturnValue({ order: orderMock });
     supabase.from.mockReturnValue({ select: selectMock });
 
