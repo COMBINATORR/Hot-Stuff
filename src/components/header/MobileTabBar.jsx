@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 export default function MobileTabBar({
   t, i18n,
@@ -8,6 +10,17 @@ export default function MobileTabBar({
   session,
   handleAccountClick
 }) {
+  const [cartBouncing, setCartBouncing] = useState(false);
+
+  useEffect(() => {
+    const handleBounce = () => {
+      setCartBouncing(true);
+      setTimeout(() => setCartBouncing(false), 600);
+    };
+    window.addEventListener('cart-bounce', handleBounce);
+    return () => window.removeEventListener('cart-bounce', handleBounce);
+  }, []);
+
   return (
     <div
       className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 flex items-center justify-around px-4 z-50 md:hidden rounded-full"
@@ -39,8 +52,11 @@ export default function MobileTabBar({
         <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.search', 'Поиск')}</span>
       </button>
 
-      <button
+      <motion.button
         onClick={() => setCartOpen(true)}
+        id="mobile-cart-btn"
+        animate={cartBouncing ? { scale: [1, 1.25, 0.85, 1.15, 1], rotate: [0, -10, 10, -5, 0] } : {}}
+        transition={{ duration: 0.5 }}
         className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-white/60 hover:text-white transition-colors focus:outline-none relative"
       >
         <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
@@ -50,7 +66,7 @@ export default function MobileTabBar({
           </span>
         )}
         <span className="text-[9px] font-bold tracking-wider uppercase mt-1">{t('header.cart', 'Корзина')}</span>
-      </button>
+      </motion.button>
 
       <NavLink
         to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}

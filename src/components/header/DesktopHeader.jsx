@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -16,6 +17,17 @@ export default function DesktopHeader({
   setCartOpen,
   cartCount
 }) {
+  const [cartBouncing, setCartBouncing] = useState(false);
+
+  useEffect(() => {
+    const handleBounce = () => {
+      setCartBouncing(true);
+      setTimeout(() => setCartBouncing(false), 600);
+    };
+    window.addEventListener('cart-bounce', handleBounce);
+    return () => window.removeEventListener('cart-bounce', handleBounce);
+  }, []);
+
   return (
     <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col pointer-events-none">
       {/* RED TEST BANNER */}
@@ -190,8 +202,11 @@ export default function DesktopHeader({
               </span>
             )}
           </button>
-          <button
+          <motion.button
             onClick={onOpenCart || (() => setCartOpen(true))}
+            id="header-cart-btn"
+            animate={cartBouncing ? { scale: [1, 1.25, 0.85, 1.15, 1], rotate: [0, -10, 10, -5, 0] } : {}}
+            transition={{ duration: 0.5 }}
             className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
             aria-label={t('header.open_cart', 'Открыть корзину')}
           >
@@ -208,7 +223,7 @@ export default function DesktopHeader({
                 {cartCount}
               </span>
             )}
-          </button>
+          </motion.button>
 
           {/* Sandwich for Mobile */}
           <motion.button

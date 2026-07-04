@@ -15,6 +15,7 @@ import CartDrawer from './components/CartDrawer.jsx';
 import FavoritesDrawer from './components/FavoritesDrawer.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import { CategoriesProvider } from './contexts/CategoriesContext.jsx';
+import CartFlyEffect from './components/CartFlyEffect.jsx';
 
 function LanguageSync() {
   const location = useLocation();
@@ -88,7 +89,36 @@ function App() {
     localStorage.setItem('hs_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  // Track last click coordinates globally to determine flight animation starting point
+  useEffect(() => {
+    let lastClickCoords = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    const handleWindowClick = (e) => {
+      if (e.clientX !== 0 || e.clientY !== 0) {
+        lastClickCoords = { x: e.clientX, y: e.clientY };
+      }
+    };
+
+    window.addEventListener('click', handleWindowClick, true);
+
+    const handleFlyTrigger = (e) => {
+      if (!e.detail.startX) e.detail.startX = lastClickCoords.x;
+      if (!e.detail.startY) e.detail.startY = lastClickCoords.y;
+    };
+
+    window.addEventListener('fly-to-cart', handleFlyTrigger, true);
+
+    return () => {
+      window.removeEventListener('click', handleWindowClick, true);
+      window.removeEventListener('fly-to-cart', handleFlyTrigger, true);
+    };
+  }, []);
+
   const addToCart = useCallback((item) => {
+    window.dispatchEvent(new CustomEvent('fly-to-cart', {
+      detail: { image: item.image, name: item.name }
+    }));
+
     setCartItems(prev => {
       const key = `${item.id}-${item.variant}`;
       const existing = prev[key];
@@ -106,6 +136,10 @@ function App() {
   }, []);
 
   const handleAddToCart = useCallback((product, selectedColor, size) => {
+    window.dispatchEvent(new CustomEvent('fly-to-cart', {
+      detail: { image: product.image, name: product.name }
+    }));
+
     const variantName = [selectedColor?.name, size].filter(Boolean).join(' / ') || 'Default';
     setCartItems(prev => {
       const key = `${product.id}-${variantName}`;
@@ -209,6 +243,7 @@ function App() {
                 onAddToCart={handleAddToCart}
               />
             )}
+            <CartFlyEffect />
           </BrowserRouter>
           </CategoriesProvider>
         </SecureProvider>
