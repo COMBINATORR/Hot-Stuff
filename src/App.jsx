@@ -162,7 +162,6 @@ function App() {
         }
       };
     });
-    setIsCartOpen(true);
   }, []);
 
   const updateQty = useCallback((id, variant, qty) => {

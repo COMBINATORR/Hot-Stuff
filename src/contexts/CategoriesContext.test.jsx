@@ -83,6 +83,11 @@ describe('CategoriesContext', () => {
     expect(screen.getByTestId('loading')).toHaveTextContent('false');
     expect(screen.getByTestId('categories-length')).toHaveTextContent('1');
     expect(screen.getByTestId('category-1')).toHaveTextContent('Cached Cat - none');
+
+    // Wait for the background update to finish to avoid test pollution
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-length')).toHaveTextContent('0');
+    });
   });
 
   it('fetches fresh data from Supabase and sorts subcategories', async () => {
