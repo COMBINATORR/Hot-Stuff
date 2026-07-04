@@ -5,14 +5,26 @@ export default function CartFlyEffect() {
   const [animations, setAnimations] = useState([]);
 
   useEffect(() => {
+    // Track click coordinates globally inside the container to bypass custom event mutation limits
+    let lastClickCoords = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    const handleGlobalClick = (e) => {
+      if (e.clientX !== 0 || e.clientY !== 0) {
+        lastClickCoords = { x: e.clientX, y: e.clientY };
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+
     const handleFly = (e) => {
-      const { image, startX, startY } = e.detail;
+      const { image } = e.detail;
+      const startX = e.detail.startX || lastClickCoords.x;
+      const startY = e.detail.startY || lastClickCoords.y;
       
-      // Calculate target coordinates dynamically
+      // Calculate target coordinates dynamically based on viewport size
       let endX = window.innerWidth - 50;
       let endY = 50;
 
-      // Check for desktop cart button first
       const desktopCart = document.getElementById('header-cart-btn');
       const mobileCart = document.getElementById('mobile-cart-btn');
 
@@ -33,13 +45,25 @@ export default function CartFlyEffect() {
     };
 
     window.addEventListener('fly-to-cart', handleFly);
-    return () => window.removeEventListener('fly-to-cart', handleFly);
+    
+    return () => {
+      window.removeEventListener('click', handleGlobalClick, true);
+      window.removeEventListener('fly-to-cart', handleFly);
+    };
   }, []);
 
   const handleAnimationComplete = (id) => {
-    setAnimations(prev => prev.filter(anim => anim.id !== id));
-    // Trigger cart wiggle animation in header
-    window.dispatchEvent(new CustomEvent('cart-bounce'));
+    setAnimations(prev => {
+      const exists = prev.some(anim => anim.id === id);
+      if (!exists) return prev;
+      
+      // Dispatch the bounce event asynchronously to avoid React state update collision
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('cart-bounce'));
+      }, 0);
+      
+      return prev.filter(anim => anim.id !== id);
+    });
   };
 
   return (
@@ -64,7 +88,7 @@ export default function CartFlyEffect() {
             transition={{
               duration: 0.85,
               ease: "easeInOut",
-              times: [0, 0.4, 0.85] // Control y curve timing
+              times: [0, 0.4, 0.85]
             }}
             onAnimationComplete={() => handleAnimationComplete(anim.id)}
             style={{
@@ -74,7 +98,7 @@ export default function CartFlyEffect() {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              border: '2px solid #E3A33F', // Gold theme border
+              border: '2px solid #E3A33F',
               backgroundColor: '#ffffff',
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255,255,255,0.2)',
               display: 'flex',
@@ -89,12 +113,10 @@ export default function CartFlyEffect() {
                 alt="Product" 
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback in case of image load error
                   e.target.style.display = 'none';
                 }}
               />
             ) : (
-              // Fallback emoji if no image
               <span className="text-xl">🌸</span>
             )}
           </motion.div>

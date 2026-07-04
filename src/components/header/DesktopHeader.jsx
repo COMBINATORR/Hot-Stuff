@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
+const cartVariants = {
+  rest: { scale: 1, rotate: 0 },
+  bounce: {
+    scale: [1, 1.25, 0.85, 1.15, 1],
+    rotate: [0, -10, 10, -5, 0],
+    transition: { duration: 0.5, ease: "easeInOut" }
+  }
+};
+
 export default function DesktopHeader({
   t, i18n,
   isLightPage,
@@ -205,8 +214,8 @@ export default function DesktopHeader({
           <motion.button
             onClick={onOpenCart || (() => setCartOpen(true))}
             id="header-cart-btn"
-            animate={cartBouncing ? { scale: [1, 1.25, 0.85, 1.15, 1], rotate: [0, -10, 10, -5, 0] } : {}}
-            transition={{ duration: 0.5 }}
+            variants={cartVariants}
+            animate={cartBouncing ? "bounce" : "rest"}
             className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
             aria-label={t('header.open_cart', 'Открыть корзину')}
           >

@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+const cartVariants = {
+  rest: { scale: 1, rotate: 0 },
+  bounce: {
+    scale: [1, 1.25, 0.85, 1.15, 1],
+    rotate: [0, -10, 10, -5, 0],
+    transition: { duration: 0.5, ease: "easeInOut" }
+  }
+};
+
 export default function MobileTabBar({
   t, i18n,
   setSearchOpen,
@@ -55,8 +64,8 @@ export default function MobileTabBar({
       <motion.button
         onClick={() => setCartOpen(true)}
         id="mobile-cart-btn"
-        animate={cartBouncing ? { scale: [1, 1.25, 0.85, 1.15, 1], rotate: [0, -10, 10, -5, 0] } : {}}
-        transition={{ duration: 0.5 }}
+        variants={cartVariants}
+        animate={cartBouncing ? "bounce" : "rest"}
         className="flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none text-white/60 hover:text-white transition-colors focus:outline-none relative"
       >
         <span className="material-symbols-outlined text-[22px] font-light">shopping_bag</span>
