@@ -18,7 +18,16 @@ export default function ProductPage({ onAddToCart }) {
   
   // Find product by id from URL, default to first product if not found
   const product = useMemo(() => {
-    const found = ALL_PRODUCTS.find(p => p.id === parseInt(id));
+    let list = ALL_PRODUCTS;
+    try {
+      const cached = localStorage.getItem('hs_products');
+      if (cached) {
+        list = JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached products in ProductPage', e);
+    }
+    const found = list.find(p => String(p.id) === String(id));
     return found || ALL_PRODUCTS[0];
   }, [id]);
 
@@ -35,6 +44,7 @@ export default function ProductPage({ onAddToCart }) {
   }, [product]);
 
   const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState('One Size');
   const [qty, setQty] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -93,6 +103,11 @@ export default function ProductPage({ onAddToCart }) {
     if (product && product.colors && product.colors.length > 0) {
       setSelectedColor(product.colors[0].name);
     }
+    if (product && product.sizes && product.sizes.length > 0) {
+      setSelectedSize(product.sizes[0]);
+    } else {
+      setSelectedSize('One Size');
+    }
     setQty(1);
     setActiveImageIndex(0);
     setDisplayMode('studio');
@@ -149,12 +164,15 @@ export default function ProductPage({ onAddToCart }) {
 
   const handleAdd = () => {
     if (onAddToCart && product) {
+      const hasSizes = product.sizes && product.sizes.length > 0;
+      const variantParts = [selectedColor, hasSizes ? selectedSize : null].filter(Boolean);
+      const variantName = variantParts.join(' / ') || 'Default';
       onAddToCart({
         id: product.id,
         name: product.name,
         price: product.price,
         emoji: product.emoji || '🌸',
-        variant: selectedColor,
+        variant: variantName,
         qty: qty,
         image: (product.gallery && product.gallery[activeImageIndex]) || product.image
       });
@@ -325,6 +343,9 @@ export default function ProductPage({ onAddToCart }) {
           product={product}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
+          selectedSize={selectedSize}
+          setSelectedSize={setSelectedSize}
+          sizesList={product.sizes || []}
           qty={qty}
           setQty={setQty}
           handleAdd={handleAdd}
