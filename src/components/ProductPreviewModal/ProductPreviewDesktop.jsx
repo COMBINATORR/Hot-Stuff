@@ -27,6 +27,7 @@ export default function ProductPreviewDesktop({
   handleAdd,
   expandedSection,
   toggleSection,
+  onImageClick,
   t
 }) {
   return (
@@ -72,12 +73,18 @@ export default function ProductPreviewDesktop({
             </div>
 
             {/* Main Image */}
-            <div className="flex-1 bg-white flex items-center justify-center p-8">
+            <div 
+              onClick={onImageClick}
+              className="flex-1 bg-white flex items-center justify-center p-8 cursor-zoom-in group/img relative overflow-hidden"
+            >
               <ResponsiveImage
                 src={galleryImages[selectedImageIndex] || product.image}
                 alt={product.name}
-                className="max-w-full max-h-full object-contain transition-all duration-300"
+                className="max-w-full max-h-full object-contain transition-all duration-300 group-hover/img:scale-[1.02]"
               />
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover/img:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-full flex items-center justify-center shadow-lg z-10">
+                <span className="material-symbols-outlined text-[20px]">zoom_in</span>
+              </div>
             </div>
           </div>
 

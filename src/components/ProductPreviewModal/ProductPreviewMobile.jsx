@@ -31,6 +31,7 @@ export default function ProductPreviewMobile({
   onTouchStart,
   onTouchMove,
   onTouchEnd,
+  onImageClick,
   t
 }) {
   return (
@@ -77,13 +78,17 @@ export default function ProductPreviewMobile({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className="w-full bg-white pt-12 pb-8 px-6 flex flex-col items-center justify-center relative min-h-[320px] select-none"
+        onClick={onImageClick}
+        className="w-full bg-white pt-12 pb-8 px-6 flex flex-col items-center justify-center relative min-h-[320px] select-none cursor-pointer"
       >
         <ResponsiveImage
           src={galleryImages[selectedImageIndex] || product.image}
           alt={product.name}
-          className="max-h-[220px] object-contain transition-all duration-300"
+          className="max-h-[220px] object-contain transition-all duration-300 active:scale-95"
         />
+        <div className="absolute bottom-12 right-6 bg-black/40 text-white p-1.5 rounded-full flex items-center justify-center shadow-md pointer-events-none z-10">
+          <span className="material-symbols-outlined text-[16px]">zoom_in</span>
+        </div>
 
         {/* Dots Indicator */}
         {galleryImages.length > 1 && (

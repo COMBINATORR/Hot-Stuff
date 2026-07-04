@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductPreviewMobile from './ProductPreviewMobile';
 import ProductPreviewDesktop from './ProductPreviewDesktop';
+import ImageZoomLightbox from './ImageZoomLightbox';
 
 // Mapping for color labels
 const COLOR_LABEL_MAP = {
@@ -29,6 +30,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [expandedSection, setExpandedSection] = useState('description');
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   
   // Ref для мобильного контейнера — сброс скролла при открытии
   const mobileModalRef = useRef(null);
@@ -216,27 +218,38 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     handleAdd,
     expandedSection,
     toggleSection,
+    onImageClick: () => setIsLightboxOpen(true),
     t
   };
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {isMobile ? (
-            <ProductPreviewMobile
-              {...childProps}
-              mobileModalRef={mobileModalRef}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-            />
-          ) : (
-            <ProductPreviewDesktop {...childProps} />
-          )}
-        </>
-      )}
-    </AnimatePresence>,
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {isMobile ? (
+              <ProductPreviewMobile
+                {...childProps}
+                mobileModalRef={mobileModalRef}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              />
+            ) : (
+              <ProductPreviewDesktop {...childProps} />
+            )}
+          </>
+        )}
+      </AnimatePresence>
+      <ImageZoomLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        imageSrc={product.image}
+        gallery={galleryImages}
+        currentIndex={selectedImageIndex}
+        onChangeIndex={setSelectedImageIndex}
+      />
+    </>,
     document.body
   );
 }
