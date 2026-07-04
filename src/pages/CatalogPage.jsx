@@ -92,7 +92,7 @@ const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
 
-export default function CatalogPage({ onAddToCart }) {
+export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const initialCat = params.get('cat') || 'all';
@@ -717,7 +717,7 @@ export default function CatalogPage({ onAddToCart }) {
               ) : (
                 filtered.map((p) => (
                   <motion.div key={p.id} variants={fadeUp} transition={{ duration: 0.35 }}>
-                    <ProductCard product={p} setSelectedPreviewProduct={setSelectedPreviewProduct} />
+                    <ProductCard product={p} setSelectedPreviewProduct={setSelectedPreviewProduct} favorites={favorites} setFavorites={setFavorites} />
                   </motion.div>
                 ))
               )}

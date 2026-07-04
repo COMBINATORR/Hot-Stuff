@@ -6,7 +6,7 @@ import { useAccountPage } from '../hooks/useAccountPage';
 import AccountDashboard from '../components/account/AccountDashboard';
 import AccountLoginForm from '../components/account/AccountLoginForm';
 
-export default function AccountPage({ onAddToCart, lang }) {
+export default function AccountPage({ onAddToCart, lang, favorites, setFavorites }) {
   const { t, i18n } = useTranslation();
   const {
     identifier, setIdentifier,
@@ -23,7 +23,6 @@ export default function AccountPage({ onAddToCart, lang }) {
     isPrivate, setIsPrivate,
     activeOrders, setActiveOrders,
     orderHistory, setOrderHistory,
-    favorites, setFavorites,
     loyaltyData, setLoyaltyData,
     sessionUser, setSessionUser,
     getDisplayAvatar, getDisplayName, getDisplayEmailOrPhone,
@@ -37,7 +36,7 @@ export default function AccountPage({ onAddToCart, lang }) {
     handleIdentifierSubmit, handleVerifySubmit, loginSuccess,
     handleLogout, handleTogglePrivate, handleCodeChange, handleKeyDown,
     showSharePush, setShowSharePush, handleShareWishlist, handleAddWishlistItem
-  } = useAccountPage({ t, lang, onAddToCart });
+  } = useAccountPage({ t, lang, onAddToCart, favorites, setFavorites });
 
   if (isSessionLoading) {
     return (

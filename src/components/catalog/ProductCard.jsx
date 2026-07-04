@@ -3,8 +3,21 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ResponsiveImage from '../ResponsiveImage';
 
-const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProduct }) {
+const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProduct, favorites = [], setFavorites }) {
   const { t } = useTranslation();
+  const isFavorite = favorites?.some(fav => fav.id === product.id);
+
+  const toggleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!setFavorites) return;
+    if (isFavorite) {
+      setFavorites(prev => prev.filter(fav => fav.id !== product.id));
+    } else {
+      setFavorites(prev => [...prev, product]);
+    }
+  };
+
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
@@ -75,12 +88,29 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
 
           {/* Heart + Name + Category */}
           <div className="flex items-start gap-2">
-            <button
-              className="text-black hover:text-primary transition-colors focus:outline-none flex-none mt-0.5"
-              aria-label={t('product.add_to_favorites', 'В избранное')}
-            >
-              <span className="material-symbols-outlined font-light text-[18px]">favorite_border</span>
-            </button>
+            <div className="relative group/heart flex-none">
+              <button
+                onClick={toggleFavorite}
+                className="text-black hover:text-primary transition-colors focus:outline-none flex mt-0.5 relative"
+                aria-label={isFavorite ? t('product.remove_from_favorites', 'Убрать из избранного') : t('product.add_to_favorites', 'В избранное')}
+              >
+                <span 
+                  className={`material-symbols-outlined text-[18px] transition-all duration-300 ${
+                    isFavorite ? 'text-red-500' : 'font-light'
+                  }`}
+                  style={isFavorite ? { fontVariationSettings: "'FILL' 1, 'wght' 200" } : {}}
+                >
+                  {isFavorite ? 'favorite' : 'favorite_border'}
+                </span>
+              </button>
+              
+              {/* Elegant Tooltip with slide-up fade animation */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-black text-white text-[9px] tracking-widest uppercase font-bold rounded-none opacity-0 translate-y-1 pointer-events-none group-hover/heart:opacity-100 group-hover/heart:translate-y-0 transition-all duration-300 whitespace-nowrap z-[99] shadow-md leading-none flex flex-col items-center">
+                <span>{isFavorite ? t('product.remove_from_favorites_short', 'УБРАТЬ') : t('product.add_to_favorites_short', 'В ИЗБРАННОЕ')}</span>
+                {/* Micro-arrow */}
+                <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 -z-10" />
+              </div>
+            </div>
             <div className="flex-1 min-w-0">
               <Link
                 to={`/product/${product.id}`}

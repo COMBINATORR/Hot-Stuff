@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAccountSession } from './useAccountSession';
 import { useAccountAuthHandlers } from './useAccountAuthHandlers';
 
-export function useAccountPage({ t, lang, onAddToCart }) {
+export function useAccountPage({ t, lang, onAddToCart, favorites: extFavorites, setFavorites: extSetFavorites }) {
   const [identifier, setIdentifier] = useState('');
   const [step, setStep] = useState(1); // 1 = Input, 2 = Verify Code / Password
   const [isRegistered, setIsRegistered] = useState(false);
@@ -22,7 +22,10 @@ export function useAccountPage({ t, lang, onAddToCart }) {
   // Dynamic backend integration states (Zero State by default)
   const [activeOrders, setActiveOrders] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  
+  const [localFavorites, setLocalFavorites] = useState([]);
+  const favorites = extFavorites || localFavorites;
+  const setFavorites = extSetFavorites || setLocalFavorites;
   const [loyaltyData, setLoyaltyData] = useState({
     discount: 0,
     tier: 'HOT STUFF START',
