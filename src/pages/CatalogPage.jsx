@@ -328,6 +328,12 @@ export default function CatalogPage({ onAddToCart }) {
             }
           }
         }
+      } else {
+        // If we are in 'all' / 'popular' category and NOT searching, only show sex toys (vibrators, massagers, couples)
+        if (!searchValLower) {
+          const isToy = p.category === 'vibrators' || p.category === 'massagers' || p.category === 'couples';
+          if (!isToy) return false;
+        }
       }
 
       // 4. Specials (Discount only)
