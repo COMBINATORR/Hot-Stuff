@@ -20,7 +20,7 @@ const ProductBadges = memo(({ product, t }) => (
 ));
 
 const ProductImage = memo(({ product, activeImage, gallery, selectedColorIndex, handleTouchStart, handleTouchEnd }) => (
-  <div className="flex-1 flex items-center justify-center py-4 relative my-2 bg-gray-50/50">
+  <div className="flex-1 flex items-center justify-center py-4 relative my-2">
     <Link
       to={`/product/${product.id}`}
       className="w-full h-full flex flex-col items-center justify-center select-none"
@@ -60,6 +60,11 @@ const ProductInfo = memo(({ product, colors, selectedColorIndex, setSelectedColo
         <p className="text-[8px] text-gray-500 font-sans mt-0.5 truncate">
           {t('menu.' + product.categoryLabel.toLowerCase(), product.categoryLabel)}
         </p>
+        {product.sizes && product.sizes.length > 0 && (
+          <p className="text-[8.5px] text-neutral-400 font-sans mt-0.5">
+            {t('product.sizes_label', 'Размеры')}: {product.sizes.join(', ')}
+          </p>
+        )}
       </div>
 
       {/* Color dots swatches (Interactive!) */}

@@ -29,28 +29,6 @@ export default function ProductPreviewAccordions({ product, expandedSection, tog
         )}
       </div>
 
-      {/* Warranty */}
-      <div className="border-b border-gray-100 py-3.5">
-        <button onClick={() => toggleSection('warranty')} className="w-full flex justify-between items-center text-left">
-          <div className="flex items-center gap-2">
-            <span className={labelIconClass}>verified_user</span>
-            {!isDesktop ? (
-               <span className="text-[11px] font-bold tracking-wider text-black">{t('product.warranty_tab')}</span>
-            ) : (
-              <div>
-                <span className="text-[11px] font-bold tracking-wider text-black block">{t('product.warranty_tab')}</span>
-                <span className="text-[9px] text-gray-400 font-sans">{t('product.warranty_badge')}</span>
-              </div>
-            )}
-          </div>
-          <span className={iconClass}>
-            {expandedSection === 'warranty' ? 'expand_less' : 'expand_more'}
-          </span>
-        </button>
-        {expandedSection === 'warranty' && (
-          <p className={pIconClass}>{t('product.warranty_desc')}</p>
-        )}
-      </div>
 
       {/* Secure */}
       <div className="border-b border-gray-100 py-3.5">

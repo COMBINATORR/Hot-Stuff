@@ -112,25 +112,33 @@ export default function Breadcrumbs({ theme = 'dark' }) {
       isLast: false
     });
 
-    const productId = parseInt(steps[1], 10);
-    const product = productsById.get(productId);
+    const productId = steps[1];
+    let list = ALL_PRODUCTS;
+    try {
+      const cached = localStorage.getItem('hs_products');
+      if (cached) list = JSON.parse(cached);
+    } catch(e) {}
+    const product = list.find(p => String(p.id) === String(productId));
 
     if (product) {
       // Определяем родительскую категорию
-      let parentSlug = 'toys-women';
+      let parentSlug = product.category || 'toys-women';
+      if (parentSlug === 'vibrators') parentSlug = 'toys-women';
       if (product.category === 'massagers') parentSlug = 'toys-men';
       if (product.category === 'couples') parentSlug = 'toys-couples';
       if (product.categoryLabel === 'АНАЛЬНЫЕ ПРОБКИ' || product.categoryLabel === 'АНАЛЬНЫЕ ВИБРОШАРИКИ') parentSlug = 'toys-anal';
 
-      const parentNames = {
-        'toys-women': t('menu.игрушки для женщин', 'Игрушки для женщин'),
-        'toys-men': t('menu.игрушки для мужчин', 'Игрушки для мужчин'),
-        'toys-couples': t('menu.игрушки для пар', 'Игрушки для пар'),
-        'toys-anal': t('menu.анальные игрушки', 'Анальные игрушки')
-      };
+      const parentCat = categoriesBySlug.get(parentSlug);
+      const parentName = parentCat 
+        ? t('menu.' + parentCat.name.toLowerCase(), parentCat.name) 
+        : (parentSlug === 'toys-women' ? t('menu.игрушки для женщин', 'Игрушки для женщин')
+          : parentSlug === 'toys-men' ? t('menu.игрушки для мужчин', 'Игрушки для мужчин')
+          : parentSlug === 'toys-couples' ? t('menu.игрушки для пар', 'Игрушки для пар')
+          : parentSlug === 'toys-anal' ? t('menu.анальные игрушки', 'Анальные игрушки')
+          : parentSlug);
 
       breadcrumbItems.push({
-        name: parentNames[parentSlug] || parentSlug,
+        name: parentName,
         link: `${langPrefix}/catalog?cat=${parentSlug}`,
         isLast: false
       });

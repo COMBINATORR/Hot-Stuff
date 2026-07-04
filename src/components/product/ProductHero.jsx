@@ -6,6 +6,9 @@ export default function ProductHero({
   product,
   selectedColor,
   setSelectedColor,
+  selectedSize,
+  setSelectedSize,
+  sizesList,
   qty,
   setQty,
   handleAdd,
@@ -68,6 +71,30 @@ export default function ProductHero({
                       }`}
                       style={{ backgroundColor: color.hex }}
                     ></button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sizes Selection */}
+            {sizesList && sizesList.length > 0 && (
+              <div className="mb-10">
+                <span className="font-sans font-bold text-[10px] tracking-widest text-outline block mb-4 uppercase">
+                  {t('product.size', 'размер')}: {selectedSize}
+                </span>
+                <div className="flex flex-wrap gap-2.5">
+                  {sizesList.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`text-[11px] tracking-widest py-3 px-6 border transition-all rounded-none uppercase font-bold focus-visible:outline-none ${
+                        selectedSize === size
+                          ? 'bg-primary text-black border-primary'
+                          : 'bg-transparent text-white border-white/15 hover:border-white/40'
+                      }`}
+                    >
+                      {size}
+                    </button>
                   ))}
                 </div>
               </div>

@@ -21,6 +21,9 @@ export default function ProductPreviewMobile({
   selectedColor,
   setSelectedColor,
   activeColorName,
+  selectedSize,
+  setSelectedSize,
+  sizesList,
   handleNavigateToProduct,
   handleAdd,
   expandedSection,
@@ -139,6 +142,30 @@ export default function ProductPreviewMobile({
           activeColorName={activeColorName}
           variant="mobile"
         />
+
+        {/* Sizes selection */}
+        {sizesList && sizesList.length > 0 && (
+          <div className="mt-6">
+            <span className="font-sans font-bold text-[10px] tracking-widest text-gray-400 block mb-3 uppercase">
+              {t('product.size', 'размер')}: {selectedSize}
+            </span>
+            <div className="flex flex-wrap gap-2.5">
+              {sizesList.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`text-[10px] tracking-wider py-2 px-5 border transition-all rounded-none uppercase font-bold focus-visible:outline-none ${
+                    selectedSize === size
+                      ? 'bg-black text-white border-black'
+                      : 'bg-transparent text-black border-gray-200 hover:border-black'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Actions Grid */}
         <ProductPreviewActions

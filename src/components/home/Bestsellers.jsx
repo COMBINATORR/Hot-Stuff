@@ -8,6 +8,27 @@ import { secureRandom } from '../../lib/random';
 
 const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 
+const sanitizeFilename = (str) => {
+  if (!str) return '';
+  return str
+    .replace(/\u0435/g, 'e') // Cyrillic e
+    .replace(/\u0430/g, 'a') // Cyrillic a
+    .replace(/\u043e/g, 'o') // Cyrillic o
+    .replace(/\u0441/g, 'c') // Cyrillic c
+    .replace(/\u0440/g, 'p') // Cyrillic p
+    .replace(/\u0445/g, 'x') // Cyrillic x
+    .replace(/\u0443/g, 'y') // Cyrillic y
+    .replace(/\u0456/g, 'i') // Cyrillic i
+    .replace(/\u0415/g, 'E') // Caps
+    .replace(/\u0410/g, 'A')
+    .replace(/\u041e/g, 'O')
+    .replace(/\u0421/g, 'C')
+    .replace(/\u0420/g, 'P')
+    .replace(/\u0425/g, 'X')
+    .replace(/\u0423/g, 'Y')
+    .replace(/\u0406/g, 'I');
+};
+
 export default function Bestsellers({ onSelectPreview }) {
   const { t } = useTranslation();
   const [dbProducts, setDbProducts] = useState([]);
@@ -41,10 +62,20 @@ export default function Bestsellers({ onSelectPreview }) {
         if (error) throw error;
         if (data && data.length > 0) {
           const mutated = data.map(p => {
-            const localProduct = productsMap.get(p.id);
+            const filenames = p.image_filename ? p.image_filename.split(',').map(s => sanitizeFilename(s.trim())) : [];
+            const mainFilename = filenames[0] || '';
+            const imageUrl = mainFilename 
+              ? supabase.storage.from('products').getPublicUrl(mainFilename).data.publicUrl
+              : '';
+            const galleryUrls = filenames.map(f => supabase.storage.from('products').getPublicUrl(f).data.publicUrl);
+            
             return {
               ...p,
-              price: localProduct ? localProduct.price : (Math.floor(secureRandom() * 101) + 100),
+              id: p.id,
+              name: p.title,              // Map title to name
+              image: imageUrl,            // Map image
+              gallery: galleryUrls,       // Map gallery
+              price: Number(p.price) || 0,
               oldPrice: null
             };
           });

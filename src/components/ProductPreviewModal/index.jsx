@@ -25,6 +25,7 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   
   // States
   const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState('One Size');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [expandedSection, setExpandedSection] = useState('description');
@@ -53,6 +54,11 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
       if (product.colors && product.colors.length > 0) {
         const firstColor = typeof product.colors[0] === 'object' ? product.colors[0].hex : product.colors[0];
         setSelectedColor(firstColor);
+      }
+      if (product.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
+      } else {
+        setSelectedSize('One Size');
       }
       setSelectedImageIndex(0);
     }
@@ -129,12 +135,15 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
 
   const handleAdd = () => {
     if (onAddToCart) {
+      const hasSizes = product.sizes && product.sizes.length > 0;
+      const variantParts = [activeColorName, hasSizes ? selectedSize : null].filter(Boolean);
+      const variantName = variantParts.join(' / ') || 'Default';
       onAddToCart({
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
-        variant: activeColorName || 'Default',
+        variant: variantName,
         qty: 1
       });
       onClose();
@@ -200,6 +209,9 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
     selectedColor,
     setSelectedColor,
     activeColorName,
+    selectedSize,
+    setSelectedSize,
+    sizesList: product.sizes || [],
     handleNavigateToProduct,
     handleAdd,
     expandedSection,

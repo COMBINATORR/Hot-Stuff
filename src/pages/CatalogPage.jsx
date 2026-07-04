@@ -14,6 +14,52 @@ import FilterDrawer from '../components/catalog/FilterDrawer';
 import CategorySidebar from '../components/catalog/CategorySidebar';
 import { useCategories } from '../contexts/CategoriesContext';
 
+const sanitizeFilename = (str) => {
+  if (!str) return '';
+  return str
+    .replace(/\u0435/g, 'e') // Cyrillic e
+    .replace(/\u0430/g, 'a') // Cyrillic a
+    .replace(/\u043e/g, 'o') // Cyrillic o
+    .replace(/\u0441/g, 'c') // Cyrillic c
+    .replace(/\u0440/g, 'p') // Cyrillic p
+    .replace(/\u0445/g, 'x') // Cyrillic x
+    .replace(/\u0443/g, 'y') // Cyrillic y
+    .replace(/\u0456/g, 'i') // Cyrillic i
+    .replace(/\u0415/g, 'E') // Caps
+    .replace(/\u0410/g, 'A')
+    .replace(/\u041e/g, 'O')
+    .replace(/\u0421/g, 'C')
+    .replace(/\u0420/g, 'P')
+    .replace(/\u0425/g, 'X')
+    .replace(/\u0423/g, 'Y')
+    .replace(/\u0406/g, 'I');
+};
+
+const colorHexMap = {
+  'белый': '#ffffff',
+  'черный': '#1a1a1a',
+  'чёрный': '#1a1a1a',
+  'красный': '#d9383a',
+  'бежевый': '#e1c7a5',
+  'розовый': '#f5a3b9',
+  'синий': '#1d5287',
+  'фиолетовый': '#7c5295',
+  'золотой': '#d4af37',
+  'золото': '#d4af37',
+  'серый': '#8e8e93',
+  'бордовый': '#800020',
+  'зеленый': '#2d7a4d',
+  'зелёный': '#2d7a4d',
+  'желтый': '#f2ca50',
+  'жёлтый': '#f2ca50',
+  'коричневый': '#8b5a2b'
+};
+
+const getColorHex = (colorName) => {
+  if (!colorName) return '#ffffff';
+  const clean = colorName.trim().toLowerCase();
+  return colorHexMap[clean] || '#ffffff';
+};
 
 const categorySlugMap = {
   'toys-women': (p) => p.category === 'vibrators' && p.categoryLabel !== 'АНАЛЬНЫЕ ПРОБКИ',
@@ -34,10 +80,10 @@ const categorySlugMap = {
   'remote-couples-vibrators': (p) => p.categoryLabel === 'ВИБРАТОРЫ С ПУЛЬТОМ' && p.category === 'couples',
   'anal-plugs': (p) => p.categoryLabel === 'АНАЛЬНЫЕ ПРОБКИ',
   'anal-beads': (p) => p.categoryLabel === 'АНАЛЬНЫЕ ВИБРОШАРИКИ',
-  'lingerie-classic': (p) => false,
-  'lingerie-erotic': (p) => false,
-  'bdsm-fetish': (p) => false,
-  'lubricants-cosmetics': (p) => false
+  'lingerie-classic': (p) => p.category === 'lingerie-classic' || p.categoryLabel.toLowerCase().includes('классическое') || ['комплекты белья', 'бюстгальтеры', 'трусики (базовые)', 'домашние комплекты', 'боди, сорочки и халаты (классические)'].includes(p.categoryLabel.toLowerCase()),
+  'lingerie-erotic': (p) => p.category === 'lingerie-erotic' || p.categoryLabel.toLowerCase().includes('эротическое') || ['трусики с доступом', 'ролевые костюмы', 'сетки (платья, боди)', 'эротические боди, сорочки и халаты', 'чулки и колготки с доступом', 'портупеи и пояса', 'перчатки', 'съедобное белье'].includes(p.categoryLabel.toLowerCase()),
+  'bdsm-fetish': (p) => p.category === 'bdsm-fetish' || p.categoryLabel.toLowerCase().includes('бдсм') || ['секс-качели', 'аксессуары для фиксации и доминирования'].includes(p.categoryLabel.toLowerCase()),
+  'lubricants-cosmetics': (p) => p.category === 'lubricants-cosmetics' || p.categoryLabel.toLowerCase().includes('лубрикант') || ['смазки / лубриканты', 'возбуждающие средства', 'сужающие кремы и спреи', 'парфюмерия с феромонами', 'уходовая косметика'].includes(p.categoryLabel.toLowerCase())
 };
 
 const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
@@ -49,26 +95,113 @@ const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 export default function CatalogPage({ onAddToCart }) {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
-  const initialCat = params.get('cat') || 'toys-women';
+  const initialCat = params.get('cat') || 'all';
   const [activeCat, setActiveCat] = useState(initialCat);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
-  const [expandedSidebarCats, setExpandedSidebarCats] = useState({ 'toys-women': true });
+  const [expandedSidebarCats, setExpandedSidebarCats] = useState({});
   const { categories, loading } = useCategories();
+
+  // Auto-expand sidebar parent category when activeCat is a subcategory
+  useEffect(() => {
+    if (!activeCat || !categories || categories.length === 0) return;
+    for (const cat of categories) {
+      const isSub = cat.subcategories?.some(sub => sub.slug === activeCat);
+      if (isSub) {
+        setExpandedSidebarCats(prev => ({
+          ...prev,
+          [cat.slug]: true
+        }));
+        break;
+      }
+    }
+  }, [activeCat, categories]);
 
   const [products, setProducts] = useState(ALL_PRODUCTS);
   const [productsLoading, setProductsLoading] = useState(true);
 
-  // Load products from cache
+  // Load products from Supabase with local cache and fallback
   useEffect(() => {
     async function loadProducts() {
+      // 1. Try to load from localStorage cache first for instant render
       try {
         const cached = localStorage.getItem('hs_products');
         if (cached) {
-          const data = JSON.parse(cached);
-          setProducts(data);
+          setProducts(JSON.parse(cached));
+          setProductsLoading(false);
         }
       } catch (e) {
         console.error('Failed to parse catalog products', e);
+      }
+
+      // 2. Fetch fresh products from Supabase in background
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const mapped = data.map(p => {
+            const filenames = p.image_filename ? p.image_filename.split(',').map(s => sanitizeFilename(s.trim())) : [];
+            const mainFilename = filenames[0] || '';
+            const imageUrl = mainFilename 
+              ? supabase.storage.from('products').getPublicUrl(mainFilename).data.publicUrl
+              : '';
+            const galleryUrls = filenames.map(f => supabase.storage.from('products').getPublicUrl(f).data.publicUrl);
+            
+            let parentCategorySlug = 'other';
+            const subName = (p.sub_category || '').toLowerCase();
+            const mainName = (p.main_category || '').toLowerCase();
+
+            if (mainName.includes('классическ') || subName.includes('базовые') || ['бюстгальтеры', 'комплекты белья', 'домашние комплекты'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'lingerie-classic';
+            } else if (mainName.includes('эротическ') || ['ролевые', 'сетки', 'чулки', 'портупеи', 'перчатки', 'съедобное'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'lingerie-erotic';
+            } else if (mainName.includes('бдсм') || ['качели', 'фиксации'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'bdsm-fetish';
+            } else if (mainName.includes('лубрикант') || mainName.includes('косметик') || ['смазки', 'возбуждающие', 'кремы', 'духи', 'косметика'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'lubricants-cosmetics';
+            } else if (mainName.includes('женщин') || ['клитор', 'точка g', 'кролик', 'вибропуля', 'вагинальные'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'vibrators';
+            } else if (mainName.includes('мужчин') || ['мастурбатор', 'простат', 'эрекционные', 'кольца'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'massagers';
+            } else if (mainName.includes('пар') || ['двоих', 'app'].some(x => subName.includes(x))) {
+              parentCategorySlug = 'couples';
+            }
+
+            return {
+              ...p,
+              id: p.id,
+              name: p.title,
+              image: imageUrl,
+              gallery: galleryUrls,
+              price: Number(p.price) || 0,
+              oldPrice: null,
+              category: parentCategorySlug,
+              categoryLabel: p.sub_category,
+              description: p.description || '',
+              colors: p.colors ? p.colors.split(',').map(c => ({ name: c.trim(), hex: getColorHex(c) })) : [],
+              sizes: p.sizes ? p.sizes.split(',').map(s => s.trim()) : [],
+              stimulation: p.stimulation ? p.stimulation.split(',').map(s => s.trim()) : [],
+              features: p.features ? p.features.split(',').map(f => f.trim()) : [],
+              specs: {
+                weight: p.weight,
+                dimensions: p.dimensions
+              }
+            };
+          });
+
+          setProducts(mapped);
+          localStorage.setItem('hs_products', JSON.stringify(mapped));
+        } else {
+          setProducts(ALL_PRODUCTS);
+        }
+      } catch (err) {
+        console.warn('[CatalogPage] Error loading products from Supabase, using fallback:', err);
+        if (!localStorage.getItem('hs_products')) {
+          setProducts(ALL_PRODUCTS);
+        }
       } finally {
         setProductsLoading(false);
       }
@@ -140,7 +273,7 @@ export default function CatalogPage({ onAddToCart }) {
     } else if (search) {
       setActiveCat('all');
     } else {
-      setActiveCat('toys-women');
+      setActiveCat('all');
     }
   }, [params]);
 
@@ -155,6 +288,20 @@ export default function CatalogPage({ onAddToCart }) {
       document.body.style.overflow = '';
     };
   }, [isFilterOpen]);
+
+  // Cache the slug-to-name resolution map
+  const slugToNameMap = useMemo(() => {
+    const map = new Map();
+    for (const cat of categories) {
+      map.set(cat.slug, cat.name);
+      if (cat.subcategories) {
+        for (const sub of cat.subcategories) {
+          map.set(sub.slug, sub.name);
+        }
+      }
+    }
+    return map;
+  }, [categories]);
 
   // Filter and sort products based on selected parameters
   const filtered = useMemo(() => {
@@ -171,8 +318,12 @@ export default function CatalogPage({ onAddToCart }) {
           if (filterFn) {
             if (!filterFn(p)) return false;
           } else {
-            if (!(p.category === activeCat ||
-                p.categoryLabel.toLowerCase() === activeCat.toLowerCase())) {
+            const activeCatName = slugToNameMap.get(activeCat);
+            if (!(
+              p.category === activeCat ||
+              p.categoryLabel === activeCat ||
+              (activeCatName && p.categoryLabel.toLowerCase() === activeCatName.toLowerCase())
+            )) {
               return false;
             }
           }
@@ -231,7 +382,7 @@ export default function CatalogPage({ onAddToCart }) {
     }
 
     return result;
-  }, [activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy, params]);
+  }, [products, activeCat, selectedStimulations, selectedPriceRanges, onlyDiscounted, selectedFeatures, sortBy, params]);
 
   const toggleSidebarCat = (key) => {
     setExpandedSidebarCats(prev => ({
@@ -269,20 +420,6 @@ export default function CatalogPage({ onAddToCart }) {
     setSelectedFeatures([]);
     setOnlyDiscounted(false);
   };
-
-  // Cache the slug-to-name resolution map
-  const slugToNameMap = useMemo(() => {
-    const map = new Map();
-    for (const cat of categories) {
-      map.set(cat.slug, cat.name);
-      if (cat.subcategories) {
-        for (const sub of cat.subcategories) {
-          map.set(sub.slug, sub.name);
-        }
-      }
-    }
-    return map;
-  }, [categories]);
 
   // Dynamically map page titles
   const pageTitle = useMemo(() => {
