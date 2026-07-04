@@ -11,6 +11,7 @@ import ProductPreviewModal from '../components/ProductPreviewModal';
 import ProductCard from '../components/catalog/ProductCard';
 import FilterDrawer from '../components/catalog/FilterDrawer';
 import CategorySidebar from '../components/catalog/CategorySidebar';
+import CategoryDrawer from '../components/catalog/CategoryDrawer';
 import { useCategories } from '../contexts/CategoriesContext';
 
 const sanitizeFilename = (str) => {
@@ -98,6 +99,7 @@ export default function CatalogPage({ onAddToCart }) {
   const [activeCat, setActiveCat] = useState(initialCat);
   const [selectedPreviewProduct, setSelectedPreviewProduct] = useState(null);
   const [expandedSidebarCats, setExpandedSidebarCats] = useState({});
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const { categories, loading } = useCategories();
 
   // Auto-expand sidebar parent category when activeCat is a subcategory
@@ -447,8 +449,92 @@ export default function CatalogPage({ onAddToCart }) {
     return activeCat;
   }, [activeCat, params, slugToNameMap, t]);
 
+  const categoryBanners = useMemo(() => ({
+    all: {
+      title: t('catalog.popular', 'Популярные секс-игрушки'),
+      description: 'Посмотри нашу коллекцию игрушек-бестселлеров, и ты поймешь, почему в них все время кто-то влюбляется. Это, по сути, золотой стандарт удовольствия, так что мы гарантируем тебе феерию ощущений и ярких оргазмов.',
+      image: '/images/categories/cat_popular.png'
+    },
+    popular: {
+      title: t('catalog.popular', 'Популярные секс-игрушки'),
+      description: 'Посмотри нашу коллекцию игрушек-бестселлеров, и ты поймешь, почему в них все время кто-то влюбляется. Это, по сути, золотой стандарт удовольствия, так что мы гарантируем тебе феерию ощущений и ярких оргазмов.',
+      image: '/images/categories/cat_popular.png'
+    },
+    new: {
+      title: t('catalog.new', 'Новинки'),
+      description: 'Самые свежие поступления девайсов и белья. Попробуй инновационные технологии стимуляции, эксклюзивные материалы и трендовые дизайны первыми.',
+      image: '/images/categories/cat_new.png'
+    },
+    'lingerie-classic': {
+      title: 'Классическое нижнее белье',
+      description: 'Премиальное классическое нижнее белье, изысканные комплекты, базовые трусики и нежнейшая домашняя одежда для вашей уверенности и комфорта каждый день.',
+      image: '/images/categories/cat_lingerie-classic.png'
+    },
+    'lingerie-erotic': {
+      title: 'Эротическое белье и одежда',
+      description: 'Чувственное эротическое белье, соблазнительные ролевые костюмы, портупеи и дерзкие аксессуары для создания волнующей атмосферы и незабываемых вечеров.',
+      image: '/images/categories/cat_lingerie-erotic.png'
+    },
+    'toys-women': {
+      title: 'Игрушки для женщин',
+      description: 'Инновационные стимуляторы, классические вибраторы и тренажеры Кегеля для раскрытия вашей чувственности, здоровья и глубокого расслабления.',
+      image: '/images/categories/cat_toys-women.png'
+    },
+    'toys-men': {
+      title: 'Игрушки для мужчин',
+      description: 'Высокотехнологичные мастурбаторы, массажеры простаты и аксессуары, созданные для мужского здоровья, выносливости и интенсивного удовольствия.',
+      image: '/images/categories/cat_toys-men.png'
+    },
+    'toys-couples': {
+      title: 'Игрушки для пар',
+      description: 'Надеваемые массажеры и парные девайсы с дистанционным управлением, созданные для синхронизации удовольствия и укрепления близости между партнерами.',
+      image: '/images/categories/cat_toys-couples.png'
+    },
+    'toys-anal': {
+      title: 'Анальные игрушки',
+      description: 'Деликатные анальные пробки с драгоценными кристаллами, виброшарики и стимуляторы, разработанные для безопасного, комфортного и невероятно яркого знакомства с новыми гранями чувственности.',
+      image: '/images/categories/cat_toys-anal.png'
+    },
+    'bdsm-fetish': {
+      title: 'БДСМ и Фетиш',
+      description: 'Элегантные кожаные фиксаторы, мягкие оковы, плетки и аксессуары для безопасного погружения в мир доминирования, подчинения и чувственных экспериментов.',
+      image: '/images/categories/cat_bdsm-fetish.png'
+    },
+    'lubricants-cosmetics': {
+      title: 'Лубриканты и интимная косметика',
+      description: 'Премиальные смазки на водной и силиконовой основе, возбуждающие гели с согревающим эффектом и уходовая косметика для максимальной нежности и скольжения.',
+      image: '/images/categories/cat_lubricants-cosmetics.png'
+    }
+  }), [t]);
+
+  const activeBanner = useMemo(() => {
+    if (categoryBanners[activeCat]) {
+      return categoryBanners[activeCat];
+    }
+    if (categories && categories.length > 0) {
+      for (const cat of categories) {
+        const sub = cat.subcategories?.find(s => s.slug === activeCat);
+        if (sub) {
+          const parentBanner = categoryBanners[cat.slug] || categoryBanners['all'];
+          const subName = slugToNameMap.get(activeCat) || sub.name;
+          return {
+            ...parentBanner,
+            title: t('menu.' + subName.toLowerCase(), subName),
+            description: sub.description || parentBanner.description
+          };
+        }
+      }
+    }
+    const name = slugToNameMap.get(activeCat) || activeCat;
+    return {
+      title: t('menu.' + name.toLowerCase(), name),
+      description: '',
+      image: '/images/categories/cat_popular.png'
+    };
+  }, [activeCat, categories, slugToNameMap, t, categoryBanners]);
+
   return (
-    <div className="page-enter pt-[110px] bg-white text-black min-h-screen">
+    <div className="page-enter pt-0 bg-white text-black min-h-screen">
       
       {/* Floating Gift Hint Banner */}
       <AnimatePresence>
@@ -485,7 +571,67 @@ export default function CatalogPage({ onAddToCart }) {
         )}
       </AnimatePresence>
 
-      <Breadcrumbs theme="light" />
+      {/* Category Header Banner (LELO Style) */}
+      {activeBanner && (
+        <div className="w-full bg-black text-white select-none mb-4">
+          {/* Banner Image Container */}
+          <div className="relative w-full h-[200px] sm:h-[260px] md:h-[380px] overflow-hidden">
+            {/* Background Image */}
+            <img
+              src={activeBanner.image}
+              alt={activeBanner.title}
+              className="w-full h-full object-cover object-center opacity-85"
+            />
+            {/* Dark Gradient Overlay - strong bottom-to-top gradient on all breakpoints */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+            
+            {/* Overlaid Title and Description Container — anchored to bottom */}
+            <div className="absolute inset-0 flex items-end">
+              <div className="container-hs px-4 sm:px-8 w-full md:grid md:grid-cols-12 relative z-10">
+                <div className="col-span-12 md:col-span-7 lg:col-span-6 text-left pb-6 md:pb-10">
+                  {/* Category Title */}
+                  <h1 className="text-[26px] sm:text-[34px] md:text-[56px] font-bold font-display tracking-tight leading-tight text-white drop-shadow-md mb-2 md:mb-4">
+                    {activeBanner.title}
+                  </h1>
+                  {/* Category Description (Desktop Only inside the overlay) */}
+                  {activeBanner.description && (
+                    <p className="hidden md:block text-[13px] md:text-[15px] leading-relaxed font-normal text-neutral-300 drop-shadow-sm max-w-xl">
+                      {activeBanner.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Description Section (Mobile Only - Black background) */}
+          {activeBanner.description && (
+            <div className="block md:hidden w-full bg-black py-5 border-b border-neutral-900">
+              <div className="container-hs px-4 sm:px-8">
+                <p className="text-[12px] sm:text-[13px] md:text-[14px] leading-relaxed font-normal text-neutral-300">
+                  {activeBanner.description}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Categories Selector Bar (Mobile Only) */}
+          <div className="block md:hidden w-full bg-neutral-950 py-3 border-y border-neutral-900">
+            <div className="container-hs px-4">
+              <button
+                onClick={() => setIsCategoryDrawerOpen(true)}
+                className="w-full flex items-center justify-between text-white font-sans font-bold text-[11px] tracking-widest uppercase py-2 bg-transparent border-none cursor-pointer focus:outline-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-primary">menu</span>
+                  <span>{t('catalog.categories', 'КАТЕГОРИИ')}</span>
+                </div>
+                <span className="material-symbols-outlined text-[16px] text-neutral-400">expand_more</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container-hs py-8">
         
@@ -503,14 +649,19 @@ export default function CatalogPage({ onAddToCart }) {
           />
 
           {/* RIGHT GRID & DETAILS */}
-          <main className="flex-1 w-full">
+          <main className="flex-1 w-full min-w-0">
+
+            {/* Breadcrumbs — aligned with product content */}
+            <div className="hidden md:block mb-5">
+              <Breadcrumbs theme="light" bare />
+            </div>
 
             {/* Title & Count Row */}
             <div className="flex justify-between items-baseline border-b border-black pb-4 mb-6">
-              <h1 className="text-[28px] md:text-[34px] font-bold text-black font-display tracking-tight leading-none">
+              <h2 className="hidden md:block text-[28px] md:text-[34px] font-bold text-black font-display tracking-tight leading-none">
                 {pageTitle}
-              </h1>
-              <span className="text-[10px] font-sans font-bold text-gray-500 uppercase tracking-wider">
+              </h2>
+              <span className="text-[10px] font-sans font-bold text-gray-500 uppercase tracking-wider md:ml-auto">
                 {t('catalog.results', { count: filtered.length })}
               </span>
             </div>
@@ -590,6 +741,16 @@ export default function CatalogPage({ onAddToCart }) {
         handlePriceRangeToggle={handlePriceRangeToggle}
         handleFeatureToggle={handleFeatureToggle}
         handleResetFilters={handleResetFilters}
+      />
+
+      {/* Category Drawer for Mobile */}
+      <CategoryDrawer
+        isOpen={isCategoryDrawerOpen}
+        onClose={() => setIsCategoryDrawerOpen(false)}
+        activeCat={activeCat}
+        categories={categories}
+        loading={loading}
+        handleCategoryClick={handleCategoryClick}
       />
 
       {/* Product Preview Modal */}

@@ -39,10 +39,6 @@ export default function DesktopHeader({
 
   return (
     <header className="w-full absolute top-12 left-0 z-40 mobile-premium-header flex flex-col pointer-events-none">
-      {/* RED TEST BANNER */}
-      <div className="w-full bg-[#E31E24] text-white text-center py-1.5 px-4 text-[9px] md:text-[10px] font-sans font-black tracking-widest uppercase select-none pointer-events-auto">
-        {t('header.test_banner', 'ТЕСТОВЫЙ РЕЖИМ: Цены снижены для проверки оплаты')}
-      </div>
       <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between h-20 pointer-events-auto">
 
         {/* LEFT: Menu / Sandwich (Desktop), Logo (Mobile) */}
@@ -53,7 +49,7 @@ export default function DesktopHeader({
             initial="rest"
             animate="rest"
             onClick={() => setNavOpen(true)}
-            className={`hidden md:flex items-center justify-center gap-3 bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`}
+            className={`hidden md:flex items-center justify-center gap-3 bg-transparent text-white border-none focus:outline-none focus-visible:text-primary active:scale-95 transition-all group h-[24px]`}
             aria-label={t('header.open_menu', 'Открыть меню')}
           >
             <div className="flex flex-col justify-between items-start w-6 h-[10px]" aria-hidden="true">
@@ -63,7 +59,7 @@ export default function DesktopHeader({
                   hover: { width: 16, x: 8 }
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                className={`h-[1.5px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
               />
               <motion.span
                 variants={{
@@ -71,20 +67,20 @@ export default function DesktopHeader({
                   hover: { width: 24 }
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                className={`h-[1.5px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
               />
             </div>
-            <span className={`font-bold text-[11px] tracking-[0.2em] font-sans ${isLightPage ? 'text-black' : 'text-white'} uppercase group-hover:text-primary group-focus-visible:text-primary transition-colors flex items-center mt-[1px]`}>
+            <span className={`font-bold text-[11px] tracking-[0.2em] font-sans text-white uppercase group-hover:text-primary group-focus-visible:text-primary transition-colors flex items-center mt-[1px]`}>
               {t('header.menu', 'МЕНЮ')}
             </span>
           </motion.button>
 
           {/* Logo for Mobile */}
           <div className="flex md:hidden flex-col items-start justify-center select-none">
-            <Link to={getHomePath()} className={`text-[22px] font-light tracking-[0.25em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none font-sans`}>
+            <Link to={getHomePath()} className={`text-[22px] font-light tracking-[0.25em] text-white uppercase leading-none font-sans`}>
               HOT STUFF
             </Link>
-            <span className={`text-[12px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-normal mt-1.5 uppercase font-sans`}>
+            <span className={`text-[12px] tracking-[0.45em] text-white font-normal mt-1.5 uppercase font-sans`}>
               {t('footer.subtitle', 'АТЫРАУ')}
             </span>
           </div>
@@ -92,10 +88,10 @@ export default function DesktopHeader({
 
         {/* CENTER: Logo (Desktop only) */}
         <div className="hidden md:flex flex-col items-center justify-center text-center select-none absolute left-1/2 -translate-x-1/2">
-          <Link to={getHomePath()} className={`text-[36px] font-medium tracking-[0.3em] ${isLightPage ? 'text-black' : 'text-white'} uppercase leading-none`}>
+          <Link to={getHomePath()} className={`text-[36px] font-medium tracking-[0.3em] text-white uppercase leading-none`}>
             HOT STUFF
           </Link>
-          <span className={`text-[18px] tracking-[0.45em] ${isLightPage ? 'text-black' : 'text-white'} font-medium mt-2 uppercase`}>
+          <span className={`text-[18px] tracking-[0.45em] text-white font-medium mt-2 uppercase`}>
             {t('footer.subtitle', 'АТЫРАУ')}
           </span>
         </div>
@@ -104,7 +100,7 @@ export default function DesktopHeader({
         <div className="flex items-center justify-end gap-5 md:gap-6">
           <button
             onClick={() => setSearchOpen(true)}
-            className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
+            className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
             aria-label={t('header.open_search', 'Открыть поиск')}
           >
             <motion.span
@@ -148,18 +144,14 @@ export default function DesktopHeader({
                 <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase font-sans">
                   <Link
                     to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
-                    className={`hover:text-primary transition-colors ${
-                      isLightPage ? 'text-black font-bold' : 'text-white font-bold'
-                    }`}
+                    className="hover:text-primary transition-colors text-white font-bold"
                   >
                     {t('header.cabinet', 'кабинет')}
                   </Link>
                   <span className="opacity-30">/</span>
                   <button
                     onClick={handleHeaderLogout}
-                    className={`hover:text-error transition-colors uppercase font-bold cursor-pointer bg-transparent border-none p-0 ${
-                      isLightPage ? 'text-black/60' : 'text-white/60'
-                    }`}
+                    className="hover:text-error transition-colors uppercase font-bold cursor-pointer bg-transparent border-none p-0 text-white/60"
                     title={t('header.logout', 'выйти')}
                   >
                     {t('header.logout', 'выйти')}
@@ -178,7 +170,7 @@ export default function DesktopHeader({
                 <NavLink
                   to={i18n.language === 'ru' ? '/account' : `/${i18n.language === 'kk' ? 'kz' : i18n.language}/account`}
                   onClick={handleAccountClick}
-                  className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
+                  className={`flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
                   title={t('header.login_register', 'Вход / Регистрация')}
                 >
                   <motion.span
@@ -194,7 +186,7 @@ export default function DesktopHeader({
           </AnimatePresence>
           <button
             onClick={onOpenFavorites}
-            className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
+            className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
             aria-label={t('header.open_favorites', 'Открыть избранное')}
           >
             <motion.span
@@ -216,7 +208,7 @@ export default function DesktopHeader({
             id="header-cart-btn"
             variants={cartVariants}
             animate={cartBouncing ? "bounce" : "rest"}
-            className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
+            className={`relative flex items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none hover:text-primary focus-visible:text-primary active:scale-90 transition-all rounded-[2px]`}
             aria-label={t('header.open_cart', 'Открыть корзину')}
           >
             <motion.span
@@ -240,7 +232,7 @@ export default function DesktopHeader({
             initial="rest"
             animate="rest"
             onClick={() => setNavOpen(true)}
-            className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent ${isLightPage ? 'text-black' : 'text-white'} border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`}
+            className={`flex md:hidden items-center justify-center w-[24px] h-[24px] bg-transparent text-white border-none focus:outline-none focus-visible:text-primary active:scale-90 transition-all group`}
             aria-label={t('header.open_menu', 'Открыть меню')}
           >
             <div className="flex flex-col justify-between items-end w-6 h-[10px]" aria-hidden="true">
@@ -250,7 +242,7 @@ export default function DesktopHeader({
                   hover: { width: 16, x: 8 }
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                className={`h-[1.5px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
               />
               <motion.span
                 variants={{
@@ -258,7 +250,7 @@ export default function DesktopHeader({
                   hover: { width: 24 }
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`h-[1.5px] ${isLightPage ? 'bg-black' : 'bg-white'} group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
+                className={`h-[1.5px] bg-white group-hover:bg-primary group-focus-visible:bg-primary transition-colors`}
               />
             </div>
           </motion.button>
@@ -267,3 +259,4 @@ export default function DesktopHeader({
     </header>
   );
 }
+

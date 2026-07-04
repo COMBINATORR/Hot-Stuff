@@ -5,7 +5,7 @@ import { ALL_PRODUCTS } from '../data/products';
 
 const productsById = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 
-export default function Breadcrumbs({ theme = 'dark' }) {
+export default function Breadcrumbs({ theme = 'dark', bare = false }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const pathname = location.pathname;
@@ -196,34 +196,40 @@ export default function Breadcrumbs({ theme = 'dark' }) {
 
   const isLight = theme === 'light';
 
+  const nav = (
+    <nav className={`flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase ${
+      isLight ? 'text-neutral-500' : 'text-neutral-400'
+    }`}>
+      {breadcrumbItems.map((item, idx) => {
+        const isLast = item.isLast;
+        return (
+          <React.Fragment key={idx}>
+            {idx > 0 && (
+              <span className={isLight ? 'text-black/20' : 'text-white/20'}>/</span>
+            )}
+            {isLast ? (
+              <span className="text-primary">{item.name}</span>
+            ) : (
+              <Link
+                to={item.link}
+                className={`transition-colors ${
+                  isLight ? 'hover:text-black text-neutral-500' : 'hover:text-white text-neutral-400'
+                }`}
+              >
+                {item.name}
+              </Link>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </nav>
+  );
+
+  if (bare) return nav;
+
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8 text-left">
-      <nav className={`flex items-center flex-wrap gap-2 text-[10px] font-bold tracking-widest uppercase ${
-        isLight ? 'text-neutral-500' : 'text-neutral-400'
-      }`}>
-        {breadcrumbItems.map((item, idx) => {
-          const isLast = item.isLast;
-          return (
-            <React.Fragment key={idx}>
-              {idx > 0 && (
-                <span className={isLight ? 'text-black/20' : 'text-white/20'}>/</span>
-              )}
-              {isLast ? (
-                <span className="text-primary">{item.name}</span>
-              ) : (
-                <Link
-                  to={item.link}
-                  className={`transition-colors ${
-                    isLight ? 'hover:text-black text-neutral-500' : 'hover:text-white text-neutral-400'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </nav>
+      {nav}
     </div>
   );
 }
