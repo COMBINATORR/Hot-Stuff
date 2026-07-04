@@ -77,7 +77,7 @@ export default function ProductPreviewMobile({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className="w-full bg-[#F9F9F9] pt-12 pb-8 px-6 flex flex-col items-center justify-center relative min-h-[320px] select-none"
+        className="w-full bg-white pt-12 pb-8 px-6 flex flex-col items-center justify-center relative min-h-[320px] select-none"
       >
         <ResponsiveImage
           src={galleryImages[selectedImageIndex] || product.image}
