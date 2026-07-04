@@ -12,7 +12,7 @@ import ProductCrossSell from '../components/product/ProductCrossSell';
 import ProductReviews from '../components/product/ProductReviews';
 
 
-export default function ProductPage({ onAddToCart }) {
+export default function ProductPage({ onAddToCart, favorites, setFavorites }) {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
   
@@ -358,6 +358,8 @@ export default function ProductPage({ onAddToCart }) {
           displayMode={displayMode}
           setDisplayMode={setDisplayMode}
           deviceLength={deviceLength}
+          favorites={favorites}
+          setFavorites={setFavorites}
         />
 
         {/* The Ritual Section */}

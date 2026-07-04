@@ -93,15 +93,27 @@ export default function ProductPreviewDesktop({
 
             {/* Header Controls — крестик и сердечко */}
             <div className="flex justify-end flex-none border-b border-gray-100">
-              <button
-                onClick={() => setIsFavorited(!isFavorited)}
-                className="flex items-center justify-center w-12 h-12 bg-white text-black hover:text-primary transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:text-primary active:scale-90"
-                aria-label={t('product.add_to_favorites', 'В избранное')}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
-                  {isFavorited ? 'favorite' : 'favorite_border'}
-                </span>
-              </button>
+              <div className="relative group/heart flex-none">
+                <button
+                  onClick={() => setIsFavorited(!isFavorited)}
+                  className="flex items-center justify-center w-12 h-12 bg-white text-black hover:text-primary transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:text-primary active:scale-90 relative z-10"
+                  aria-label={isFavorited ? t('product.remove_from_favorites', 'Убрать из избранного') : t('product.add_to_favorites', 'В избранное')}
+                >
+                  <span 
+                    className={`material-symbols-outlined text-[20px] transition-all duration-300 ${isFavorited ? 'text-red-500' : ''}`}
+                    style={isFavorited ? { fontVariationSettings: "'FILL' 1, 'wght' 200" } : {}}
+                  >
+                    {isFavorited ? 'favorite' : 'favorite_border'}
+                  </span>
+                </button>
+
+                {/* Elegant Tooltip with slide-left fade animation */}
+                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2.5 py-1.5 bg-black text-white text-[9px] tracking-widest uppercase font-bold rounded-none opacity-0 translate-x-1 pointer-events-none group-hover/heart:opacity-100 group-hover/heart:translate-x-0 transition-all duration-300 whitespace-nowrap z-[99] shadow-md leading-none flex items-center">
+                  <span>{isFavorited ? t('product.remove_from_favorites_short', 'УБРАТЬ') : t('product.add_to_favorites_short', 'В ИЗБРАННОЕ')}</span>
+                  {/* Micro-arrow */}
+                  <div className="w-2 h-2 bg-black rotate-45 absolute -right-1 top-1/2 -translate-y-1/2 -z-10" />
+                </div>
+              </div>
               <button
                 onClick={onClose}
                 className="flex items-center justify-center w-12 h-12 bg-white text-black hover:bg-black hover:text-white transition-all border-l border-gray-100 focus-visible:outline-none focus-visible:bg-black focus-visible:text-white active:scale-90"

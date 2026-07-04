@@ -58,9 +58,12 @@ export default function ProductPreviewMobile({
         <button
           onClick={() => setIsFavorited(!isFavorited)}
           className="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-black border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:scale-90 transition-all"
-          aria-label={t('product.add_to_favorites', 'В избранное')}
+          aria-label={isFavorited ? t('product.remove_from_favorites', 'Убрать из избранного') : t('product.add_to_favorites', 'В избранное')}
         >
-          <span className={`material-symbols-outlined text-[18px] ${isFavorited ? 'fill-current text-primary' : ''}`}>
+          <span 
+            className={`material-symbols-outlined text-[18px] transition-all duration-300 ${isFavorited ? 'text-red-500' : ''}`}
+            style={isFavorited ? { fontVariationSettings: "'FILL' 1, 'wght' 200" } : {}}
+          >
             {isFavorited ? 'favorite' : 'favorite_border'}
           </span>
         </button>

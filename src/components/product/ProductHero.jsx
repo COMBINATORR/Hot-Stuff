@@ -20,8 +20,21 @@ export default function ProductHero({
   handleTouchEnd,
   displayMode,
   setDisplayMode,
-  deviceLength
+  deviceLength,
+  favorites = [],
+  setFavorites
 }) {
+  const isFavorite = favorites?.some(fav => fav.id === product?.id);
+  const toggleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!setFavorites || !product) return;
+    if (isFavorite) {
+      setFavorites(prev => prev.filter(fav => fav.id !== product.id));
+    } else {
+      setFavorites(prev => [...prev, product]);
+    }
+  };
   return (
     <>
     {/* Hero Section */}
@@ -122,6 +135,28 @@ export default function ProductHero({
               >
                 {t('product.add_to_cart')}
               </button>
+
+              <div className="relative group/heart flex-none h-[52px]">
+                <button
+                  onClick={toggleFavorite}
+                  className="flex items-center justify-center w-[52px] h-[52px] bg-transparent hover:bg-white/5 text-white hover:text-primary transition-all border border-white/10 focus-visible:outline-none focus-visible:border-primary active:scale-95 relative z-10"
+                  aria-label={isFavorite ? t('product.remove_from_favorites', 'Убрать из избранного') : t('product.add_to_favorites', 'В избранное')}
+                >
+                  <span 
+                    className={`material-symbols-outlined text-[20px] transition-all duration-300 ${isFavorite ? 'text-red-500' : ''}`}
+                    style={isFavorite ? { fontVariationSettings: "'FILL' 1, 'wght' 200" } : {}}
+                  >
+                    {isFavorite ? 'favorite' : 'favorite_border'}
+                  </span>
+                </button>
+
+                {/* Elegant Tooltip with slide-up fade animation */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-2.5 py-1.5 bg-black text-white text-[9px] tracking-widest uppercase font-bold rounded-none opacity-0 translate-y-1 pointer-events-none group-hover/heart:opacity-100 group-hover/heart:translate-y-0 transition-all duration-300 whitespace-nowrap z-[99] shadow-md leading-none flex flex-col items-center">
+                  <span>{isFavorite ? t('product.remove_from_favorites_short', 'УБРАТЬ') : t('product.add_to_favorites_short', 'В ИЗБРАННОЕ')}</span>
+                  {/* Micro-arrow */}
+                  <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 -z-10" />
+                </div>
+              </div>
             </div>
 
             {/* Kaspi Red Installments */}

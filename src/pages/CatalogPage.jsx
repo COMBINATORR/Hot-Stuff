@@ -759,6 +759,8 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
         isOpen={!!selectedPreviewProduct}
         onClose={() => setSelectedPreviewProduct(null)}
         onAddToCart={onAddToCart}
+        favorites={favorites}
+        setFavorites={setFavorites}
       />
     </div>
   );

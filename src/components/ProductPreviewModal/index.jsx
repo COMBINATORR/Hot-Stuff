@@ -20,7 +20,7 @@ const COLOR_LABEL_MAP = {
   '#d4af37': 'GOLD',
 };
 
-export default function ProductPreviewModal({ product, isOpen, onClose, onAddToCart }) {
+export default function ProductPreviewModal({ product, isOpen, onClose, onAddToCart, favorites = [], setFavorites }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   
@@ -28,7 +28,30 @@ export default function ProductPreviewModal({ product, isOpen, onClose, onAddToC
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedSize, setSelectedSize] = useState('One Size');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isFavorited, setIsFavorited] = useState(false);
+  
+  const isFavorited = favorites?.some(fav => fav.id === product?.id);
+  const setIsFavorited = (val) => {
+    if (!setFavorites || !product) return;
+    if (typeof val === 'function') {
+      setFavorites(prev => {
+        const currentIsFav = prev.some(fav => fav.id === product.id);
+        const resolvedVal = val(currentIsFav);
+        if (resolvedVal) {
+          if (currentIsFav) return prev;
+          return [...prev, product];
+        } else {
+          return prev.filter(fav => fav.id !== product.id);
+        }
+      });
+    } else {
+      if (val) {
+        if (!isFavorited) setFavorites(prev => [...prev, product]);
+      } else {
+        setFavorites(prev => prev.filter(fav => fav.id !== product.id));
+      }
+    }
+  };
+
   const [expandedSection, setExpandedSection] = useState('description');
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   

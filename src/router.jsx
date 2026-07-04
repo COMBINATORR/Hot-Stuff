@@ -130,7 +130,7 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
         {/* Маршруты без префикса (русский по умолчанию) */}
         <Route path="/"             element={<PageWrapper><HomePage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
         <Route path="/catalog"      element={<PageWrapper><CatalogPage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
-        <Route path="/product/:id"  element={<PageWrapper><ProductPage onAddToCart={onAddToCart} /></PageWrapper>} />
+        <Route path="/product/:id"  element={<PageWrapper><ProductPage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
         <Route path="/cart"         element={<PageWrapper><CartPage cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
         <Route path="/checkout"     element={<PageWrapper><CheckoutPage cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
         <Route path="/account"      element={<PageWrapper><AccountPage onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
@@ -143,7 +143,7 @@ export default function AppRouter({ cartItems, setCartItems, onAddToCart, onUpda
           <React.Fragment key={lang}>
             <Route path={`/${lang}`}             element={<PageWrapper><HomePage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} onSelectQuickView={onSelectQuickView} /></PageWrapper>} />
             <Route path={`/${lang}/catalog`}     element={<PageWrapper><CatalogPage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
-            <Route path={`/${lang}/product/:id`} element={<PageWrapper><ProductPage lang={lang} onAddToCart={onAddToCart} /></PageWrapper>} />
+            <Route path={`/${lang}/product/:id`} element={<PageWrapper><ProductPage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
             <Route path={`/${lang}/cart`}         element={<PageWrapper><CartPage lang={lang} cartItems={cartItems} onUpdateQty={onUpdateQty} onRemove={onRemove} /></PageWrapper>} />
             <Route path={`/${lang}/checkout`}    element={<PageWrapper><CheckoutPage lang={lang} cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
             <Route path={`/${lang}/account`}     element={<PageWrapper><AccountPage lang={lang} onAddToCart={onAddToCart} favorites={favorites} setFavorites={setFavorites} /></PageWrapper>} />
