@@ -5,6 +5,9 @@ import { ALL_PRODUCTS } from '../data/products';
 
 const productsById = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 
+let cachedProductsRaw = null;
+let cachedProductsMap = null;
+
 export default function Breadcrumbs({ theme = 'dark', bare = false }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
@@ -115,12 +118,22 @@ export default function Breadcrumbs({ theme = 'dark', bare = false }) {
     });
 
     const productId = steps[1];
-    let list = ALL_PRODUCTS;
+    let product;
     try {
       const cached = localStorage.getItem('hs_products');
-      if (cached) list = JSON.parse(cached);
+      if (cached) {
+        if (cached !== cachedProductsRaw) {
+          cachedProductsRaw = cached;
+          const list = JSON.parse(cached);
+          cachedProductsMap = new Map(list.map(p => [String(p.id), p]));
+        }
+        product = cachedProductsMap.get(String(productId));
+      }
     } catch(e) {}
-    const product = list.find(p => String(p.id) === String(productId));
+
+    if (!product) {
+      product = productsById.get(Number(productId)) || productsById.get(String(productId));
+    }
 
     if (product) {
       // Определяем родительскую категорию
