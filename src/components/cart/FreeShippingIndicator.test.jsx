@@ -1,6 +1,5 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import FreeShippingIndicator from './FreeShippingIndicator';
 
 // Mock react-i18next is handled in vitest.setup.js,
