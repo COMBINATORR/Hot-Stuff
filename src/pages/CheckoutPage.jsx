@@ -73,6 +73,11 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   // Confirmed order data to persist totals after cart is cleared
   const [confirmedOrder, setConfirmedOrder] = useState(null);
 
+  // Custom Mock Halyk Widget modal states
+  const [showHalykMockModal, setShowHalykMockModal] = useState(false);
+  const [halykPaymentDetails, setHalykPaymentDetails] = useState(null);
+  const [halykCallback, setHalykCallback] = useState(null);
+
   const deliveryOptions = [
     { 
       id: 'yandex',       
@@ -285,11 +290,6 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
 
         if (data && data.success) {
           const useTestWidget = data.provider === 'mock-halyk';
-          const halykSdk = await loadHalykScript(useTestWidget);
-          if (!halykSdk) {
-            throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
-          }
-
           const paymentObject = {
             invoiceId: generatedOrderId,
             amount: total,
@@ -300,14 +300,32 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
             failureBackLink: window.location.origin + '/checkout'
           };
 
-          halykSdk.showPaymentWidget(paymentObject, (response) => {
-            console.log('[Halyk Epay Result]', response);
-            if (response && (response.success || response.code === 0 || response.status === 'success' || response.code === 'success')) {
-              finalizeAndCleanCart(generatedOrderId);
-            } else {
-              setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
+          if (useTestWidget) {
+            setHalykPaymentDetails(paymentObject);
+            setHalykCallback(() => (response) => {
+              console.log('[Halyk Epay Result]', response);
+              if (response && response.success) {
+                finalizeAndCleanCart(generatedOrderId);
+              } else {
+                setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
+              }
+            });
+            setShowHalykMockModal(true);
+          } else {
+            const halykSdk = await loadHalykScript(false);
+            if (!halykSdk) {
+              throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
             }
-          });
+
+            halykSdk.showPaymentWidget(paymentObject, (response) => {
+              console.log('[Halyk Epay Result]', response);
+              if (response && (response.success || response.code === 0 || response.status === 'success' || response.code === 'success')) {
+                finalizeAndCleanCart(generatedOrderId);
+              } else {
+                setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
+              }
+            });
+          }
         } else {
           throw new Error(t('checkout.halyk_token_error', 'Не удалось получить токен авторизации платежа от банка'));
         }
@@ -469,6 +487,130 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
           </AnimatePresence>
         </div>
       </div>
+      {/* Mock Halyk ePay Widget Modal */}
+      <AnimatePresence>
+        {showHalykMockModal && halykPaymentDetails && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowHalykMockModal(false);
+                if (halykCallback) halykCallback({ success: false });
+              }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-[420px] bg-[#f8f9fa] rounded-[24px] shadow-2xl overflow-hidden font-sans text-[#1c1c1c] z-10 border border-neutral-200"
+            >
+              {/* Header: Halyk ePay Brand Style */}
+              <div className="bg-[#00a876] px-6 py-5 text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[18px] font-black tracking-wider uppercase">HALYK <span className="font-light text-[#ccffeb]">epay</span></span>
+                </div>
+                <div className="bg-white/20 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  TEST MODE
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Details */}
+                <div className="bg-white p-4 rounded-[16px] border border-neutral-100 space-y-2">
+                  <div className="flex justify-between text-[13px] text-neutral-500">
+                    <span>Магазин:</span>
+                    <span className="font-bold text-neutral-800">HOT STUFF</span>
+                  </div>
+                  <div className="flex justify-between text-[13px] text-neutral-500">
+                    <span>Номер заказа:</span>
+                    <span className="font-mono font-bold text-neutral-800">{halykPaymentDetails.invoiceId}</span>
+                  </div>
+                  <div className="h-px bg-neutral-100 my-2" />
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[14px] font-bold text-neutral-700">К оплате:</span>
+                    <span className="text-[20px] font-black text-[#00a876]">
+                      {halykPaymentDetails.amount.toLocaleString()} ₸
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Fields Form Mock */}
+                <div className="space-y-4">
+                  <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider ml-1">
+                    Данные тестовой карты
+                  </div>
+                  
+                  {/* Card Number */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly
+                      value="4400 4300 0000 0000"
+                      className="w-full bg-white border border-neutral-200 rounded-[14px] px-4 py-3.5 text-[15px] font-mono text-neutral-800 outline-none cursor-not-allowed"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-neutral-400">VISA</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Expiry */}
+                    <input
+                      type="text"
+                      readOnly
+                      value="12 / 29"
+                      className="w-full bg-white border border-neutral-200 rounded-[14px] px-4 py-3.5 text-[15px] font-mono text-neutral-800 text-center outline-none cursor-not-allowed"
+                    />
+                    {/* CVV */}
+                    <input
+                      type="text"
+                      readOnly
+                      value="123"
+                      className="w-full bg-white border border-neutral-200 rounded-[14px] px-4 py-3.5 text-[15px] font-mono text-neutral-800 text-center outline-none cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setShowHalykMockModal(false);
+                      if (halykCallback) halykCallback({ success: true });
+                    }}
+                    className="w-full bg-[#00a876] hover:bg-[#009165] active:scale-[0.98] text-white font-bold py-4 rounded-[16px] transition-all text-[15px] shadow-lg shadow-[#00a876]/20 flex items-center justify-center gap-2"
+                  >
+                    <span>Оплатить {halykPaymentDetails.amount.toLocaleString()} ₸</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowHalykMockModal(false);
+                      if (halykCallback) halykCallback({ success: false });
+                    }}
+                    className="w-full hover:bg-neutral-100 text-neutral-500 font-bold py-3.5 rounded-[16px] transition-colors text-[14px]"
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
+
+              {/* Security Badges */}
+              <div className="bg-neutral-100/80 px-6 py-4 flex items-center justify-center gap-4 border-t border-neutral-200/50 text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
+                <span>🔒 PCI DSS Compliant</span>
+                <span>•</span>
+                <span>Halyk 3D Secure</span>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
