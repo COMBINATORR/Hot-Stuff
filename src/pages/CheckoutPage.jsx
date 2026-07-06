@@ -49,6 +49,9 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const [yandexDeliveryTime, setYandexDeliveryTime] = useState(0);
   const [isCalculatingDelivery, setIsCalculatingDelivery] = useState(false);
 
+  // Confirmed order data to persist totals after cart is cleared
+  const [confirmedOrder, setConfirmedOrder] = useState(null);
+
   const deliveryOptions = [
     { 
       id: 'yandex',       
@@ -134,7 +137,11 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
         });
 
         if (!error && data && data.status === 'paid') {
-          setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
+          if (delivery === 'yandex' || delivery === 'pickup') {
+            finalizeAndCleanCart(invoiceId);
+          } else {
+            setStep('delivery_address');
+          }
           isMounted = false; // Stop polling
         }
       } catch (err) {
@@ -154,6 +161,23 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
     };
   }, [step, invoiceId, provider]);
 
+  // Helper to finalize order details, switch to success, and clear cart
+  const finalizeAndCleanCart = (currentOrderId) => {
+    setConfirmedOrder({
+      orderId: currentOrderId || orderId || `HS-${Date.now()}`,
+      payment,
+      delivery,
+      address,
+      city,
+      zip,
+      total
+    });
+    setStep('success');
+    if (setCartItems) {
+      setCartItems([]);
+    }
+  };
+
   // Form input validation
   const validateForm = () => {
     const errors = {};
@@ -170,6 +194,15 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
     if ((payment !== 'kaspi' || delivery === 'yandex') && delivery !== 'pickup') {
       if (!address.trim()) errors.address = t('checkout.error_address', 'Адрес обязателен');
       if (!city.trim()) errors.city = t('checkout.error_city', 'Город обязателен');
+    }
+
+    // Require successful Yandex Delivery price estimation
+    if (delivery === 'yandex' && !errors.address) {
+      if (isCalculatingDelivery) {
+        errors.address = t('checkout.error_calculating_delivery', 'Идет расчет стоимости доставки...');
+      } else if (yandexDeliveryCost === 0) {
+        errors.address = t('checkout.error_delivery_calc_failed', 'Не удалось рассчитать доставку. Проверьте адрес.');
+      }
     }
 
     setFormErrors(errors);
@@ -219,17 +252,18 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       }
     } else {
       // Cash / Card checkout goes straight to success
-      setStep('success');
-      if (setCartItems) {
-        setCartItems([]);
-      }
+      finalizeAndCleanCart(generatedOrderId);
     }
   };
 
   const checkPaymentStatusManual = async () => {
     if (provider === 'kaspi-direct' || invoiceId.startsWith('mock-')) {
       // Free / Mock flow proceeds immediately
-      setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
+      if (delivery === 'yandex' || delivery === 'pickup') {
+        finalizeAndCleanCart(orderId);
+      } else {
+        setStep('delivery_address');
+      }
       return;
     }
 
@@ -242,7 +276,11 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       if (error) throw error;
 
       if (data && data.status === 'paid') {
-        setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
+        if (delivery === 'yandex' || delivery === 'pickup') {
+          finalizeAndCleanCart(orderId);
+        } else {
+          setStep('delivery_address');
+        }
       } else {
         alert(t('checkout.payment_not_received', 'Оплата еще не поступила. Пожалуйста, оплатите счет в приложении Kaspi.kz и попробуйте снова.'));
       }
@@ -263,10 +301,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       return;
     }
     
-    setStep('success');
-    if (setCartItems) {
-      setCartItems([]);
-    }
+    finalizeAndCleanCart(orderId);
   };
 
   return (
@@ -355,13 +390,13 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
             {/* STEP 4: Checkout Success View */}
             {step === 'success' && (
               <CheckoutSuccess
-                orderId={orderId}
-                payment={payment}
-                delivery={delivery}
-                address={address}
-                city={city}
-                zip={zip}
-                total={total}
+                orderId={confirmedOrder?.orderId || orderId}
+                payment={confirmedOrder?.payment || payment}
+                delivery={confirmedOrder?.delivery || delivery}
+                address={confirmedOrder?.address || address}
+                city={confirmedOrder?.city || city}
+                zip={confirmedOrder?.zip || zip}
+                total={confirmedOrder?.total ?? total}
               />
             )}
           </AnimatePresence>

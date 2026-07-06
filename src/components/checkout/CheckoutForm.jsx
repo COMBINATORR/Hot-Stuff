@@ -124,7 +124,9 @@ export default function CheckoutForm({
                   <p className="text-[11px] text-neutral-500 font-medium mt-0.5">{d.time}</p>
                 </div>
                 <span className="text-xs font-bold text-black">
-                  {d.price === 0 ? t('checkout.free', 'Бесплатно') : `${d.price.toLocaleString('ru-KZ')} ₸`}
+                  {d.id === 'yandex' && d.price === 0
+                    ? t('checkout.delivery_yandex_calc', 'Рассчитывается по адресу')
+                    : (d.price === 0 ? t('checkout.free', 'Бесплатно') : `${d.price.toLocaleString('ru-KZ')} ₸`)}
                 </span>
               </button>
             ))}
@@ -253,7 +255,11 @@ export default function CheckoutForm({
             </div>
             <div className="flex justify-between text-neutral-500 font-medium">
               <span>{t('checkout.delivery')}</span>
-              <span className="font-bold text-black">{deliveryCost === 0 ? t('checkout.free', 'Бесплатно') : `${deliveryCost.toLocaleString('ru-KZ')} ₸`}</span>
+              <span className="font-bold text-black">
+                {delivery === 'yandex' && deliveryCost === 0
+                  ? t('checkout.delivery_yandex_calc', 'Рассчитывается по адресу')
+                  : (deliveryCost === 0 ? t('checkout.free', 'Бесплатно') : `${deliveryCost.toLocaleString('ru-KZ')} ₸`)}
+              </span>
             </div>
             <div className="h-px bg-black/5 my-2" />
             <div className="flex justify-between items-baseline">

@@ -393,7 +393,14 @@
     "billing": "Neutral billing",
     "billing_desc": "Your card statement or Kaspi transaction history will display a neutral merchant name (e.g., \"Retail Atyrau\" or \"HS-Atyrau\"), without any mention of adult products or the brand.",
     "ssl": "SSL & Data Protection",
-    "ssl_desc": "Your personal data is protected by 256-bit SSL encryption and is used solely for the confidential delivery of your order by the courier."
+    "ssl_desc": "Your personal data is protected by 256-bit SSL encryption and is used solely for the confidential delivery of your order by the courier.",
+    "error_first_name": "First name is required",
+    "error_phone": "Phone is required",
+    "error_phone_invalid": "Invalid phone format",
+    "error_address": "Address is required",
+    "error_city": "City is required",
+    "error_calculating_delivery": "Calculating delivery cost...",
+    "error_delivery_calc_failed": "Failed to calculate delivery. Check the address."
   },
   "account": {
     "title": "My Account",
