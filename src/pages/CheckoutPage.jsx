@@ -154,7 +154,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
           
           // Open payment link in new window immediately if user on mobile
           if (data.provider === 'kaspi-direct' && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
-            window.open(data.paymentUrl, '_blank');
+            window.open(data.paymentUrl, '_blank', 'noopener,noreferrer');
           }
           
           setStep('kaspi_pending');
