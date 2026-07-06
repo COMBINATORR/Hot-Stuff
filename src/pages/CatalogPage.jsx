@@ -148,9 +148,9 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
             const filenames = p.image_filename ? p.image_filename.split(',').map(s => sanitizeFilename(s.trim())) : [];
             const mainFilename = filenames[0] || '';
             const imageUrl = mainFilename 
-              ? `${baseProductUrl}${mainFilename}`
+              ? `${baseProductUrl}${mainFilename.split('/').map(encodeURIComponent).join('/')}`
               : '';
-            const galleryUrls = filenames.map(f => `${baseProductUrl}${f}`);
+            const galleryUrls = filenames.map(f => `${baseProductUrl}${f.split('/').map(encodeURIComponent).join('/')}`);
             
             let parentCategorySlug = 'other';
             const subName = (p.sub_category || '').toLowerCase();
