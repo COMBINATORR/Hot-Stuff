@@ -38,7 +38,7 @@ export default function CartFlyEffect() {
         endY = rect.top + rect.height / 2;
       }
 
-      const id = Date.now() + Math.random();
+      const id = crypto.randomUUID();
       const newAnim = { id, image, startX, startY, endX, endY };
 
       setAnimations(prev => [...prev, newAnim]);
