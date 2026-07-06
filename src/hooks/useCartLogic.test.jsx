@@ -77,6 +77,32 @@ describe('useCartLogic', () => {
     expect(newItems.find(i => i.id === '1' && i.variant === 'A').qty).toBe(3);
   });
 
+  it('bounds item quantity to a minimum of 1 for zero and negative updates', () => {
+    const setItemsMock = vi.fn();
+    const { result } = renderHook(() => useCartLogic({ ...defaultProps, items: sampleItems, setItems: setItemsMock }));
+
+    act(() => {
+      result.current.handleUpdateQty('1', 'A', 0);
+    });
+
+    act(() => {
+      result.current.handleUpdateQty('1', 'A', -5);
+    });
+
+    expect(setItemsMock).toHaveBeenCalledTimes(2);
+
+    // Test the callback logic for 0
+    const updateFnZero = setItemsMock.mock.calls[0][0];
+    const newItemsZero = updateFnZero(sampleItems);
+    expect(newItemsZero.find(i => i.id === '1' && i.variant === 'A').qty).toBe(1);
+
+    // Test the callback logic for -5
+    const updateFnNegative = setItemsMock.mock.calls[1][0];
+    const newItemsNegative = updateFnNegative(sampleItems);
+    expect(newItemsNegative.find(i => i.id === '1' && i.variant === 'A').qty).toBe(1);
+  });
+
+
   it('handles removing an item (handleRemove)', () => {
     const setItemsMock = vi.fn();
     const { result } = renderHook(() => useCartLogic({ ...defaultProps, items: sampleItems, setItems: setItemsMock }));

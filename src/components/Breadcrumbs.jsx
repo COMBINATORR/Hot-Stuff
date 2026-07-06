@@ -3,10 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 
-const productsById = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
-
-let cachedProductsRaw = null;
-let cachedProductsMap = null;
+const productsById = new Map(ALL_PRODUCTS.map(p => [String(p.id), p]));
+let cachedHsProductsString = null;
+let cachedHsProductsMap = null;
 
 export default function Breadcrumbs({ theme = 'dark', bare = false }) {
   const location = useLocation();
@@ -118,21 +117,21 @@ export default function Breadcrumbs({ theme = 'dark', bare = false }) {
     });
 
     const productId = steps[1];
-    let product;
+    let product = null;
     try {
       const cached = localStorage.getItem('hs_products');
       if (cached) {
-        if (cached !== cachedProductsRaw) {
-          cachedProductsRaw = cached;
-          const list = JSON.parse(cached);
-          cachedProductsMap = new Map(list.map(p => [String(p.id), p]));
+        if (cached !== cachedHsProductsString) {
+          cachedHsProductsString = cached;
+          const parsed = JSON.parse(cached);
+          cachedHsProductsMap = new Map(parsed.map(p => [String(p.id), p]));
         }
-        product = cachedProductsMap.get(String(productId));
+        product = cachedHsProductsMap.get(String(productId));
       }
     } catch(e) {}
 
     if (!product) {
-      product = productsById.get(Number(productId)) || productsById.get(String(productId));
+      product = productsById.get(String(productId));
     }
 
     if (product) {
