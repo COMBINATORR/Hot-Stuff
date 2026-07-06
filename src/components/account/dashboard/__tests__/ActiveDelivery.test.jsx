@@ -10,9 +10,6 @@ describe('ActiveDelivery Component', () => {
     }
     if (typeof options === 'object' && options !== null) {
       let text = options.defaultValue || key;
-      if (key === 'account.delivery_order_num' && options.num) {
-        return `Заказ №${options.num}`;
-      }
       return Object.entries(options).reduce((acc, [k, v]) => {
         if (typeof v === 'string' || typeof v === 'number') {
           if (acc.includes(`{{${k}}}`)) {
