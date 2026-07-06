@@ -444,3 +444,9 @@ entrypoint = "./functions/telegram-proxy/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/telegram-proxy/*.html" ]
+
+[functions.halyk-checkout]
+enabled = true
+verify_jwt = false
+import_map = "./functions/halyk-checkout/deno.json"
+entrypoint = "./functions/halyk-checkout/index.ts"

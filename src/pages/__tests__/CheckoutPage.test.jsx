@@ -109,6 +109,20 @@ describe('CheckoutPage', () => {
 
   it('completes checkout flow with card payment immediately to success step', async () => {
     const setCartItems = vi.fn();
+    
+    // Mock Halyk SDK in window
+    const mockShowPaymentWidget = vi.fn((paymentObject, callback) => {
+      callback({ success: true });
+    });
+    window.halyk = {
+      showPaymentWidget: mockShowPaymentWidget
+    };
+
+    mockInvoke.mockResolvedValueOnce({
+      data: { success: true, accessToken: 'test-token', terminal: 'test-terminal' },
+      error: null
+    });
+
     render(
       <MemoryRouter>
         <CheckoutPage cartItems={mockCartItems} setCartItems={setCartItems} />

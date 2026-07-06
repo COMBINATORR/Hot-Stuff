@@ -13,6 +13,26 @@ import { calculateYandexDelivery } from '../lib/supabaseClient';
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
 
+const loadHalykScript = () => {
+  return new Promise((resolve) => {
+    if (window.halyk) {
+      resolve(window.halyk);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = import.meta.env.PROD 
+      ? 'https://epay.homebank.kz/payform/payment-api.js' 
+      : 'https://test-epay.epayment.kz/payform/payment-api.js';
+    script.onload = () => {
+      resolve(window.halyk);
+    };
+    script.onerror = () => {
+      resolve(null);
+    };
+    document.body.appendChild(script);
+  });
+};
+
 export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -250,8 +270,53 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       } finally {
         setIsCheckingOut(false);
       }
+    } else if (payment === 'card') {
+      setIsCheckingOut(true);
+      try {
+        const halykSdk = await loadHalykScript();
+        if (!halykSdk) {
+          throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
+        }
+
+        const { data, error } = await supabase.functions.invoke('halyk-checkout', {
+          body: {
+            amount: total,
+            invoiceId: generatedOrderId
+          }
+        });
+
+        if (error) throw error;
+
+        if (data && data.success) {
+          const paymentObject = {
+            invoiceId: generatedOrderId,
+            amount: total,
+            currency: 'KZT',
+            terminal: data.terminal,
+            auth: data.accessToken,
+            backLink: window.location.origin + '/checkout',
+            failureBackLink: window.location.origin + '/checkout'
+          };
+
+          halykSdk.showPaymentWidget(paymentObject, (response) => {
+            console.log('[Halyk Epay Result]', response);
+            if (response && (response.success || response.code === 0 || response.status === 'success' || response.code === 'success')) {
+              finalizeAndCleanCart(generatedOrderId);
+            } else {
+              setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
+            }
+          });
+        } else {
+          throw new Error(t('checkout.halyk_token_error', 'Не удалось получить токен авторизации платежа от банка'));
+        }
+      } catch (err) {
+        console.error('[Halyk Checkout Error]', err);
+        setPaymentError(err.message || t('checkout.payment_error', 'Ошибка при инициализации оплаты картой'));
+      } finally {
+        setIsCheckingOut(false);
+      }
     } else {
-      // Cash / Card checkout goes straight to success
+      // Cash checkout goes straight to success
       finalizeAndCleanCart(generatedOrderId);
     }
   };
