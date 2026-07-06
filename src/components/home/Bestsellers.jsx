@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import ResponsiveImage from '../ResponsiveImage';
 import { ALL_PRODUCTS } from '../../data/products';
-import { secureRandom } from '../../lib/random';
 
 const productsMap = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
 
