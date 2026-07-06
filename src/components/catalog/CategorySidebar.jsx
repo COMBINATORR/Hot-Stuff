@@ -6,18 +6,22 @@ export default function CategorySidebar({
   categories,
   loading,
   handleCategoryClick,
-  toggleSidebarCat
+  toggleSidebarCat,
+  onOpenFavorites
 }) {
   const { t } = useTranslation();
 
   return (
     <aside className="hidden md:block w-[240px] flex-none border-r border-gray-100 pr-8">
-      <div className="flex items-center gap-2 mb-8 select-none">
-        <span className="material-symbols-outlined text-[18px] text-black font-light leading-none">favorite</span>
-        <span className="font-sans font-bold text-[10px] tracking-[0.2em] text-black uppercase">
-            {t('catalog.all_toys')}
+      <button
+        onClick={onOpenFavorites}
+        className="w-full flex items-center gap-2 mb-8 text-left font-sans font-bold text-[10px] tracking-[0.2em] text-black hover:text-primary transition-colors bg-transparent border-none cursor-pointer focus:outline-none uppercase"
+      >
+        <span className="material-symbols-outlined text-[18px] font-light leading-none">favorite</span>
+        <span>
+            {t('catalog.favorites', 'ИЗБРАННОЕ')}
         </span>
-      </div>
+      </button>
 
       <nav className="space-y-4">
         {/* Popular item */}

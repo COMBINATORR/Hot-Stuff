@@ -9,7 +9,8 @@ export default function CategoryDrawer({
   activeCat,
   categories,
   loading,
-  handleCategoryClick
+  handleCategoryClick,
+  onOpenFavorites
 }) {
   const { t } = useTranslation();
   const [expandedCats, setExpandedCats] = useState({});
@@ -57,12 +58,18 @@ export default function CategoryDrawer({
           >
             {/* Header */}
             <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-950 text-white">
-              <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => {
+                  onClose();
+                  if (onOpenFavorites) onOpenFavorites();
+                }}
+                className="flex items-center gap-2.5 text-left bg-transparent border-none cursor-pointer text-white hover:text-primary transition-colors focus:outline-none"
+              >
                 <span className="material-symbols-outlined text-[20px] text-primary">favorite</span>
                 <span className="font-sans font-black text-[12px] tracking-[0.2em] uppercase">
-                  {t('catalog.all_toys', 'КАТЕГОРИИ')}
+                  {t('catalog.favorites', 'ИЗБРАННОЕ')}
                 </span>
-              </div>
+              </button>
               <button
                 onClick={onClose}
                 className="text-white hover:text-primary transition-colors flex items-center justify-center p-1 bg-transparent border-none focus:outline-none cursor-pointer"

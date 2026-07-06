@@ -92,7 +92,7 @@ const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
 
-export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
+export default function CatalogPage({ onAddToCart, favorites, setFavorites, onOpenFavorites }) {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const initialCat = params.get('cat') || 'all';
@@ -655,6 +655,7 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
             loading={loading}
             handleCategoryClick={handleCategoryClick}
             toggleSidebarCat={toggleSidebarCat}
+            onOpenFavorites={onOpenFavorites}
           />
 
           {/* RIGHT GRID & DETAILS */}
@@ -760,6 +761,7 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
         categories={categories}
         loading={loading}
         handleCategoryClick={handleCategoryClick}
+        onOpenFavorites={onOpenFavorites}
       />
 
       {/* Product Preview Modal */}

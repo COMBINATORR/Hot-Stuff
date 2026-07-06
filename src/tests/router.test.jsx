@@ -53,7 +53,8 @@ describe('AppRouter', () => {
     onRemove: vi.fn(),
     favorites: [],
     setFavorites: vi.fn(),
-    onSelectQuickView: vi.fn()
+    onSelectQuickView: vi.fn(),
+    onOpenFavorites: vi.fn()
   };
 
   beforeEach(() => {

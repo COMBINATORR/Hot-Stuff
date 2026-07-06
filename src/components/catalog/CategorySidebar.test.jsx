@@ -138,4 +138,19 @@ describe('CategorySidebar', () => {
     fireEvent.click(screen.getByText('catalog.new_upper'));
     expect(handleCategoryClick).toHaveBeenCalledWith('new');
   });
+
+  it('calls onOpenFavorites when favorites header button is clicked', () => {
+    const onOpenFavorites = vi.fn();
+    render(
+      <CategorySidebar
+        loading={false}
+        categories={mockCategories}
+        expandedSidebarCats={{}}
+        onOpenFavorites={onOpenFavorites}
+      />
+    );
+
+    fireEvent.click(screen.getByText('catalog.favorites'));
+    expect(onOpenFavorites).toHaveBeenCalled();
+  });
 });

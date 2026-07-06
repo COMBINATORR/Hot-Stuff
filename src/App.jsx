@@ -213,6 +213,7 @@ function App() {
                 favorites={favorites}
                 setFavorites={setFavorites}
                 onSelectQuickView={setSelectedProduct}
+                onOpenFavorites={() => setIsFavoritesOpen(true)}
               />
             </main>
             <ConditionalFooter />

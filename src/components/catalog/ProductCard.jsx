@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ResponsiveImage from '../ResponsiveImage';
@@ -25,8 +25,20 @@ const ProductCard = memo(function ProductCard({ product, setSelectedPreviewProdu
   const colors = product.colors || [];
   const gallery = product.gallery || [];
 
+  const hoverImage = gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : null;
+
+  // Preload hover image in the background to eliminate delay on hover
+  useEffect(() => {
+    if (typeof window === 'undefined' || !hoverImage) return;
+    const src = typeof hoverImage === 'string' ? hoverImage : hoverImage?.img?.src;
+    if (src) {
+      const img = new window.Image();
+      img.src = src;
+    }
+  }, [hoverImage]);
+
   const activeImage = isHovered
-    ? (gallery.length > 1 ? gallery[(selectedColorIndex + 1) % gallery.length] : product.image)
+    ? (hoverImage || product.image)
     : (gallery.length > 0 ? gallery[selectedColorIndex] : product.image);
 
   const handleTouchStart = (e) => setTouchStartX(e.targetTouches[0].clientX);
