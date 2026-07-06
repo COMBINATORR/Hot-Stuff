@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 import ResponsiveImage from './ResponsiveImage';
