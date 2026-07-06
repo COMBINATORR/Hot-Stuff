@@ -13,16 +13,17 @@ import { calculateYandexDelivery } from '../lib/supabaseClient';
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
 
-const loadHalykScript = () => {
+const loadHalykScript = (useTestWidget) => {
   return new Promise((resolve) => {
     if (window.halyk) {
       resolve(window.halyk);
       return;
     }
+
     const script = document.createElement('script');
-    script.src = import.meta.env.PROD 
-      ? 'https://epay.homebank.kz/payform/payment-api.js' 
-      : 'https://test-epay.epayment.kz/payform/payment-api.js';
+    script.src = useTestWidget
+      ? 'https://test-epay.epayment.kz/payform/payment-api.js' 
+      : 'https://epay.homebank.kz/payform/payment-api.js';
     script.onload = () => {
       resolve(window.halyk);
     };
@@ -273,11 +274,6 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
     } else if (payment === 'card') {
       setIsCheckingOut(true);
       try {
-        const halykSdk = await loadHalykScript();
-        if (!halykSdk) {
-          throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
-        }
-
         const { data, error } = await supabase.functions.invoke('halyk-checkout', {
           body: {
             amount: total,
@@ -288,6 +284,12 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
         if (error) throw error;
 
         if (data && data.success) {
+          const useTestWidget = data.provider === 'mock-halyk';
+          const halykSdk = await loadHalykScript(useTestWidget);
+          if (!halykSdk) {
+            throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
+          }
+
           const paymentObject = {
             invoiceId: generatedOrderId,
             amount: total,
