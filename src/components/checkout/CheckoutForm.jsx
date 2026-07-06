@@ -130,8 +130,8 @@ export default function CheckoutForm({
             ))}
           </div>
 
-          {/* Address details directly shown ONLY if payment is NOT Kaspi Pay */}
-          {payment !== 'kaspi' && (
+          {/* Address details directly shown if payment is NOT Kaspi Pay OR if Yandex Delivery is chosen */}
+          {(payment !== 'kaspi' || delivery === 'yandex') && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-2">
               <div className="sm:col-span-2">
                 <label className="text-[12px] text-neutral-500 font-bold ml-1 mb-1.5 block">{t('checkout.address')}</label>

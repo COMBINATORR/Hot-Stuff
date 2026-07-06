@@ -8,6 +8,7 @@ import CheckoutKaspiPending from '../components/checkout/CheckoutKaspiPending';
 import CheckoutDeliveryAddress from '../components/checkout/CheckoutDeliveryAddress';
 import CheckoutSuccess from '../components/checkout/CheckoutSuccess';
 import { supabase } from '../lib/supabase';
+import { calculateYandexDelivery } from '../lib/supabaseClient';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
@@ -43,12 +44,25 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const [formErrors, setFormErrors] = useState({});
   const [paymentError, setPaymentError] = useState('');
 
+  // Yandex Delivery dynamic cost states
+  const [yandexDeliveryCost, setYandexDeliveryCost] = useState(0);
+  const [yandexDeliveryTime, setYandexDeliveryTime] = useState(0);
+  const [isCalculatingDelivery, setIsCalculatingDelivery] = useState(false);
+
   const deliveryOptions = [
     { 
       id: 'atyrau',   
       label: t('checkout.delivery_atyrau', 'По Атырау'),       
       price: 0,    
       time: t('checkout.delivery_time', { time: i18n.language === 'en' ? '1-2 days' : (i18n.language === 'kk' || i18n.language === 'kz' ? '1-2 күн' : '1–2 дня') }) 
+    },
+    { 
+      id: 'yandex',       
+      label: t('checkout.delivery_yandex', 'Яндекс Доставка (Экспресс)'),   
+      price: yandexDeliveryCost, 
+      time: isCalculatingDelivery 
+        ? t('checkout.delivery_calculating', 'Расчет стоимости...') 
+        : (yandexDeliveryTime ? t('checkout.delivery_time_mins', { time: `${yandexDeliveryTime} мин` }) : t('checkout.delivery_yandex_calc', 'Рассчитывается по адресу'))
     },
     { 
       id: 'kz',       
@@ -68,6 +82,42 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const deliveryCost = deliveryOptions.find(d => d.id === delivery)?.price || 0;
   const total = subtotal + deliveryCost;
 
+  // Dynamic Yandex Delivery price calculation with 1s debounce
+  useEffect(() => {
+    if (delivery !== 'yandex' || !address.trim()) {
+      setYandexDeliveryCost(0);
+      setYandexDeliveryTime(0);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsCalculatingDelivery(true);
+      try {
+        const data = await calculateYandexDelivery({
+          address,
+          city: city || 'Атырау',
+          items: cartItems.map(item => ({
+            name: item.name,
+            quantity: item.qty
+          }))
+        });
+
+        if (data && data.success) {
+          setYandexDeliveryCost(data.price || 0);
+          setYandexDeliveryTime(data.eta_minutes || 0);
+        } else {
+          console.error('Yandex delivery calculation failed:', data);
+        }
+      } catch (err) {
+        console.error('Failed to calculate Yandex delivery:', err);
+      } finally {
+        setIsCalculatingDelivery(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [address, city, delivery, cartItems]);
+
   // Background polling for ApiPay invoice status
   useEffect(() => {
     if (step !== 'kaspi_pending' || !invoiceId || provider === 'kaspi-direct') {
@@ -84,7 +134,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
         });
 
         if (!error && data && data.status === 'paid') {
-          setStep('delivery_address');
+          setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
           isMounted = false; // Stop polling
         }
       } catch (err) {
@@ -117,7 +167,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       errors.phone = t('checkout.error_phone_invalid', 'Неверный формат телефона');
     }
 
-    if (payment !== 'kaspi') {
+    if (payment !== 'kaspi' || delivery === 'yandex') {
       if (!address.trim()) errors.address = t('checkout.error_address', 'Адрес обязателен');
       if (!city.trim()) errors.city = t('checkout.error_city', 'Город обязателен');
     }
@@ -179,7 +229,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const checkPaymentStatusManual = async () => {
     if (provider === 'kaspi-direct' || invoiceId.startsWith('mock-')) {
       // Free / Mock flow proceeds immediately
-      setStep('delivery_address');
+      setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
       return;
     }
 
@@ -192,7 +242,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       if (error) throw error;
 
       if (data && data.status === 'paid') {
-        setStep('delivery_address');
+        setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
       } else {
         alert(t('checkout.payment_not_received', 'Оплата еще не поступила. Пожалуйста, оплатите счет в приложении Kaspi.kz и попробуйте снова.'));
       }
