@@ -27,11 +27,123 @@ Deno.serve(async (req) => {
 
     // 2. Parse request body
     const body = await req.json().catch(() => ({}));
-    const { amount, invoiceId } = body;
+    const { action = "create", amount, invoiceId } = body;
 
-    if (!amount || !invoiceId) {
+    if (!invoiceId) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: amount and invoiceId are required" }),
+        JSON.stringify({ error: "Missing required field: invoiceId is required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // 3. Check if we should use Mock/Sandbox mode
+    const isMockMode = !clientId || clientId === "placeholder" || clientId.startsWith("mock") || !clientSecret;
+
+    // Handle status check action
+    if (action === "status") {
+      console.log(`Checking Halyk status for Invoice: ${invoiceId}`);
+      if (isMockMode) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: "paid",
+            statusName: "CHARGE",
+            provider: "mock-halyk",
+            invoiceId
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Get token first (needed for API requests)
+      const tokenUrl = isProd
+        ? "https://epay-oauth.homebank.kz/oauth2/token"
+        : "https://test-epay-oauth.epayment.kz/oauth2/token";
+
+      const formData = new URLSearchParams();
+      formData.append("grant_type", "client_credentials");
+      formData.append("client_id", clientId);
+      formData.append("client_secret", clientSecret);
+      formData.append("scope", "payment");
+      formData.append("terminal", terminalId);
+
+      const tokenResponse = await fetch(tokenUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        return new Response(
+          JSON.stringify({ error: `Failed to fetch token for status check: ${errorText}` }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+
+      // Query status
+      const statusUrl = isProd
+        ? `https://epay-api.homebank.kz/check-status/payment/transaction/${invoiceId}`
+        : `https://test-epay-api.epayment.kz/check-status/payment/transaction/${invoiceId}`;
+
+      console.log(`Requesting Halyk status from: ${statusUrl}`);
+
+      const statusResponse = await fetch(statusUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      });
+
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        const tx = statusData.transaction || {};
+        const isPaid = statusData.resultCode === "100" && (tx.statusName === "CHARGE" || tx.statusName === "AUTH" || tx.statusName === "VERIFIED");
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: isPaid ? "paid" : "pending",
+            statusName: tx.statusName || "UNKNOWN",
+            details: statusData,
+            provider: "halyk"
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      } else {
+        const errorText = await statusResponse.text();
+        console.error("Halyk status API returned error:", errorText);
+        return new Response(
+          JSON.stringify({ error: `Halyk status API error: ${errorText}` }),
+          {
+            status: statusResponse.status,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // Default action: Create Token for widget
+    if (!amount) {
+      return new Response(
+        JSON.stringify({ error: "Missing required field: amount is required for creation" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -41,13 +153,9 @@ Deno.serve(async (req) => {
 
     console.log(`Processing Halyk checkout for Invoice: ${invoiceId}, Amount: ${amount}`);
 
-    // 3. Check if we should use Mock/Sandbox mode
-    const isMockMode = !clientId || clientId === "placeholder" || clientId.startsWith("mock") || !clientSecret;
-
     if (isMockMode) {
       console.log("[MOCK] Running in Halyk Sandbox Mode. Generating mock token.");
       
-      // Return details for frontend test-widget initialization
       return new Response(
         JSON.stringify({
           success: true,

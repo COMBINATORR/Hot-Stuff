@@ -14,6 +14,7 @@ function Confetti({ active }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return; // Fix for jsdom/testing environments
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -59,11 +60,15 @@ function Confetti({ active }) {
   );
 }
 
-/* ── delivery badge metadata ──────────────────────────────────────── */
-const DELIVERY_META = {
-  yandex:  { label: 'Яндекс Доставка (Экспресс)', icon: '🚀', eta: '1–3 часа',       color: '#F5A623' },
-  kz:      { label: 'По Казахстану',               icon: '📦', eta: '3–7 рабочих дней', color: '#7B61FF' },
-  pickup:  { label: 'Самовывоз',                   icon: '🏪', eta: 'Сегодня',          color: '#34C759' },
+/* ── helper metadata functions with i18n support ─────────────────── */
+const getDeliveryMeta = (delivery, t) => {
+  if (delivery === 'yandex') {
+    return { label: t('checkout.delivery_yandex', 'Яндекс Доставка (Экспресс)'), icon: '🚀', eta: '1–3 часа', color: '#F5A623' };
+  }
+  if (delivery === 'pickup') {
+    return { label: t('checkout.delivery_pickup', 'Самовывоз'), icon: '🏪', eta: 'Сегодня', color: '#34C759' };
+  }
+  return { label: t('checkout.delivery_kz', 'По Казахстану'), icon: '📦', eta: '3–7 рабочих дней', color: '#7B61FF' };
 };
 
 const PAYMENT_ICONS = {
@@ -71,18 +76,20 @@ const PAYMENT_ICONS = {
   card:  '🏦',
   cash:  '💵',
 };
-const PAYMENT_LABELS = {
-  kaspi: 'Kaspi Pay',
-  card:  'Банковская карта',
-  cash:  'Наличными при получении',
+
+const getPaymentLabel = (payment, t) => {
+  if (payment === 'kaspi') return 'Kaspi Pay';
+  if (payment === 'card') return t('checkout.payment_card', 'Банковская карта');
+  return t('checkout.payment_cash', 'Наличными');
 };
 
-/* ── status steps ─────────────────────────────────────────────────── */
-const getStatusSteps = (delivery) => [
-  { id: 'placed',    label: 'Заказ принят',        icon: '✅', done: true  },
-  { id: 'confirmed', label: 'Подтверждение',        icon: '📋', done: true  },
-  { id: 'packed',    label: 'Упаковка',             icon: '📦', done: false },
-  { id: 'delivery',  label: delivery === 'pickup' ? 'Готов к выдаче' : 'В пути',
+const getStatusSteps = (delivery, t) => [
+  { id: 'placed',    label: t('checkout.status_placed', 'Заказ принят'),        icon: '✅', done: true  },
+  { id: 'confirmed', label: t('checkout.status_confirmed', 'Подтверждение'),     icon: '📋', done: true  },
+  { id: 'packed',    label: t('checkout.status_packed', 'Упаковка'),             icon: '📦', done: false },
+  { id: 'delivery',  label: delivery === 'pickup'
+                              ? t('checkout.status_ready_pickup', 'Готов к выдаче')
+                              : t('checkout.status_in_transit', 'В пути'),
                                                     icon: delivery === 'pickup' ? '🏪' : '🚚', done: false },
 ];
 
@@ -111,8 +118,8 @@ export default function CheckoutSuccess({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const deliveryMeta = DELIVERY_META[delivery] || DELIVERY_META.pickup;
-  const statusSteps  = getStatusSteps(delivery);
+  const deliveryMeta = getDeliveryMeta(delivery, t);
+  const statusSteps  = getStatusSteps(delivery, t);
   const fullName     = [firstName, lastName].filter(Boolean).join(' ') || null;
   const displayOrderId = orderId || `HS-${Date.now()}`;
 
@@ -159,15 +166,15 @@ export default function CheckoutSuccess({
             transition={{ delay: 0.25 }}
           >
             <h2 className="text-2xl font-black text-black uppercase tracking-wider">
-              Заказ оформлен!
+              {t('checkout.order_success_title', 'Заказ оформлен!')}
             </h2>
             {fullName ? (
               <p className="text-sm text-neutral-500 font-medium mt-1">
-                {fullName}, спасибо за покупку! 🙏
+                {fullName}, {t('checkout.order_success_thanks', 'спасибо за покупку!')} 🙏
               </p>
             ) : (
               <p className="text-sm text-neutral-500 font-medium mt-1">
-                Спасибо за покупку! Ваш заказ принят в обработку.
+                {t('checkout.order_success_desc', 'Спасибо за покупку! Ваш заказ успешно принят в обработку.')}
               </p>
             )}
           </motion.div>
@@ -182,7 +189,7 @@ export default function CheckoutSuccess({
         >
           <div>
             <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-0.5">
-              Номер заказа
+              {t('checkout.order_id_label', 'Номер заказа')}
             </p>
             <p className="text-base font-black tracking-wide">{displayOrderId}</p>
           </div>
@@ -205,7 +212,7 @@ export default function CheckoutSuccess({
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">{deliveryMeta.icon}</span>
             <div>
-              <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Доставка</p>
+              <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">{t('checkout.delivery_method_label', 'Доставка')}</p>
               <p className="font-black text-black text-sm">{deliveryMeta.label}</p>
             </div>
             <span
@@ -246,14 +253,14 @@ export default function CheckoutSuccess({
             ))}
           </div>
 
-          {(address || delivery === 'pickup') && (
+          {address && (
             <div className="mt-4 pt-3 border-t border-black/5">
               <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-wider mb-1">
-                {delivery === 'pickup' ? '📍 Адрес самовывоза' : '📍 Адрес доставки'}
+                {t('checkout.shipping_address_label', '📍 Адрес доставки')}
               </p>
               {delivery === 'pickup' ? (
                 <p className="text-sm font-bold text-neutral-700">
-                  г. Атырау, ул. Алмазная 2/1
+                  {[address, city, zip].filter(Boolean).join(', ')}
                 </p>
               ) : (
                 <p className="text-sm font-bold text-neutral-700">
@@ -278,8 +285,8 @@ export default function CheckoutSuccess({
           <div className="flex items-center gap-3 px-5 py-4 border-b border-black/5">
             <span className="text-2xl">{PAYMENT_ICONS[payment] || '💳'}</span>
             <div>
-              <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-wider">Оплата</p>
-              <p className="font-black text-black text-sm">{PAYMENT_LABELS[payment] || payment}</p>
+              <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-wider">{t('checkout.payment_method_label', 'Оплата')}</p>
+              <p className="font-black text-black text-sm">{getPaymentLabel(payment, t)}</p>
             </div>
             <span className="ml-auto text-[11px] font-bold px-2.5 py-1 rounded-full bg-green-50 text-green-600">
               ✓ Оплачено
@@ -345,7 +352,7 @@ export default function CheckoutSuccess({
 
           {/* Total */}
           <div className="flex justify-between items-center px-5 py-4">
-            <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider">Итого оплачено</span>
+            <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider">{t('checkout.total_paid_label', 'Итого оплачено')}</span>
             <span className="text-xl font-black" style={{ color: '#D4AF37' }}>
               {(total ?? 0).toLocaleString('ru-KZ')} ₸
             </span>
@@ -397,7 +404,7 @@ export default function CheckoutSuccess({
             to="/catalog"
             className="w-full h-[56px] bg-black hover:bg-neutral-900 text-white font-bold text-[13px] tracking-widest uppercase rounded-[18px] transition-colors flex items-center justify-center cursor-pointer shadow-md no-underline"
           >
-            Продолжить покупки
+            {t('checkout.back_to_shop', 'Вернуться в каталог')}
           </Link>
           <Link
             to="/"

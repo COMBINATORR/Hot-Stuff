@@ -306,11 +306,25 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
 
           if (useTestWidget) {
             setHalykPaymentDetails(paymentObject);
-            setHalykCallback(() => (response) => {
+            setHalykCallback(() => async (response) => {
               console.log('[Halyk Epay Result]', response);
               if (response && response.success) {
                 finalizeAndCleanCart(generatedOrderId);
               } else {
+                setIsCheckingOut(true);
+                try {
+                  const { data: statusData } = await supabase.functions.invoke('halyk-checkout', {
+                    body: { action: 'status', invoiceId: generatedOrderId }
+                  });
+                  if (statusData && statusData.status === 'paid') {
+                    finalizeAndCleanCart(generatedOrderId);
+                    return;
+                  }
+                } catch (statusErr) {
+                  console.warn('[Halyk Mock Status Verification Failed]', statusErr);
+                } finally {
+                  setIsCheckingOut(false);
+                }
                 setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
               }
             });
@@ -321,11 +335,25 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
               throw new Error(t('checkout.halyk_sdk_error', 'Не удалось загрузить платежную систему Халык Банка'));
             }
 
-            halykSdk.showPaymentWidget(paymentObject, (response) => {
+            halykSdk.showPaymentWidget(paymentObject, async (response) => {
               console.log('[Halyk Epay Result]', response);
               if (response && (response.success || response.code === 0 || response.status === 'success' || response.code === 'success')) {
                 finalizeAndCleanCart(generatedOrderId);
               } else {
+                setIsCheckingOut(true);
+                try {
+                  const { data: statusData } = await supabase.functions.invoke('halyk-checkout', {
+                    body: { action: 'status', invoiceId: generatedOrderId }
+                  });
+                  if (statusData && statusData.status === 'paid') {
+                    finalizeAndCleanCart(generatedOrderId);
+                    return;
+                  }
+                } catch (statusErr) {
+                  console.warn('[Halyk Status Verification Failed]', statusErr);
+                } finally {
+                  setIsCheckingOut(false);
+                }
                 setPaymentError(t('checkout.payment_cancelled', 'Оплата банковской картой была отменена или отклонена'));
               }
             });
