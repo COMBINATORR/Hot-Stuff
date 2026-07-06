@@ -81,8 +81,8 @@ Deno.serve(async (req) => {
 
     // If API Key is missing, placeholder, or starts with mock, use deterministic mock logic
     if (!apiKey || apiKey === "placeholder" || apiKey.startsWith("mock")) {
-      const shopLat = 47.0945;
-      const shopLon = 51.9168;
+      const shopLat = 47.102831;
+      const shopLon = 51.924708;
       const destCoords = getMockCoordinates(address);
       const distance = getDistance(shopLat, shopLon, destCoords.lat, destCoords.lon);
       
@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
             id: 1,
             type: "source",
             address: {
-              fullname: "Атырау, улица Сатпаева 10", // Store location
-              coordinates: [51.9168, 47.0945]
+              fullname: "Атырау, проспект Азаттык, 26а", // Store location
+              coordinates: [51.924708, 47.102831]
             }
           },
           {
