@@ -196,7 +196,11 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       address,
       city,
       zip,
-      total
+      total,
+      firstName,
+      lastName,
+      phone,
+      items: cartItems.map(i => ({ id: i.id, name: i.name, variant: i.variant, qty: i.qty, price: i.price, image: i.image }))
     });
     setStep('success');
     if (setCartItems) {
@@ -482,6 +486,10 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
                 city={confirmedOrder?.city || city}
                 zip={confirmedOrder?.zip || zip}
                 total={confirmedOrder?.total ?? total}
+                firstName={confirmedOrder?.firstName || firstName}
+                lastName={confirmedOrder?.lastName || lastName}
+                phone={confirmedOrder?.phone || phone}
+                items={confirmedOrder?.items || cartItems}
               />
             )}
           </AnimatePresence>
