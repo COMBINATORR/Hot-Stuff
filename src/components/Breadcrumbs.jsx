@@ -3,7 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_PRODUCTS } from '../data/products';
 
-const productsById = new Map(ALL_PRODUCTS.map(p => [p.id, p]));
+const productsById = new Map(ALL_PRODUCTS.map(p => [String(p.id), p]));
+let cachedHsProductsString = null;
+let cachedHsProductsMap = null;
 
 export default function Breadcrumbs({ theme = 'dark', bare = false }) {
   const location = useLocation();
@@ -115,12 +117,22 @@ export default function Breadcrumbs({ theme = 'dark', bare = false }) {
     });
 
     const productId = steps[1];
-    let list = ALL_PRODUCTS;
+    let product = null;
     try {
       const cached = localStorage.getItem('hs_products');
-      if (cached) list = JSON.parse(cached);
+      if (cached) {
+        if (cached !== cachedHsProductsString) {
+          cachedHsProductsString = cached;
+          const parsed = JSON.parse(cached);
+          cachedHsProductsMap = new Map(parsed.map(p => [String(p.id), p]));
+        }
+        product = cachedHsProductsMap.get(String(productId));
+      }
     } catch(e) {}
-    const product = list.find(p => String(p.id) === String(productId));
+
+    if (!product) {
+      product = productsById.get(String(productId));
+    }
 
     if (product) {
       // Определяем родительскую категорию
