@@ -11,6 +11,9 @@ import ProductLifestyle from '../components/product/ProductLifestyle';
 import ProductCrossSell from '../components/product/ProductCrossSell';
 import ProductReviews from '../components/product/ProductReviews';
 
+let productsMapCache = null;
+let productsCacheStr = null;
+
 
 export default function ProductPage({ onAddToCart, favorites, setFavorites }) {
   const { t, i18n } = useTranslation();
@@ -18,16 +21,34 @@ export default function ProductPage({ onAddToCart, favorites, setFavorites }) {
   
   // Find product by id from URL, default to first product if not found
   const product = useMemo(() => {
-    let list = ALL_PRODUCTS;
+    let map = productsMapCache;
+    let cachedStr = null;
+
     try {
-      const cached = localStorage.getItem('hs_products');
-      if (cached) {
-        list = JSON.parse(cached);
-      }
+      cachedStr = localStorage.getItem('hs_products');
     } catch (e) {
-      console.warn('Failed to parse cached products in ProductPage', e);
+      console.warn('Failed to get cached products in ProductPage', e);
     }
-    const found = list.find(p => String(p.id) === String(id));
+
+    if (cachedStr) {
+      if (cachedStr !== productsCacheStr) {
+        try {
+          const list = JSON.parse(cachedStr);
+          map = new Map(list.map(p => [String(p.id), p]));
+          productsCacheStr = cachedStr;
+          productsMapCache = map;
+        } catch (e) {
+          console.warn('Failed to parse cached products in ProductPage', e);
+        }
+      }
+    }
+
+    if (!map) {
+      map = new Map(ALL_PRODUCTS.map(p => [String(p.id), p]));
+      productsMapCache = map;
+    }
+
+    const found = map.get(String(id));
     return found || ALL_PRODUCTS[0];
   }, [id]);
 
