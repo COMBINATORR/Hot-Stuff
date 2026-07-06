@@ -143,13 +143,14 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
         if (error) throw error;
 
         if (data && data.length > 0) {
+          const baseProductUrl = supabase.storage.from('products').getPublicUrl('').data.publicUrl;
           const mapped = data.map(p => {
             const filenames = p.image_filename ? p.image_filename.split(',').map(s => sanitizeFilename(s.trim())) : [];
             const mainFilename = filenames[0] || '';
             const imageUrl = mainFilename 
-              ? supabase.storage.from('products').getPublicUrl(mainFilename).data.publicUrl
+              ? `${baseProductUrl}${mainFilename}`
               : '';
-            const galleryUrls = filenames.map(f => supabase.storage.from('products').getPublicUrl(f).data.publicUrl);
+            const galleryUrls = filenames.map(f => `${baseProductUrl}${f}`);
             
             let parentCategorySlug = 'other';
             const subName = (p.sub_category || '').toLowerCase();
@@ -290,19 +291,29 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
     };
   }, [isFilterOpen]);
 
-  // Cache the slug-to-name resolution map
-  const slugToNameMap = useMemo(() => {
+  // Cache the slug-to-category resolution map
+  const slugToCategoryMap = useMemo(() => {
     const map = new Map();
+    if (!categories) return map;
     for (const cat of categories) {
-      map.set(cat.slug, cat.name);
+      map.set(cat.slug, { ...cat, isSub: false });
       if (cat.subcategories) {
         for (const sub of cat.subcategories) {
-          map.set(sub.slug, sub.name);
+          map.set(sub.slug, { ...sub, isSub: true, parentSlug: cat.slug });
         }
       }
     }
     return map;
   }, [categories]);
+
+  // Backward compatible name map
+  const slugToNameMap = useMemo(() => {
+    const map = new Map();
+    slugToCategoryMap.forEach((val, key) => {
+      map.set(key, val.name);
+    });
+    return map;
+  }, [slugToCategoryMap]);
 
   // Filter and sort products based on selected parameters
   const filtered = useMemo(() => {
@@ -512,17 +523,15 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
       return categoryBanners[activeCat];
     }
     if (categories && categories.length > 0) {
-      for (const cat of categories) {
-        const sub = cat.subcategories?.find(s => s.slug === activeCat);
-        if (sub) {
-          const parentBanner = categoryBanners[cat.slug] || categoryBanners['all'];
-          const subName = slugToNameMap.get(activeCat) || sub.name;
-          return {
-            ...parentBanner,
-            title: t('menu.' + subName.toLowerCase(), subName),
-            description: sub.description || parentBanner.description
-          };
-        }
+      const catData = slugToCategoryMap.get(activeCat);
+      if (catData && catData.isSub) {
+        const parentBanner = categoryBanners[catData.parentSlug] || categoryBanners['all'];
+        const subName = catData.name;
+        return {
+          ...parentBanner,
+          title: t('menu.' + subName.toLowerCase(), subName),
+          description: catData.description || parentBanner.description
+        };
       }
     }
     const name = slugToNameMap.get(activeCat) || activeCat;
@@ -531,7 +540,7 @@ export default function CatalogPage({ onAddToCart, favorites, setFavorites }) {
       description: '',
       image: '/images/categories/cat_popular.png'
     };
-  }, [activeCat, categories, slugToNameMap, t, categoryBanners]);
+  }, [activeCat, categories, slugToNameMap, slugToCategoryMap, t, categoryBanners]);
 
   return (
     <div className="page-enter pt-0 bg-white text-black min-h-screen">

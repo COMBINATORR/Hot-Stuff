@@ -61,16 +61,14 @@ export default function Bestsellers({ onSelectPreview }) {
 
         if (error) throw error;
         if (data && data.length > 0) {
-          const bucket = supabase.storage.from('products');
-          const baseUrl = bucket.getPublicUrl('').data.publicUrl;
-
+          const baseProductUrl = supabase.storage.from('products').getPublicUrl('').data.publicUrl;
           const mutated = data.map(p => {
             const filenames = p.image_filename ? p.image_filename.split(',').map(s => sanitizeFilename(s.trim())) : [];
             const mainFilename = filenames[0] || '';
             const imageUrl = mainFilename 
-              ? baseUrl + mainFilename.split('/').map(encodeURIComponent).join('/')
+              ? baseProductUrl + mainFilename.split('/').map(encodeURIComponent).join('/')
               : '';
-            const galleryUrls = filenames.map(f => baseUrl + f.split('/').map(encodeURIComponent).join('/'));
+            const galleryUrls = filenames.map(f => baseProductUrl + f.split('/').map(encodeURIComponent).join('/'));
             
             return {
               ...p,
