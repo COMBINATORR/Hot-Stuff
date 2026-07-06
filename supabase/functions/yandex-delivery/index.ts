@@ -1,17 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
 function getCorsHeaders(reqOrigin: string | null) {
-  const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
-  const allowedOrigins = ["http://localhost:3000"];
-  if (envOrigins) {
-    allowedOrigins.push(...envOrigins.split(",").map((o) => o.trim()));
-  }
-
-  const isAllowed = reqOrigin && allowedOrigins.includes(reqOrigin);
   return {
-    "Access-Control-Allow-Origin": isAllowed
-      ? reqOrigin
-      : "http://localhost:3000",
+    "Access-Control-Allow-Origin": reqOrigin || "*",
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
