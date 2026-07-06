@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function ProductPreviewSwatches({ colorsList, selectedColor, setSelectedColor, activeColorName, variant = 'mobile' }) {
   if (!colorsList || colorsList.length === 0) return null;
