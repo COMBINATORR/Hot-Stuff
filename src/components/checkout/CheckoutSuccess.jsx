@@ -53,7 +53,12 @@ export default function CheckoutSuccess({
         <div className="flex justify-between items-baseline py-1">
           <span className="text-neutral-400 font-bold uppercase tracking-wider">{t('checkout.delivery_method_label', 'Доставка')}</span>
           <span className="font-black text-black">
-            {delivery === 'atyrau' ? t('checkout.delivery_atyrau', 'По Атырау') : t('checkout.delivery_kz', 'По Казахстану')}
+            {delivery === 'yandex' 
+              ? t('checkout.delivery_yandex', 'Яндекс Доставка (Экспресс)') 
+              : (delivery === 'pickup' 
+                ? t('checkout.delivery_pickup', 'Самовывоз') 
+                : t('checkout.delivery_kz', 'По Казахстану'))
+            }
           </span>
         </div>
 

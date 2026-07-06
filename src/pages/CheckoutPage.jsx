@@ -26,7 +26,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   
-  const [delivery, setDelivery] = useState('atyrau');
+  const [delivery, setDelivery] = useState('pickup');
   const [payment, setPayment] = useState('kaspi');
   
   const [address, setAddress] = useState('');
@@ -51,12 +51,6 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
 
   const deliveryOptions = [
     { 
-      id: 'atyrau',   
-      label: t('checkout.delivery_atyrau', 'По Атырау'),       
-      price: 0,    
-      time: t('checkout.delivery_time', { time: i18n.language === 'en' ? '1-2 days' : (i18n.language === 'kk' || i18n.language === 'kz' ? '1-2 күн' : '1–2 дня') }) 
-    },
-    { 
       id: 'yandex',       
       label: t('checkout.delivery_yandex', 'Яндекс Доставка (Экспресс)'),   
       price: yandexDeliveryCost, 
@@ -69,6 +63,12 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       label: t('checkout.delivery_kz', 'По Казахстану'),   
       price: 2500, 
       time: t('checkout.delivery_time', { time: i18n.language === 'en' ? '3-7 days' : (i18n.language === 'kk' || i18n.language === 'kz' ? '3-7 күн' : '3–7 дней') }) 
+    },
+    { 
+      id: 'pickup',   
+      label: t('checkout.delivery_pickup', 'Самовывоз'),       
+      price: 0,    
+      time: t('checkout.delivery_pickup_time', { time: i18n.language === 'en' ? 'Today' : (i18n.language === 'kk' || i18n.language === 'kz' ? 'Бүгін' : 'Сегодня') }) 
     },
   ];
 
@@ -134,7 +134,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
         });
 
         if (!error && data && data.status === 'paid') {
-          setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
+          setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
           isMounted = false; // Stop polling
         }
       } catch (err) {
@@ -167,7 +167,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       errors.phone = t('checkout.error_phone_invalid', 'Неверный формат телефона');
     }
 
-    if (payment !== 'kaspi' || delivery === 'yandex') {
+    if ((payment !== 'kaspi' || delivery === 'yandex') && delivery !== 'pickup') {
       if (!address.trim()) errors.address = t('checkout.error_address', 'Адрес обязателен');
       if (!city.trim()) errors.city = t('checkout.error_city', 'Город обязателен');
     }
@@ -229,7 +229,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
   const checkPaymentStatusManual = async () => {
     if (provider === 'kaspi-direct' || invoiceId.startsWith('mock-')) {
       // Free / Mock flow proceeds immediately
-      setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
+      setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
       return;
     }
 
@@ -242,7 +242,7 @@ export default function CheckoutPage({ cartItems = [], setCartItems }) {
       if (error) throw error;
 
       if (data && data.status === 'paid') {
-        setStep(delivery === 'yandex' ? 'success' : 'delivery_address');
+        setStep((delivery === 'yandex' || delivery === 'pickup') ? 'success' : 'delivery_address');
       } else {
         alert(t('checkout.payment_not_received', 'Оплата еще не поступила. Пожалуйста, оплатите счет в приложении Kaspi.kz и попробуйте снова.'));
       }

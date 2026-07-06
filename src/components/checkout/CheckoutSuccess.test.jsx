@@ -7,7 +7,7 @@ describe('CheckoutSuccess', () => {
   const defaultProps = {
     orderId: 'ORD-123',
     payment: 'card',
-    delivery: 'atyrau',
+    delivery: 'pickup',
     address: 'Test St',
     city: 'City',
     zip: '123',
@@ -39,7 +39,7 @@ describe('CheckoutSuccess', () => {
 
     // Delivery
     expect(screen.getByText('checkout.delivery_method_label')).toBeInTheDocument();
-    expect(screen.getByText('checkout.delivery_atyrau')).toBeInTheDocument();
+    expect(screen.getByText('checkout.delivery_pickup')).toBeInTheDocument();
 
     // Address
     expect(screen.getByText('checkout.shipping_address_label')).toBeInTheDocument();
